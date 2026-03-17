@@ -106,7 +106,8 @@ router.get('/user/:userId', async (req, res) => {
       .slice(0, 5)
     res.json(history)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error(`[API_ERROR] GET /api/messages/user/${req.params.userId}:`, err.message)
+    res.status(500).json({ error: 'Failed to fetch message history' })
   }
 })
 

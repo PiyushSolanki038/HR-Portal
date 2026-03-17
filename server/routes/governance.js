@@ -11,7 +11,8 @@ router.get('/', async (req, res) => {
     const data = await readSheet(TAB)
     res.json(data)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error(`[API_ERROR] GET /api/governance:`, err.message)
+    res.status(500).json({ error: 'Failed to fetch governance data' })
   }
 })
 

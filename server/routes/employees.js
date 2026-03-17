@@ -10,7 +10,8 @@ router.get('/', async (req, res) => {
     const employees = await readSheet('Employees')
     res.json(employees)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[API_ERROR] GET /api/employees:', err.message)
+    res.status(500).json({ error: 'Failed to fetch employee list' })
   }
 })
 

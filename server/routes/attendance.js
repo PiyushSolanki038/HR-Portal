@@ -6,12 +6,10 @@ const router = Router()
 // GET today's attendance
 router.get('/today', async (req, res) => {
   try {
-    // Use IST local date to match what the bot and portal mark endpoint write
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
     const records = await readSheet('Attendance')
     const todayRecs = records.filter(r => r.date === today)
 
-    // Get all employees and merge — mark absent if no record
     const employees = await readSheet('Employees')
     const merged = employees.map(emp => {
       const rec = todayRecs.find(r => r.empId === emp.id)
@@ -22,7 +20,8 @@ router.get('/today', async (req, res) => {
     })
     res.json(merged)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[API_ERROR] GET /api/attendance/today:', err.message)
+    res.status(500).json({ error: 'Failed to fetch today\'s attendance' })
   }
 })
 

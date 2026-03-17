@@ -6,9 +6,11 @@ const router = Router()
 
 router.get('/', async (req, res) => {
   try {
-    res.json(await readSheet('Hiring'))
+    const data = await readSheet('Hiring')
+    res.json(data)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[API_ERROR] GET /api/hiring:', err.message)
+    res.status(500).json({ error: 'Failed to fetch hiring data' })
   }
 })
 

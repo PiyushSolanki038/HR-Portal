@@ -5,11 +5,19 @@ dotenv.config()
 const SHEET_ID = process.env.GOOGLE_SHEET_ID
 
 function getAuth() {
-  const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON)
-  return new google.auth.GoogleAuth({
-    credentials: creds,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  })
+  try {
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+      throw new Error("MISSING_ENV_VAR: GOOGLE_SERVICE_ACCOUNT_JSON is not defined")
+    }
+    const creds = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON)
+    return new google.auth.GoogleAuth({
+      credentials: creds,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    })
+  } catch (err) {
+    console.error("FATAL_AUTH_ERROR: Failed to initialize Google Auth:", err.message)
+    throw err
+  }
 }
 
 const CACHE = {}
@@ -37,7 +45,7 @@ export async function readSheet(tabName) {
       console.warn(`Tab "${tabName}" not found or invalid request. Returning empty.`)
       return []
     }
-    console.error(`Error reading sheet "${tabName}":`, err)
+    console.error(`SHEET_READ_ERROR [${tabName}]:`, err.message)
     throw err
   }
   const rows = res.data.values || []

@@ -13,7 +13,8 @@ router.get('/', async (req, res) => {
     const events = await readSheet('Audit')
     res.json(events.reverse())
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[API_ERROR] GET /api/audit:', err.message)
+    res.status(500).json({ error: 'Failed to fetch audit log' })
   }
 })
 

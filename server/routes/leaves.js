@@ -38,7 +38,8 @@ router.get('/', async (req, res) => {
     const leaves = await readSheet('Leaves')
     res.json(leaves.map(normalizeLeave))
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[API_ERROR] GET /api/leaves:', err.message)
+    res.status(500).json({ error: 'Failed to fetch leaves data' })
   }
 })
 

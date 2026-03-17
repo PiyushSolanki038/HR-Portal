@@ -71,7 +71,7 @@ router.post('/login', async (req, res) => {
     })
 
   } catch (err) {
-    console.error('Error during direct login:', err)
+    console.error('[API_ERROR] POST /api/auth/login:', err.message)
     res.status(500).json({ error: 'Internal server error during authentication' })
   }
 })

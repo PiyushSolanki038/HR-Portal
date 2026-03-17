@@ -40,7 +40,8 @@ router.get('/', async (req, res) => {
     }))
     res.json(payroll)
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[API_ERROR] GET /api/payroll:', err.message)
+    res.status(500).json({ error: 'Failed to fetch payroll data' })
   }
 })
 

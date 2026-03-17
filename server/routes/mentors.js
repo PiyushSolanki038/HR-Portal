@@ -13,8 +13,8 @@ router.get('/', async (req, res) => {
     if (code === 400 || code === '400') {
       return res.json([]) // Return empty array if sheet not found
     }
-    console.error('Fetch Mentors Error:', err)
-    res.status(500).json({ error: 'Failed to fetch mentors' })
+    console.error('[API_ERROR] GET /api/mentors:', err.message)
+    res.status(500).json({ error: 'Failed to fetch mentors list' })
   }
 })
 
