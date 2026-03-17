@@ -41,10 +41,10 @@ export default function Attendance() {
 
       {tab === 'today' && (
         <>
-          <div className="filter-bar">
-            <div className="search-bar">
+          <div className="filter-bar" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+            <div className="search-bar" style={{ maxWidth: '100%' }}>
               <Search size={16} className="search-icon" />
-              <input placeholder="Search by name or department…" value={search} onChange={e => setSearch(e.target.value)} />
+              <input placeholder="Search by name or department…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%' }} />
             </div>
           </div>
 

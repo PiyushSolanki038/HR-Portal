@@ -125,8 +125,8 @@ export default function Employees() {
           <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 32 }}>Staff Directory</h1>
           <p className="subtitle">{employees.length} enterprise team members linked</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <div style={{ background: 'var(--bg-elevated)', padding: 4, borderRadius: 12, display: 'flex', border: '1px solid var(--line)', marginRight: 8 }}>
+        <div className="page-header-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
+          <div style={{ background: 'var(--bg-elevated)', padding: 4, borderRadius: 12, display: 'flex', border: '1px solid var(--line)' }}>
             <button 
               onClick={() => setViewMode('list')}
               style={{ padding: '8px 12px', borderRadius: 8, background: viewMode === 'list' ? 'var(--bg-card)' : 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', boxShadow: viewMode === 'list' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none' }}
@@ -140,10 +140,10 @@ export default function Employees() {
                <Plus size={16} color={viewMode === 'grid' ? 'var(--accent)' : 'var(--muted)'} style={{ transform: 'rotate(45deg)' }} />
             </button>
           </div>
-          <button className="btn btn-secondary" onClick={() => { setMsgTarget('broadcast'); setShowMsgModal(true); }}>
+          <button className="btn btn-secondary" style={{ flex: '1 1 auto' }} onClick={() => { setMsgTarget('broadcast'); setShowMsgModal(true); }}>
             <Radio size={16} /> Broadcast
           </button>
-          <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+          <button className="btn btn-primary" style={{ flex: '1 1 auto' }} onClick={() => setShowAddModal(true)}>
             <UserPlus size={18} /> Add Employee
           </button>
         </div>
@@ -166,13 +166,13 @@ export default function Employees() {
             <thead>
               <tr>
                 <th>Employee</th>
-                <th>ID</th>
+                <th className="hidden-mobile">ID</th>
                 <th>Role</th>
-                <th>Department</th>
-                <th>Score</th>
+                <th className="hidden-mobile">Department</th>
+                <th className="hidden-mobile">Score</th>
                 <th>Stats (P/L)</th>
-                <th>Leaves</th>
-                <th>Status</th>
+                <th className="hidden-mobile">Leaves</th>
+                <th className="hidden-mobile">Status</th>
                 <th style={{ textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
@@ -196,10 +196,10 @@ export default function Employees() {
                         </div>
                       </div>
                     </td>
-                    <td style={{ color: 'var(--muted)', fontFamily: 'monospace', fontSize: 11 }}>{emp.id}</td>
+                    <td className="hidden-mobile" style={{ color: 'var(--muted)', fontFamily: 'monospace', fontSize: 11 }}>{emp.id}</td>
                     <td style={{ fontWeight: 600 }}>{emp.role}</td>
-                    <td style={{ color: 'var(--text-dim)' }}>{emp.dept}</td>
-                    <td>
+                    <td className="hidden-mobile" style={{ color: 'var(--text-dim)' }}>{emp.dept}</td>
+                    <td className="hidden-mobile">
                       <PerformanceRing score={parseInt(stats.score) || 0} size={32} strokeWidth={3} />
                     </td>
                     <td>
@@ -207,8 +207,8 @@ export default function Employees() {
                       <span style={{ color: 'var(--line)', margin: '0 4px' }}>/</span>
                       <span style={{ color: 'var(--amber)', fontWeight: 700 }}>{stats.late || 0}</span>
                     </td>
-                    <td style={{ color: 'var(--blue)', fontWeight: 700 }}>{empLeaves}</td>
-                    <td>
+                    <td className="hidden-mobile" style={{ color: 'var(--blue)', fontWeight: 700 }}>{empLeaves}</td>
+                    <td className="hidden-mobile">
                       <span className={`badge ${emp.status === 'active' ? 'badge-green' : 'badge-red'}`} style={{ borderRadius: 8 }}>
                         {emp.status || 'active'}
                       </span>

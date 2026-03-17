@@ -28,12 +28,12 @@ export default function Leaves() {
         </div>
       </div>
 
-      <div className="filter-bar">
-        <div className="search-bar">
+      <div className="filter-bar" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+        <div className="search-bar" style={{ maxWidth: '100%' }}>
           <Search size={16} className="search-icon" />
-          <input placeholder="Search by employee…" value={search} onChange={e => setSearch(e.target.value)} />
+          <input placeholder="Search by employee…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%' }} />
         </div>
-        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ maxWidth: '100%' }}>
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>

@@ -69,7 +69,7 @@ export default function Login() {
     }}>
       
       {/* ─── HEADER LINK BAR ─── */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '32px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
+      <div className="login-header" style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 }}>
          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: theme.fontHeading, fontSize: '24px', fontWeight: 800 }}>
             SISWIT
             <span style={{ fontSize: '14px', fontWeight: 600, color: theme.textMuted, marginLeft: '16px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -82,7 +82,7 @@ export default function Login() {
       </div>
 
       {/* ─── BACKGROUND VECTOR ART ─── */}
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
+      <div className="hidden-mobile" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none' }}>
          {/* Left Side Elements */}
          <svg style={{ position: 'absolute', top: '35%', left: '10%' }} width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 20C15 20 15 5 30 5C45 5 45 35 60 35C75 35 75 10 90 10C105 10 105 20 120 20" stroke={theme.textMuted} strokeWidth="1.5" strokeLinecap="round"/>
@@ -122,13 +122,14 @@ export default function Login() {
       <div style={{
          position: 'relative',
          zIndex: 10,
-         width: '100%',
+         width: '90%',
          maxWidth: '460px',
          background: theme.cardBg,
          borderRadius: '32px',
-         padding: '56px 48px',
-         boxShadow: '0 24px 80px rgba(0,0,0,0.1)'
-      }} className="animate-in slide-in-from-bottom-8 duration-700">
+         padding: '40px 24px',
+         boxShadow: '0 24px 80px rgba(0,0,0,0.1)',
+         margin: '80px 0'
+      }} className="animate-in slide-in-from-bottom-8 duration-700 login-card">
          
          {/* Form Titles */}
          <div style={{ textAlign: 'center', marginBottom: '32px' }}>

@@ -65,7 +65,7 @@ export default function HRDashboardView({ user, stats, employees, attendance, le
       </div>
 
       {/* Advanced Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
+      <div className="grid-2-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
         {[
           { label: 'Register Employee', icon: UserPlus, to: '/employees', color: 'var(--accent)' },
           { label: 'Review Leaves', icon: AlertTriangle, to: '/leaves', color: 'var(--blue)' },
@@ -138,7 +138,7 @@ export default function HRDashboardView({ user, stats, employees, attendance, le
                     <button className="btn" onClick={() => showToast(`Congratulation sent to ${spotlightEmp?.name || 'employee'}!`, 'success')} style={{ borderRadius: 14, background: '#fff', color: '#000', fontWeight: 900, padding: '12px 24px', fontSize: 12, border: 'none' }}>CONGRATULATE</button>
                   </div>
                </div>
-               <div style={{ width: 130, height: 130, borderRadius: 32, background: 'rgba(255,255,255,0.05)', color: spotlightEmp?.color || 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 42, fontWeight: 950, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 0 40px rgba(0,0,0,0.5)' }}>
+               <div className="spotlight-avatar" style={{ width: 100, height: 100, flexShrink: 0, borderRadius: 24, background: 'rgba(255,255,255,0.05)', color: spotlightEmp?.color || 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 950, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
                   {spotlightEmp?.av ? (
                     <img src={spotlightEmp.av} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (

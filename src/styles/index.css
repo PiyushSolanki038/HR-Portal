@@ -85,7 +85,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-  overflow-x: hidden; /* Prevent horizontal scroll on main body */
+  overflow-x: hidden;
+  max-width: 100vw; /* Strict width control */
+  width: 100%;
 }
 
 a { color: var(--accent); text-decoration: none; max-width: 100%; } /* Prevent link/image overflow */
@@ -563,6 +565,34 @@ tbody tr:hover {
     width: 100%;
   }
 
+/* Modals - Fixed position, full-ish height on mobile */
+@media (max-width: 768px) {
+  .modal-overlay {
+    background: rgba(0,0,0,0.6) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  .modal-content {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    border-radius: 24px 24px 0 0 !important;
+    padding: 24px 20px 80px 20px !important; /* Extra bottom for BottomNav */
+    margin: 0 !important;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.2) !important;
+    animation: slide-up 0.4s cubic-bezier(0, 1, 0, 1) !important;
+    overflow-y: auto !important;
+  }
+
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
   /* Modals - Force layout on small screens even with inline styles */
   div[style*="gridTemplateColumns"] {
     grid-template-columns: 1fr !important;
@@ -592,6 +622,23 @@ tbody tr:hover {
   .app-shell.sidebar-is-open {
     overflow: hidden;
     height: 100vh;
+  }
+
+  .truncate-mobile {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+  }
+
+  .hidden-mobile {
+    display: none !important;
+  }
+
+  /* Grid: 2 columns on mobile */
+  .grid-2-mobile {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
   }
 }
 

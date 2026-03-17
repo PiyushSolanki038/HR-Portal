@@ -87,18 +87,15 @@ export default function Payroll() {
           <h1>Payroll Processing</h1>
           <p className="subtitle">Monthly precision register for {monthStr}</p>
         </div>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary">
-            <Eye size={16} /> Preview Mode
+        <div className="page-header-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
+          <button className="btn btn-secondary" style={{ flex: '1 1 auto' }}>
+            <Eye size={16} /> Preview
           </button>
-          <button className="btn btn-secondary">
-            <History size={16} /> History
+          <button className="btn btn-secondary" style={{ flex: '1 1 auto' }}>
+            <Download size={16} /> CSV
           </button>
-          <button className="btn btn-secondary">
-            <Download size={16} /> Export CSV
-          </button>
-          <button className="btn btn-primary" onClick={handleProcessSelected}>
-            <PlayCircle size={16} /> Process Selected
+          <button className="btn btn-primary" style={{ flex: '1 1 auto' }} onClick={handleProcessSelected}>
+            <PlayCircle size={16} /> Run Payroll
           </button>
         </div>
       </div>
@@ -148,9 +145,9 @@ export default function Payroll() {
                   <input type="checkbox" checked={selected.length === filtered.length && filtered.length > 0} onChange={handleSelectAll} style={{ width: 'auto' }} />
                 </th>
                 <th>Employee</th>
-                <th>Dept</th>
+                <th className="hidden-mobile">Dept</th>
                 <th>Gross</th>
-                <th>Deductions</th>
+                <th className="hidden-mobile">Deduction</th>
                 <th>Net</th>
                 <th>Status</th>
               </tr>
@@ -180,9 +177,9 @@ export default function Payroll() {
                       </div>
                     </div>
                   </td>
-                  <td style={{ color: 'var(--muted)' }}>{p.emp?.dept}</td>
+                  <td className="hidden-mobile" style={{ color: 'var(--muted)' }}>{p.emp?.dept}</td>
                   <td style={{ fontFamily: 'var(--font-mono)' }}>₹{p.gross.toLocaleString('en-IN')}</td>
-                  <td style={{ fontFamily: 'var(--font-mono)', color: p.deductions > 0 ? 'var(--red)' : 'var(--muted)' }}>
+                  <td className="hidden-mobile" style={{ fontFamily: 'var(--font-mono)', color: p.deductions > 0 ? 'var(--red)' : 'var(--muted)' }}>
                     {p.deductions > 0 ? `-₹${p.deductions.toLocaleString('en-IN')}` : '—'}
                   </td>
                   <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--green)', fontWeight: 700 }}>₹{p.net.toLocaleString('en-IN')}</td>

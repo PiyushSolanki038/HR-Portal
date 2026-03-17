@@ -130,27 +130,29 @@ export default function Settings() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 40 }}>
-        {/* Navigation */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {/* Navigation - Horizontal on mobile, vertical on desktop */}
+        <div style={{ display: 'flex', overflowX: 'auto', gap: 8, paddingBottom: 8, borderBottom: '1px solid var(--line)' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className="btn btn-ghost"
               style={{
-                justifyContent: 'flex-start',
-                padding: '12px 16px',
+                flex: '0 0 auto',
+                padding: '10px 16px',
                 borderRadius: 12,
                 background: activeTab === tab.id ? 'var(--accent-glow)' : 'transparent',
                 color: activeTab === tab.id ? 'var(--accent)' : 'var(--text-dim)',
                 fontWeight: activeTab === tab.id ? 700 : 500,
                 border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
               }}
             >
-              <tab.icon size={18} />
-              <span style={{ marginLeft: 12 }}>{tab.label}</span>
-              {activeTab === tab.id && <ChevronRight size={14} style={{ marginLeft: 'auto' }} />}
+              <tab.icon size={16} />
+              <span style={{ fontSize: 13 }}>{tab.label}</span>
             </button>
           ))}
         </div>
@@ -173,7 +175,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 32 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
                 <div className="form-group">
                   <label>Full Name</label>
                   <input value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
@@ -281,16 +283,17 @@ export default function Settings() {
                 <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 16 }}>Backend Configuration</p>
                 <div className="form-group">
                   <label>Google Sheet Content ID</label>
-                  <div style={{ display: 'flex', gap: 12 }}>
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                     <input 
                       value={system.sheetId} 
                       onChange={e => setSystem({...system, sheetId: e.target.value})} 
-                      style={{ fontFamily: 'monospace', fontSize: 12 }} 
+                      style={{ fontFamily: 'monospace', fontSize: 12, flex: 1, minWidth: 200 }} 
                     />
                     <button 
                       className="btn btn-secondary" 
                       onClick={handleTestConnection}
                       disabled={loading}
+                      style={{ flex: '1 1 auto' }}
                     >
                       {loading ? 'Testing...' : 'Test Connection'}
                     </button>

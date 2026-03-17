@@ -387,9 +387,22 @@
     height: 56px;
   }
 
+  .topbar-user-role {
+    display: none !important;
+  }
+
+  .topbar-user-name {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+  }
+
   .page {
     padding: 16px;
     width: 100vw;
+    padding-bottom: 80px !important; /* Safety for BottomNav */
   }
 
   .topbar-search {

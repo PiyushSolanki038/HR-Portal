@@ -88,7 +88,7 @@ export default function MyProfile() {
         )}
       </div>
 
-      <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 24, marginBottom: 24 }}>
+      <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginBottom: 24 }}>
         {/* Sidebar Profile Card */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div className="card" style={{ textAlign: 'center' }}>
@@ -130,7 +130,7 @@ export default function MyProfile() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div className="card" style={{ border: isEditing ? '1px solid var(--accent)' : 'var(--border)', transition: 'all 0.3s ease' }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>Personal Information</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBottom: 6, fontWeight: 600 }}>EMAIL ADDRESS</label>
                 {!isEditing ? (
@@ -186,7 +186,7 @@ export default function MyProfile() {
 
           <div className="card">
             <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>Employment Details</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBottom: 6, fontWeight: 600 }}>EMPLOYEE ID</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -218,7 +218,7 @@ export default function MyProfile() {
             </div>
           </div>
 
-          <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+          <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
              <div className="card">
                 <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Bell size={18} /> Notifications

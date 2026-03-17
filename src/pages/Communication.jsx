@@ -31,14 +31,15 @@ const theme = {
 
 const styles = {
   wrapper: {
-    height: 'calc(100vh - 160px)', 
+    height: 'calc(100vh - 180px)', 
     display: 'flex',
     background: theme.panelBg,
     borderRadius: '24px',
     border: theme.border,
     overflow: 'hidden',
     boxShadow: 'var(--shadow-lg)',
-    animation: 'fadeIn 0.5s ease-out'
+    animation: 'fadeIn 0.5s ease-out',
+    maxWidth: '100%'
   },
   sidebar: {
     width: '320px',
@@ -125,10 +126,10 @@ const styles = {
     gap: '16px',
   },
   bubble: {
-    maxWidth: '65%',
-    padding: '14px 20px',
+    maxWidth: '85%',
+    padding: '12px 16px',
     borderRadius: '20px',
-    fontSize: '14px',
+    fontSize: '13px',
     lineHeight: 1.6,
     position: 'relative',
     boxShadow: '0 2px 8px rgba(0,0,0,0.05)'

@@ -34,8 +34,8 @@ export default function Topbar({ onMenuToggle }) {
         </button>
         <div className="topbar-user">
           <div className="topbar-user-info">
-            <div className="topbar-user-name">{user?.name || 'Admin'}</div>
-            <div className="topbar-user-role">{user?.role || 'HR Manager'}</div>
+            <div className="topbar-user-name truncate-mobile">{user?.name || 'Admin'}</div>
+            <div className="topbar-user-role hidden-mobile">{user?.role || 'HR Manager'}</div>
           </div>
           <div className="avatar" style={{ background: user?.color || 'var(--accent)' }}>
             {user?.av || 'AD'}

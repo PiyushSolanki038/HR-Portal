@@ -226,7 +226,7 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
         </div>
       </div>
 
-      <div style={{ marginTop: 32, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+      <div className="grid-2-mobile" style={{ marginTop: 32, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
         <Link to="/my-attendance" className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center', background: 'var(--green-dim)', border: '1px solid var(--green)' }}>
           <Clock size={16} /> Mark Attendance
         </Link>
