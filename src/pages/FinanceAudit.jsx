@@ -56,36 +56,68 @@ export default function FinanceAudit() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: 24 }}>
-        <div className="table-container">
-          <table>
+      <div className="card-premium" style={{ padding: 0 }}>
+        <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-elevated)' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--accent-glow)', color: 'var(--accent-text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                 <ShieldCheck size={20} />
+              </div>
+              <div>
+                 <div style={{ fontSize: 14, fontWeight: 800 }}>Verified Audit Trail</div>
+                 <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>SYSTEM VERSION 4.2.0 • AGENT: {user?.name || 'ADMIN'}</div>
+              </div>
+           </div>
+           <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
+              LAST RECONCILIATION: {new Date().toLocaleDateString('en-IN')}
+           </div>
+        </div>
+        <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
+          <table style={{ borderCollapse: 'separate', borderSpacing: '0 8px', width: 'calc(100% - 48px)', margin: '16px 24px' }}>
              <thead>
-                <tr>
-                   <th>Timestamp</th>
-                   <th>Actor</th>
-                   <th>Action Event</th>
-                   <th>Description</th>
-                   <th>IP Address</th>
+                <tr style={{ background: 'transparent' }}>
+                   <th style={{ background: 'transparent', padding: '12px 16px' }}>Timestamp</th>
+                   <th style={{ background: 'transparent', padding: '12px 16px' }}>Actor</th>
+                   <th style={{ background: 'transparent', padding: '12px 16px' }}>Action Event</th>
+                   <th style={{ background: 'transparent', padding: '12px 16px' }}>Detailed Description</th>
+                   <th style={{ background: 'transparent', padding: '12px 16px' }}>Network IP</th>
                 </tr>
              </thead>
              <tbody>
                 {logs.map((log, i) => (
-                   <tr key={i}>
-                      <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--muted)', fontSize: 12 }}>
-                        {new Date(log.timestamp).toLocaleString('en-IN', { hour12: false })}
+                   <tr key={i} style={{ background: 'var(--bg-card)', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', transition: 'all 0.2s' }} className="hover-elevate">
+                      <td style={{ padding: '16px', borderRadius: '12px 0 0 12px', border: '1px solid var(--line)', borderRight: 'none' }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--muted)', fontSize: 11 }}>{new Date(log.timestamp).toLocaleDateString()}</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 13, marginTop: 2 }}>{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
                       </td>
-                      <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{log.actor}</td>
-                      <td>
-                         <span className={`badge ${getSeverityClass(log.severity)}`}>
+                      <td style={{ padding: '16px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, border: '1px solid var(--line)' }}>{log.actor.charAt(0)}</div>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 13 }}>{log.actor}</span>
+                         </div>
+                      </td>
+                      <td style={{ padding: '16px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+                         <span className={`badge ${getSeverityClass(log.severity)}`} style={{ padding: '6px 12px', borderRadius: 8, fontSize: 10 }}>
                             {log.action}
                          </span>
                       </td>
-                      <td style={{ fontSize: 13 }}>{log.desc}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--muted)', fontSize: 12 }}>{log.ip}</td>
+                      <td style={{ padding: '16px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+                         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-dim)', maxWidth: 400, whiteSpace: 'normal', lineHeight: 1.5 }}>{log.desc}</div>
+                      </td>
+                      <td style={{ padding: '16px', borderRadius: '0 12px 12px 0', border: '1px solid var(--line)', borderLeft: 'none' }}>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', color: 'var(--muted)', fontSize: 12 }}>
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)' }} />
+                            {log.ip}
+                         </div>
+                      </td>
                    </tr>
                 ))}
              </tbody>
           </table>
+        </div>
+        <div style={{ padding: '24px 32px', borderTop: '1px solid var(--line)', textAlign: 'center' }}>
+           <button className="btn btn-ghost" style={{ fontSize: 12, fontWeight: 700 }}>
+              LOAD ARCHIVED RECORDS
+           </button>
         </div>
       </div>
     </div>

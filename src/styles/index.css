@@ -17,10 +17,10 @@
   --muted:       #64748b;
 
   /* ─── Accent (Amber/Yellow from login) ─── */
-  --accent:      #FAC885;
-  --accent-dim:  #eab308;
-  --accent-glow: rgba(250, 200, 133, 0.3);
-  --accent-text: #854d0e;
+  --accent:      #F59E0B; /* More vibrant Amber */
+  --accent-dim:  #D97706;
+  --accent-glow: rgba(245, 158, 11, 0.15);
+  --accent-text: #78350F;
 
   /* ─── Status Colors (Adjusted for light theme) ─── */
   --green:       #16a34a;
@@ -187,17 +187,39 @@ select {
 }
 
 .card:hover {
-  border-color: var(--line-light);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--accent);
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+  transform: translateY(-2px);
+}
+
+.card-premium {
+  background: var(--bg-card);
+  border: var(--border);
+  border-radius: var(--r-xl);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-premium::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, var(--accent-glow), transparent 70%);
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .card-glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: var(--border);
-  border-radius: var(--r-lg);
-  padding: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 }
 
 /* ─── Buttons ─── */
@@ -248,7 +270,7 @@ select {
 }
 .btn-ghost:hover {
   background: var(--bg-hover);
-  color: var(--text);
+  color: var(--accent-dim);
 }
 
 .btn-danger {

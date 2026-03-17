@@ -65,21 +65,21 @@ export default function HRDashboardView({ user, stats, employees, attendance, le
       </div>
 
       {/* Advanced Quick Actions */}
-      <div className="grid-2-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
+      <div className="grid-2-mobile" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginBottom: 32 }}>
         {[
-          { label: 'Register Employee', icon: UserPlus, to: '/employees', color: 'var(--accent)' },
-          { label: 'Review Leaves', icon: AlertTriangle, to: '/leaves', color: 'var(--blue)' },
-          { label: 'Payroll Management', icon: FileText, to: '/payroll', color: 'var(--green)' },
-          { label: 'Governance', icon: Zap, to: '/disciplinary', color: 'var(--purple)' },
+          { label: 'Register Employee', icon: UserPlus, to: '/employees', color: '#10b981' },
+          { label: 'Review Leaves', icon: AlertTriangle, to: '/leaves', color: '#3b82f6' },
+          { label: 'Payroll Hub', icon: FileText, to: '/payroll', color: '#f59e0b' },
+          { label: 'Governance', icon: Zap, to: '/disciplinary', color: '#8b5cf6' },
         ].map(action => (
-          <Link key={action.label} to={action.to} className="card hover-scale" style={{ 
-            padding: '20px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 16, 
-            textDecoration: 'none', color: 'inherit', background: 'var(--bg-card)', border: '1px solid var(--line)'
+          <Link key={action.label} to={action.to} className="card-premium hover-scale" style={{ 
+            padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, 
+            textDecoration: 'none', color: 'inherit', border: '1px solid var(--line)', textAlign: 'center'
           }}>
-            <div style={{ width: 44, height: 44, borderRadius: 14, background: `${action.color}15`, color: action.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <action.icon size={22} />
+            <div style={{ width: 52, height: 52, borderRadius: 16, background: `${action.color}15`, color: action.color, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
+              <action.icon size={26} />
             </div>
-            <span style={{ fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>{action.label}</span>
+            <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1.2, color: 'var(--text-dim)' }}>{action.label}</span>
           </Link>
         ))}
       </div>
@@ -117,37 +117,78 @@ export default function HRDashboardView({ user, stats, employees, attendance, le
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 32 }}>
         {/* Left Column: Spotlight & Activity */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-          {/* Spotlight Section - Black Design Hub */}
-          <div className="card" style={{ 
-            padding: 32, background: '#000', color: '#fff', borderRadius: 24,
-            position: 'relative', overflow: 'hidden', border: 'none'
+          {/* Spotlight Section - Premium Gradient Design */}
+          <div className="card-premium animate-in" style={{ 
+            padding: 40, 
+            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', 
+            color: '#fff', 
+            borderRadius: 32,
+            position: 'relative', 
+            overflow: 'hidden', 
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
           }}>
-            <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ position: 'relative', zIndex: 2, display: 'flex', gap: 40, alignItems: 'center' }}>
                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--amber)', marginBottom: 20 }}>
-                    <Star size={18} fill="var(--amber)" />
-                    <span style={{ fontSize: 13, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5 }}>Employee of the Quarter</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--accent)', marginBottom: 24 }}>
+                    <div style={{ padding: 8, background: 'rgba(245, 158, 11, 0.15)', borderRadius: 10 }}>
+                      <Star size={20} fill="var(--accent)" />
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 2 }}>Institutional Spotlight</span>
                   </div>
-                  <h2 style={{ fontSize: 42, fontWeight: 950, marginBottom: 8, color: '#fff', letterSpacing: '-0.02em' }}>{spotlightEmp?.name || 'Awaiting Selection'}</h2>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--amber)', opacity: 0.9, marginBottom: 28 }}>{spotlightEmp?.role || 'Excellence in Action'} • {latestAward?.title || 'Consistency & Delivery'}</p>
-                  <div style={{ display: 'flex', gap: 12 }}>
-                    <button className="btn" onClick={() => navigate('/disciplinary')} style={{ borderRadius: 14, background: 'var(--amber)', color: '#000', fontWeight: 900, padding: '12px 24px', fontSize: 12, border: 'none' }}>VIEW ACHIEVEMENT</button>
-                    <button className="btn" onClick={() => showToast(`Congratulation sent to ${spotlightEmp?.name || 'employee'}!`, 'success')} style={{ borderRadius: 14, background: '#fff', color: '#000', fontWeight: 900, padding: '12px 24px', fontSize: 12, border: 'none' }}>CONGRATULATE</button>
+                  <h2 style={{ fontSize: 48, fontWeight: 950, marginBottom: 12, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1 }}>
+                    {spotlightEmp?.name || 'Awaiting Selection'}
+                  </h2>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Award size={18} color="var(--accent)" /> 
+                    {spotlightEmp?.dept || 'Operations'} • {latestAward?.title || 'Excellence in Action'}
+                  </p>
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <button className="btn btn-premium" onClick={() => navigate('/disciplinary')} style={{ borderRadius: 16, padding: '14px 28px', fontSize: 13, border: 'none' }}>
+                       VIEW ACHIEVEMENT
+                    </button>
+                    <button className="btn" onClick={() => showToast(`Congratulation sent to ${spotlightEmp?.name || 'employee'}!`, 'success')} style={{ borderRadius: 16, background: 'rgba(255,255,255,0.1)', color: '#fff', fontWeight: 800, padding: '14px 28px', fontSize: 13, border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)' }}>
+                       CONGRATULATE
+                    </button>
                   </div>
                </div>
-               <div className="spotlight-avatar" style={{ width: 100, height: 100, flexShrink: 0, borderRadius: 24, background: 'rgba(255,255,255,0.05)', color: spotlightEmp?.color || 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 950, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
-                  {spotlightEmp?.av ? (
-                    <img src={spotlightEmp.av} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    spotlightEmp?.name?.substring(0,2).toUpperCase() || 'SIS'
-                  )}
+
+               <div style={{ position: 'relative', flexShrink: 0 }}>
+                 <div style={{ 
+                    width: 160, height: 160, borderRadius: 40, 
+                    background: 'rgba(255,255,255,0.03)', 
+                    padding: 8, 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(20px)'
+                 }}>
+                    <div style={{ 
+                      width: '100%', height: '100%', borderRadius: 32, 
+                      background: `linear-gradient(135deg, ${spotlightEmp?.color || '#F59E0B'}, #B45309)`, 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      fontSize: 56, fontWeight: 950, color: '#fff', overflow: 'hidden',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+                    }}>
+                       {spotlightEmp?.av ? (
+                         <img 
+                           src={spotlightEmp.av} 
+                           alt="" 
+                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                           onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerText = spotlightEmp?.name?.substring(0,2).toUpperCase() || 'SIS' }}
+                         />
+                       ) : (
+                         spotlightEmp?.name?.substring(0,2).toUpperCase() || 'SIS'
+                       )}
+                    </div>
+                 </div>
+                 {/* Decorative element */}
+                 <div style={{ position: 'absolute', bottom: -20, right: -20, width: 80, height: 80, borderRadius: '50%', background: 'var(--accent)', filter: 'blur(60px)', opacity: 0.3 }} />
                </div>
             </div>
             {/* Ambient Background Graphic */}
-            <Award size={280} style={{ position: 'absolute', right: -60, bottom: -60, opacity: 0.08, transform: 'rotate(-15deg)', color: '#fff' }} />
+            <Activity size={400} style={{ position: 'absolute', left: -100, bottom: -150, opacity: 0.05, color: '#fff' }} />
           </div>
 
           <div className="card" style={{ padding: 24, borderRadius: 24 }}>
