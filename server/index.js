@@ -39,4 +39,21 @@ app.use('/api/governance', governanceRouter)
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }))
 
+// Test route to verify Sheets connection
+import { readSheet } from './sheets.js'
+app.get('/api/test-sheets', async (req, res) => {
+  try {
+    console.log('[TEST_SHEETS] Attempting to read Employees sheet...')
+    const data = await readSheet('Employees')
+    if (data.length > 0) {
+      res.json({ success: true, count: data.length, firstRow: data[0] })
+    } else {
+      res.json({ success: true, count: 0, message: 'Sheet is empty or tab "Employees" not found' })
+    }
+  } catch (err) {
+    console.error('[TEST_SHEETS_ERROR]:', err.message)
+    res.status(500).json({ error: err.message, stack: err.stack })
+  }
+})
+
 app.listen(PORT, () => console.log(`SISWIT API running on port ${PORT}`))

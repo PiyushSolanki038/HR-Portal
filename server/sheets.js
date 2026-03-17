@@ -3,6 +3,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const SHEET_ID = process.env.GOOGLE_SHEET_ID
+console.log(`[SHEETS_INIT] Using Sheet ID: "${SHEET_ID ? SHEET_ID.substring(0,5) + '...' : 'UNDEFINED'}"`)
 
 function getAuth() {
   try {
@@ -34,6 +35,7 @@ export async function readSheet(tabName) {
   const sheets = google.sheets({ version: 'v4', auth })
   let res;
   try {
+    console.log(`[SHEETS_READ] Fetching tab: "${tabName}" from ID: "${SHEET_ID}"`)
     res = await sheets.spreadsheets.values.get({
       spreadsheetId: SHEET_ID,
       range: tabName,
