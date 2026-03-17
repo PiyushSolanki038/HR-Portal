@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { loginUser } from '../services/api'
+import { UserCircle, Briefcase, Command, Globe, Shield } from 'lucide-react'
 
 // Theme colors based on the reference drawing
 const theme = {
