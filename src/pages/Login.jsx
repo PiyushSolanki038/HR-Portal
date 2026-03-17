@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { UserCircle, Briefcase, Command, Globe, Shield } from 'lucide-react'
+import { loginUser } from '../services/api'
 
 // Theme colors based on the reference drawing
 const theme = {
@@ -39,14 +39,9 @@ export default function Login() {
     setError('')
     
     try {
-      const res = await fetch('http://localhost:3001/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ empId, password })
-      })
-      const data = await res.json()
+      const data = await loginUser({ empId, password })
       
-      if (res.ok && data.success) {
+      if (data.success) {
         login(data.user)
         navigate(data.route)
       } else {

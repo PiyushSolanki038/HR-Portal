@@ -9,6 +9,9 @@ async function req(path, options = {}) {
   return res.json()
 }
 
+// Auth
+export const loginUser           = (data)      => req('/auth/login', { method:'POST', body:JSON.stringify(data) })
+
 // Employees
 export const getEmployees       = ()           => req('/employees')
 export const getEmployee        = (id)         => req(`/employees/${id}`)
