@@ -7,18 +7,21 @@ export default function AppShell({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${sidebarOpen ? 'sidebar-is-open' : ''}`}>
       <div
         className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
         onClick={() => setSidebarOpen(false)}
       />
+      
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
       <div className="main-content">
         <Topbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-        <div className="page">
+        <main className="page">
           {children}
-        </div>
+        </main>
       </div>
+
       <BottomNav />
     </div>
   )

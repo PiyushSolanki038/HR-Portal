@@ -84,10 +84,10 @@ export default function Attendance() {
       )}
 
       {tab === 'weekly' && (
-        <div className="card">
+        <div className="card" style={{ overflow: 'hidden' }}>
           <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Last 5 Working Days</h3>
           {weeklyGrid.length > 0 && (
-            <div>
+            <div className="table-container">
               <div className="weekly-grid">
                 <div className="grid-row" style={{ marginBottom: 4 }}>
                   <div className="grid-name" style={{ color: 'var(--muted)', fontSize: 11, fontWeight: 600 }}>EMPLOYEE</div>
