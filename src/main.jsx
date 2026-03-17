@@ -8,6 +8,7 @@ import { DataProvider } from './context/DataContext'
 import './styles/index.css'
 import './styles/layout.css'
 import './styles/components.css'
+import './styles/mobile-fix.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
