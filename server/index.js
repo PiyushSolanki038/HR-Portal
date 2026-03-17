@@ -1,7 +1,14 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 dotenv.config()
+
+// Support for __dirname in ESM
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 import employeesRouter  from './routes/employees.js'
 import attendanceRouter from './routes/attendance.js'
@@ -25,6 +32,7 @@ app.use(cors({
 }))
 app.use(express.json())
 
+// 1. API Routes (Check these first)
 app.use('/api/employees',  employeesRouter)
 app.use('/api/attendance', attendanceRouter)
 app.use('/api/leaves',     leavesRouter)
@@ -54,6 +62,15 @@ app.get('/api/test-sheets', async (req, res) => {
     console.error('[TEST_SHEETS_ERROR]:', err.message)
     res.status(500).json({ error: err.message, stack: err.stack })
   }
+})
+
+// 2. Static Frontend (Serve dist folder for any non-API route)
+const distPath = path.join(__dirname, '../dist')
+app.use(express.static(distPath))
+
+// 3. SPA Fallback (Redirect all other requests to index.html for React Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'))
 })
 
 app.listen(PORT, () => console.log(`SISWIT API running on port ${PORT}`))
