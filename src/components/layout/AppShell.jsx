@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
+import BottomNav from './BottomNav'
 
 export default function AppShell({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -18,6 +19,7 @@ export default function AppShell({ children }) {
           {children}
         </div>
       </div>
+      <BottomNav />
     </div>
   )
 }

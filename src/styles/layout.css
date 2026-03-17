@@ -275,18 +275,72 @@
 
 /* ─── Responsive ─── */
 
-.sidebar-overlay {
+/* ─── Bottom Navigation (Mobile Only) ─── */
+.bottom-nav {
   display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: var(--bg-card);
+  border-top: var(--border);
+  z-index: 150;
+  padding: 0 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
 }
 
-.menu-toggle {
-  display: none;
+.bottom-nav-link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.bottom-nav-link.active {
+  color: var(--accent);
+}
+
+.bottom-nav-link svg {
+  width: 20px;
+  height: 20px;
+}
+
+.bottom-nav-icon-wrapper {
+  position: relative;
+  display: flex;
+}
+
+.bottom-nav-badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background: var(--red);
+  color: white;
+  font-size: 9px;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+  border: 1.5px solid var(--bg-card);
 }
 
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
-    z-index: 200;
+    z-index: 300;
+    width: 280px;
   }
 
   .sidebar.open {
@@ -297,8 +351,9 @@
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 199;
-    background: rgba(0,0,0,0.5);
+    z-index: 299;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
   }
 
   .sidebar-overlay.open {
@@ -307,23 +362,29 @@
 
   .main-content {
     margin-left: 0;
+    padding-bottom: 64px; /* Space for BottomNav */
+  }
+
+  .bottom-nav {
+    display: flex;
   }
 
   .menu-toggle {
     display: flex;
   }
-}
 
-@media (max-width: 420px) {
   .topbar {
     padding: 0 16px;
   }
-  .topbar-search input {
-    width: 200px;
-  }
+
   .page {
-    padding: 16px;
-    overflow-x: auto;
+    padding: 20px 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .topbar-search input {
+    width: 160px;
   }
 }
 
