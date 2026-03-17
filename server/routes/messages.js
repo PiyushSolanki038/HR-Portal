@@ -126,8 +126,26 @@ router.post('/send', async (req, res) => {
     // Tab 5: Messages (id, fromId, toId, message, timestamp, read, attachments, channel, threadId)
     await appendRow('Messages', [id, fromId, toId, message, timestamp, 'false', '', channel, ''])
 
-    // If it's a critical alert or if user has telegram linked, we can optionally cross-post
-    // But for now, user requested "portal portal only"
+    // Automated Telegram Relay for Portal Notifications
+    try {
+      const { readSheet } = await import('../sheets.js')
+      const employees = await readSheet('Employees')
+      const targetEmp = employees.find(e => e.id === toId)
+      
+      if (targetEmp?.telegramChatId) {
+        const fromEmp = employees.find(e => e.id === fromId)
+        const senderName = fromEmp ? fromEmp.name : fromId
+        
+        await sendMessage(targetEmp.telegramChatId,
+          `💬 <b>New Portal Message</b>\n\n` +
+          `From: <b>${senderName}</b>\n` +
+          `Message: <i>${message}</i>\n\n` +
+          `Reply via the SISWIT portal.`
+        )
+      }
+    } catch (relayErr) {
+      console.error('[RELAY_ERROR] Failed to relay portal message to Telegram:', relayErr.message)
+    }
     
     res.json({ success: true, message: { id, fromId, toId, message, timestamp } })
   } catch (err) {

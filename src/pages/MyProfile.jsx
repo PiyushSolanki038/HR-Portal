@@ -3,6 +3,7 @@ import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import * as api from '../services/api'
 import { 
   User, 
   Mail, 
@@ -17,7 +18,9 @@ import {
   Lock,
   Star,
   CheckCircle,
-  Clock
+  Clock,
+  Send,
+  ExternalLink
 } from 'lucide-react'
 
 export default function MyProfile() {
@@ -30,7 +33,8 @@ export default function MyProfile() {
   const [formData, setFormData] = useState({
     email: '',
     phone: '',
-    address: ''
+    address: '',
+    telegramChatId: ''
   })
 
   const fullUser = employees.find(e => e.id === user?.id) || user
@@ -39,7 +43,8 @@ export default function MyProfile() {
     setFormData({
       email: fullUser?.email || '',
       phone: fullUser?.phone || '',
-      address: fullUser?.address || ''
+      address: fullUser?.address || '',
+      telegramChatId: fullUser?.telegramChatId || ''
     })
     setIsEditing(true)
   }
@@ -161,6 +166,30 @@ export default function MyProfile() {
                     onChange={e => setFormData({...formData, phone: e.target.value})} 
                     placeholder="+91 00000 00000"
                   />
+                )}
+              </div>
+              <div style={{ gridColumn: 'span 2' }}>
+                <label style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBottom: 6, fontWeight: 600 }}>TELEGRAM CHAT ID</label>
+                {!isEditing ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Send size={16} color="var(--muted)" />
+                    <span style={{ fontSize: 14 }}>{fullUser?.telegramChatId || 'Not linked'}</span>
+                  </div>
+                ) : (
+                  <div>
+                    <input 
+                      className="input" 
+                      value={formData.telegramChatId} 
+                      onChange={e => setFormData({...formData, telegramChatId: e.target.value})} 
+                      placeholder="Enter your Telegram Chat ID (e.g. 123456789)"
+                    />
+                    <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 12, background: 'var(--bg-elevated)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)' }} />
+                      <div style={{ fontSize: 11.5, color: 'var(--text-dim)', lineHeight: 1.4 }}>
+                        Find your ID via <a href="https://t.me/userinfobot" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>@userinfobot <ExternalLink size={10} /></a> to receive all portal notifications on Telegram.
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
               <div style={{ gridColumn: 'span 2' }}>

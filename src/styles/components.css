@@ -29,12 +29,14 @@
   transition: opacity 0.25s;
 }
 
-.stat-card:hover::before { opacity: 1; }
+.stat-card:hover::before {
+  opacity: 1;
+}
 
 .stat-card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px -10px rgba(0,0,0,0.1);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card .stat-info h3 {
@@ -81,8 +83,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: transparent;
+  backdrop-filter: blur(100px);
   animation: fadeIn 0.15s ease;
 }
 
@@ -171,13 +173,31 @@
   max-width: 440px;
 }
 
-.toast-success { border-left: 3px solid var(--green); }
-.toast-error   { border-left: 3px solid var(--red); }
-.toast-warning { border-left: 3px solid var(--amber); }
-.toast-info    { border-left: 3px solid var(--blue); }
+.toast-success {
+  border-left: 3px solid var(--green);
+}
 
-.toast-icon { flex-shrink: 0; }
-.toast-message { font-size: 13px; flex: 1; }
+.toast-error {
+  border-left: 3px solid var(--red);
+}
+
+.toast-warning {
+  border-left: 3px solid var(--amber);
+}
+
+.toast-info {
+  border-left: 3px solid var(--blue);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+}
+
+.toast-message {
+  font-size: 13px;
+  flex: 1;
+}
+
 .toast-close {
   background: none;
   border: none;
@@ -258,11 +278,30 @@
   z-index: 1;
 }
 
-.heatmap-cell.present  { background: var(--green-dim); color: var(--green); }
-.heatmap-cell.late     { background: var(--amber-dim); color: var(--amber); }
-.heatmap-cell.absent   { background: var(--red-dim);   color: var(--red); }
-.heatmap-cell.leave    { background: var(--blue-dim);  color: var(--blue); }
-.heatmap-cell.empty    { background: var(--bg-elevated); color: var(--muted); }
+.heatmap-cell.present {
+  background: var(--green-dim);
+  color: var(--green);
+}
+
+.heatmap-cell.late {
+  background: var(--amber-dim);
+  color: var(--amber);
+}
+
+.heatmap-cell.absent {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.heatmap-cell.leave {
+  background: var(--blue-dim);
+  color: var(--blue);
+}
+
+.heatmap-cell.empty {
+  background: var(--bg-elevated);
+  color: var(--muted);
+}
 
 /* ─── Login Page ─── */
 
@@ -386,10 +425,25 @@
   font-weight: 700;
 }
 
-.grid-cell.p { background: var(--green-dim); color: var(--green); }
-.grid-cell.l { background: var(--amber-dim); color: var(--amber); }
-.grid-cell.a { background: var(--red-dim);   color: var(--red); }
-.grid-cell.x { background: var(--blue-dim);  color: var(--blue); }
+.grid-cell.p {
+  background: var(--green-dim);
+  color: var(--green);
+}
+
+.grid-cell.l {
+  background: var(--amber-dim);
+  color: var(--amber);
+}
+
+.grid-cell.a {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.grid-cell.x {
+  background: var(--blue-dim);
+  color: var(--blue);
+}
 
 /* ─── Kanban / Pipeline ─── */
 
@@ -485,7 +539,7 @@
   left: 0;
   right: 0;
   height: 80px;
-  background: linear-gradient(135deg, var(--accent-glow), rgba(168,85,247,0.1));
+  background: linear-gradient(135deg, var(--accent-glow), rgba(168, 85, 247, 0.1));
 }
 
 .profile-info h2 {
@@ -522,12 +576,15 @@
   color: var(--muted);
   text-transform: uppercase;
 }
+
 /* ─── Premium Utilities ─── */
 
 .card-glass {
-  background: var(--bg-card); /* Restore to solid #FFFFFF */
+  background: var(--bg-card);
+  /* Restore to solid #FFFFFF */
   border: 1px solid var(--line);
-  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.05); /* Softer, enterprise shadow */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  /* Softer, enterprise shadow */
   border-radius: var(--r-xl);
 }
 
@@ -536,9 +593,17 @@
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .glow-text {
@@ -546,9 +611,10 @@
 }
 
 .btn-premium {
-  background: linear-gradient(135deg, var(--accent), #fcd34d); /* Pure Amber Gradient */
+  background: linear-gradient(135deg, var(--accent), #fcd34d);
+  /* Pure Amber Gradient */
   color: #000;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   font-weight: 800;
   box-shadow: 0 4px 12px var(--accent-glow);
   text-transform: uppercase;

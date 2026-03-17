@@ -41,6 +41,24 @@ router.post('/', async (req, res) => {
       createdAt: new Date().toISOString()
     }
     await appendRow('Tasks', newTask)
+
+    // Automated Telegram Notification
+    try {
+      const emp = await findRow('Employees', 'id', newTask.assignedTo)
+      if (emp?.telegramChatId) {
+        const dl = new Date(newTask.deadline).toLocaleDateString('en-IN', { day:'2-digit', month:'short' })
+        await sendMessage(emp.telegramChatId,
+          `📋 <b>New Task Assigned</b>\n\n` +
+          `<b>${newTask.title}</b>\n` +
+          `Deadline: ${dl}\n` +
+          `Priority: ${newTask.priority.toUpperCase()}\n\n` +
+          `Check the portal for details.`
+        )
+      }
+    } catch (notifyErr) {
+      console.error('[NOTIFY_ERROR] Failed to send task notification:', notifyErr.message)
+    }
+
     res.json(newTask)
   } catch (err) {
     res.status(500).json({ error: err.message })
@@ -52,11 +70,13 @@ router.patch('/:id/toggle', async (req, res) => {
     const tasks = await readSheet('Tasks')
     const task = tasks.find(t => String(t.id) === String(req.params.id))
     if (!task) return res.status(404).json({ error: 'Task not found' })
-    const newDone = task.done === 'true' ? 'false' : 'true'
+    const currentDone = task.done === 'true' || task.done === true || String(task.done).toLowerCase() === 'true';
+    const newDone = !currentDone;
+    
     await updateRowWhere('Tasks', 'id', String(req.params.id), {
-      done: newDone
+      done: String(newDone) // Keep consistently as lowercase string for the sheet
     })
-    res.json({ success: true, task: { ...task, done: newDone } })
+    res.json({ success: true, task: { ...task, done: String(newDone) } })
   } catch (err) {
     console.error('Toggle task error:', err)
     res.status(500).json({ error: err.message })

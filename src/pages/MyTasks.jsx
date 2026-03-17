@@ -38,8 +38,10 @@ export default function MyTasks() {
     return 'amber'
   }
 
+  const isDone = (t) => t && (t.done === true || String(t.done).toLowerCase() === 'true')
+
   const getTaskStatusInfo = (task) => {
-    if (task.done === 'true' || task.done === true) return { label: 'Done', color: 'var(--green)', icon: CheckCircle2 }
+    if (isDone(task)) return { label: 'Done', color: 'var(--green)', icon: CheckCircle2 }
     
     const deadline = new Date(task.deadline)
     if (isNaN(deadline.getTime())) return { label: 'No deadline', color: 'var(--muted)', icon: Calendar }
@@ -67,7 +69,7 @@ export default function MyTasks() {
 
   const myTasks = tasks.filter(t => t.assignedTo?.toLowerCase() === user?.id?.toLowerCase())
   const validTasks = myTasks.filter(isValidTask)
-  const completedCount = validTasks.filter(t => t.done === 'true' || t.done === true).length
+  const completedCount = validTasks.filter(isDone).length
   const completionRate = validTasks.length ? Math.round((completedCount / validTasks.length) * 100) : 0
 
   const categories = [
@@ -80,15 +82,14 @@ export default function MyTasks() {
 
   const filteredTasks = validTasks.filter(t => {
     if (filter === 'all') return true
-    if (filter === 'done') return t.done === 'true' || t.done === true
-    if (t.done === 'true' || t.done === true) return false // Don't show completed tasks in other filters
+    if (filter === 'done') return isDone(t)
+    if (isDone(t)) return false // Don't show completed tasks in other filters
     
     const deadline = new Date(t.deadline)
-    if (isNaN(deadline.getTime())) return true // Skip date validation if invalid
+    if (isNaN(deadline.getTime())) return true 
     
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    
     const diff = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24))
 
     if (filter === 'overdue') return diff < 0
@@ -102,7 +103,7 @@ export default function MyTasks() {
     try {
       const task = validTasks.find(t => t.id === taskId)
       await api.toggleTask(taskId)
-      showToast((task.done === 'true' || task.done === true) ? 'Task reopened' : 'Completed: ' + (task.title || 'Task'), 'success')
+      showToast(isDone(task) ? 'Task reopened' : 'Completed: ' + (task.title || 'Task'), 'success')
       refresh()
     } catch (err) {
       showToast('Failed to update task', 'error')
@@ -158,17 +159,17 @@ export default function MyTasks() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {filteredTasks.map(task => {
           const status = getTaskStatusInfo(task)
-          const isDone = task.done === 'true' || task.done === true
+          const isTaskDone = isDone(task)
           
           return (
             <div 
               key={task.id} 
-              className="card" 
+              className="card-premium" 
               style={{ 
                 padding: 0, 
-                overflow: 'hidden', 
-                borderLeft: `5px solid ${status.color}`,
-                cursor: 'pointer'
+                borderLeft: `6px solid ${status.color}`,
+                cursor: 'pointer',
+                marginBottom: 4
               }}
               onClick={() => setSelectedTask(task)}
             >
@@ -179,12 +180,12 @@ export default function MyTasks() {
                     ) : (
                       <div style={{ 
                         width: 22, height: 22, borderRadius: 4, 
-                        border: `2px solid ${isDone ? 'var(--green)' : 'var(--muted)'}`,
-                        background: isDone ? 'var(--green)' : 'transparent',
+                        border: `2px solid ${isTaskDone ? 'var(--green)' : 'var(--muted)'}`,
+                        background: isTaskDone ? 'var(--green)' : 'transparent',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         color: 'white', transition: 'all 0.2s'
                       }}>
-                         {isDone && <CheckCircle2 size={16} />}
+                         {isTaskDone && <CheckCircle2 size={16} />}
                       </div>
                     )}
                  </div>
@@ -193,8 +194,8 @@ export default function MyTasks() {
                     <h3 style={{ 
                       fontSize: 15, 
                       fontWeight: 600, 
-                      textDecoration: isDone ? 'line-through' : 'none',
-                      color: isDone ? 'var(--muted)' : 'var(--text)'
+                      textDecoration: isTaskDone ? 'line-through' : 'none',
+                      color: isTaskDone ? 'var(--muted)' : 'var(--text)'
                     }}>
                       {task.title}
                     </h3>
@@ -236,57 +237,86 @@ export default function MyTasks() {
 
       {selectedTask && (
         <div className="modal-overlay" onClick={() => setSelectedTask(null)}>
-           <div className="modal-content card" onClick={e => e.stopPropagation()} style={{ maxWidth: 600, width: '90%' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                 <div className={`badge badge-${getPriorityBadgeColor(selectedTask.priority)}`}>
-                    {(selectedTask.priority || 'med').toUpperCase()} PRIORITY
-                 </div>
-                 <button className="btn-icon btn-sm" onClick={() => setSelectedTask(null)}>×</button>
+           <div 
+             className="modal-content animate-in" 
+             onClick={e => e.stopPropagation()} 
+             style={{ 
+               maxWidth: '500px', 
+               width: '100%', 
+               border: '1px solid var(--line)',
+               boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)'
+             }}
+           >
+              <button 
+                className="btn-icon btn-sm" 
+                onClick={() => setSelectedTask(null)}
+                style={{ position: 'absolute', top: 24, right: 24, borderRadius: 12 }}
+              >
+                ×
+              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                <div className={`badge badge-${getPriorityBadgeColor(selectedTask.priority)}`} style={{ padding: '6px 12px', fontSize: 10 }}>
+                   {(selectedTask.priority || 'med').toUpperCase()} PRIORITY
+                </div>
+                <div style={{ width: 1, height: 16, background: 'var(--line)' }} />
+                <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>TASK ID: #{selectedTask.id?.substring(0,8)}</div>
               </div>
 
-              <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>
+              <h2 className="glow-text" style={{ fontSize: 28, fontWeight: 900, marginBottom: 16, lineHeight: 1.2 }}>
                 {selectedTask.title || 'Untitled Task'}
               </h2>
-              <p style={{ fontSize: 15, color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 24 }}>
-                 {selectedTask.description || selectedTask.desc || 'No detailed description provided for this task.'}
-              </p>
+              
+              <div style={{ padding: '0 4px', marginBottom: '32px' }}>
+                <p style={{ fontSize: '15px', color: 'var(--text-dim)', lineHeight: '1.7', margin: 0 }}>
+                   {selectedTask.description || 'No detailed description provided for this task.'}
+                </p>
+              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 24 }}>
-                 <div className="card-glass" style={{ padding: 12 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 4 }}>Assigned By</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                       <div className="avatar avatar-sm" style={{ background: 'var(--accent)' }}>{selectedTask.assignedBy?.[0] || 'H'}</div>
-                       {selectedTask.assignedBy || 'HR Team'}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+                 <div>
+                    <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '1px' }}>Assigned By</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                       <div className="avatar avatar-sm" style={{ background: 'var(--accent)', fontWeight: 900 }}>{selectedTask.assignedBy?.[0] || 'H'}</div>
+                       <div style={{ fontSize: '14px', fontWeight: 700 }}>{selectedTask.assignedBy || 'HR Team'}</div>
                     </div>
                  </div>
-                 <div className="card-glass" style={{ padding: 12 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 4 }}>Deadline</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: getTaskStatusInfo(selectedTask).color }}>
-                       {getFormattedDeadline(selectedTask)}
+                 <div>
+                    <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '1px' }}>Due Date</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                       <div style={{ width: 28, height: 28, borderRadius: '8px', background: `${getTaskStatusInfo(selectedTask).color}15`, color: getTaskStatusInfo(selectedTask).color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Calendar size={14} />
+                       </div>
+                       <div style={{ fontSize: '14px', fontWeight: 700, color: getTaskStatusInfo(selectedTask).color }}>
+                          {getFormattedDeadline(selectedTask)}
+                       </div>
                     </div>
                  </div>
-                 <div className="card-glass" style={{ padding: 12 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 4 }}>Category</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                       <Tag size={14} /> {selectedTask.tag || 'General'}
+                 <div>
+                    <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '1px' }}>Category</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                       <div style={{ width: 28, height: 28, borderRadius: '8px', background: 'var(--bg-elevated)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--line)' }}>
+                          <Tag size={14} />
+                       </div>
+                       <div style={{ fontSize: '14px', fontWeight: 700 }}>{selectedTask.tag || 'General'}</div>
                     </div>
                  </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
                  <button 
                    className="btn btn-primary" 
                    style={{ flex: 1, justifyContent: 'center' }}
                    onClick={() => { handleToggleComplete(selectedTask.id); setSelectedTask(null); }}
                  >
-                    {(selectedTask.done === 'true' || selectedTask.done === true) ? 'Reopen Task' : 'Mark as Complete'}
+                    {isDone(selectedTask) ? 'Reopen Task' : 'Mark as Complete'}
                  </button>
                  <button 
                    className="btn btn-secondary" 
                    style={{ flex: 1, justifyContent: 'center' }}
-                   onClick={() => setSelectedTask(null)}
+                   onClick={() => { setSelectedTask(null); navigate('/communication'); }}
                  >
-                    <MessageSquare size={16} /> Chat with Assigner
+                    <MessageSquare size={16} /> Chat
                  </button>
               </div>
            </div>
