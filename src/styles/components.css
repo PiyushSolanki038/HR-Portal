@@ -279,8 +279,8 @@
 .login-page::before {
   content: '';
   position: absolute;
-  width: 600px;
-  height: 600px;
+  width: min(600px, 100vw);
+  height: min(600px, 100vw);
   background: radial-gradient(circle, var(--accent-glow), transparent 70%);
   top: -200px;
   right: -200px;
@@ -290,8 +290,8 @@
 .login-page::after {
   content: '';
   position: absolute;
-  width: 400px;
-  height: 400px;
+  width: min(400px, 80vw);
+  height: min(400px, 80vw);
   background: radial-gradient(circle, rgba(168, 85, 247, 0.08), transparent 70%);
   bottom: -100px;
   left: -100px;
@@ -401,8 +401,9 @@
 }
 
 .pipeline-column {
-  min-width: 260px;
-  flex: 1;
+  min-width: 280px;
+  max-width: 100%;
+  flex: 0 0 280px;
   background: var(--bg-card);
   border: var(--border);
   border-radius: var(--r-lg);

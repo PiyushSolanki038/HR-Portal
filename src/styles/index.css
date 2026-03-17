@@ -70,8 +70,11 @@
 *, *::before, *::after {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* Ensuring border-box is global */
+  box-sizing: border-box;
+  max-width: 100vw; /* Universal protection */
 }
+ /* Ensuring border-box is global */
+
 
 html {
   font-size: 14px;
@@ -91,6 +94,11 @@ body {
 }
 
 a { color: var(--accent); text-decoration: none; max-width: 100%; } /* Prevent link/image overflow */
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
 a:hover { color: var(--accent-text); }
 
 button {
