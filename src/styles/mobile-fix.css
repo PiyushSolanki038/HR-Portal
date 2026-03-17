@@ -1,0 +1,365 @@
+/* ═══════════════════════════════════════════════
+   SISWIT — Complete Mobile Responsive Fix
+   Breakpoint: 768px
+   ═══════════════════════════════════════════════ */
+
+/* ─── Global Reset ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+img, svg, video {
+  max-width: 100%;
+}
+
+/* ─── Override inline grid styles on mobile ─── */
+@media (max-width: 768px) {
+
+  /* ════════════════════════════════
+     HEADER / TOPBAR
+  ════════════════════════════════ */
+  .topbar {
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+
+  .topbar-search input {
+    width: 120px !important;
+    font-size: 12px;
+  }
+
+  .topbar-user {
+    padding: 4px 6px !important;
+    gap: 6px !important;
+  }
+
+  .topbar-user-name {
+    max-width: 70px !important;
+    font-size: 11px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar-user-role {
+    display: none !important;
+  }
+
+  /* ════════════════════════════════
+     PAGE WRAPPER
+  ════════════════════════════════ */
+  .page {
+    padding: 12px !important;
+    width: 100% !important;
+    overflow-x: hidden;
+  }
+
+  /* ════════════════════════════════
+     PAGE HEADER (title + buttons row)
+  ════════════════════════════════ */
+  .page-header,
+  [style*="display: flex"][style*="marginBottom: 32"] {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+
+  /* Dashboard title */
+  [style*="fontSize: 32"] {
+    font-size: 22px !important;
+  }
+
+  /* ════════════════════════════════
+     QUICK ACTION CARDS (4-col grid → 2-col)
+  ════════════════════════════════ */
+  .grid-2-mobile,
+  [style*="repeat(4, 1fr)"],
+  [style*="repeat(3, 1fr)"] {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Quick action link cards */
+  [style*="repeat(4, 1fr)"] a,
+  [style*="repeat(3, 1fr)"] a {
+    padding: 14px !important;
+    gap: 10px !important;
+  }
+
+  [style*="repeat(4, 1fr)"] span,
+  [style*="repeat(3, 1fr)"] span {
+    font-size: 11px !important;
+  }
+
+  /* ════════════════════════════════
+     STATS GRID
+  ════════════════════════════════ */
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  .stat-card {
+    padding: 14px !important;
+  }
+
+  .stat-card .stat-info .stat-value {
+    font-size: 20px !important;
+  }
+
+  /* ════════════════════════════════
+     EMPLOYEE OF THE QUARTER CARD
+  ════════════════════════════════ */
+  [style*="Employee of the Quarter"],
+  .spotlight-card {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Any card with position relative + overflow hidden that's too wide */
+  .card {
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* ════════════════════════════════
+     ALL TABLES
+  ════════════════════════════════ */
+  .table-container,
+  .table-wrapper,
+  [class*="table"] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100% !important;
+  }
+
+  table {
+    min-width: 500px;
+  }
+
+  td, th {
+    white-space: nowrap;
+    font-size: 12px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* ════════════════════════════════
+     EMPLOYEES PAGE
+  ════════════════════════════════ */
+  .staff-actions,
+  [style*="display: flex"][style*="gap"][style*="button"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* Employee list rows */
+  .employee-row {
+    flex-wrap: wrap !important;
+  }
+
+  /* ════════════════════════════════
+     MODALS
+  ════════════════════════════════ */
+  .modal {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    margin: 0 auto;
+    border-radius: 16px !important;
+  }
+
+  .modal-body {
+    padding: 16px !important;
+  }
+
+  .modal-header {
+    padding: 14px 16px !important;
+  }
+
+  .modal-footer {
+    padding: 12px 16px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .modal-footer button {
+    flex: 1 !important;
+    justify-content: center !important;
+    min-width: 100px;
+  }
+
+  /* ════════════════════════════════
+     FORMS
+  ════════════════════════════════ */
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100% !important;
+    font-size: 14px !important; /* Prevent iOS zoom */
+  }
+
+  /* ════════════════════════════════
+     BUTTONS
+  ════════════════════════════════ */
+  .btn {
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+  }
+
+  /* ════════════════════════════════
+     GRID LAYOUTS
+  ════════════════════════════════ */
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Any inline grid with multiple columns */
+  [style*="grid-template-columns: 1fr 1fr 1fr"],
+  [style*="gridTemplateColumns: '1fr 1fr 1fr'"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* ════════════════════════════════
+     PROFILE PAGE
+  ════════════════════════════════ */
+  .profile-header {
+    flex-direction: column !important;
+    padding: 20px !important;
+    text-align: center;
+    align-items: center !important;
+  }
+
+  .profile-stats {
+    justify-content: center !important;
+    gap: 16px !important;
+  }
+
+  /* ════════════════════════════════
+     COMMUNICATION / CHAT PAGE
+  ════════════════════════════════ */
+  .msg-compose {
+    padding: 14px !important;
+  }
+
+  /* ════════════════════════════════
+     FINANCE / PAYROLL
+  ════════════════════════════════ */
+  .finance-grid,
+  [style*="repeat(auto-fit"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ════════════════════════════════
+     WEEKLY GRID (Attendance)
+  ════════════════════════════════ */
+  .weekly-grid .grid-name {
+    width: 80px !important;
+    font-size: 10px !important;
+  }
+
+  .weekly-grid .grid-cell {
+    min-width: 22px !important;
+    height: 22px !important;
+    font-size: 8px !important;
+  }
+
+  /* ════════════════════════════════
+     HEATMAP
+  ════════════════════════════════ */
+  .heatmap-cell {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 8px !important;
+  }
+
+  /* ════════════════════════════════
+     PIPELINE / KANBAN
+  ════════════════════════════════ */
+  .pipeline {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ════════════════════════════════
+     TOAST NOTIFICATIONS
+  ════════════════════════════════ */
+  .toast-container {
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    bottom: 80px !important;
+  }
+
+  .toast {
+    min-width: auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* ════════════════════════════════
+     BOTTOM NAV SAFE AREA
+  ════════════════════════════════ */
+  .main-content {
+    padding-bottom: 70px !important;
+  }
+
+  /* ════════════════════════════════
+     ANALYTICS PAGE
+  ════════════════════════════════ */
+  [style*="repeat(auto-fill"],
+  [style*="repeat(auto-fit"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* ════════════════════════════════
+     EMPLOYEE PROFILE PAGE
+  ════════════════════════════════ */
+  .emp-profile-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ════════════════════════════════
+     SETTINGS PAGE
+  ════════════════════════════════ */
+  .settings-layout {
+    flex-direction: column !important;
+  }
+
+  /* ════════════════════════════════
+     GENERAL FLEX ROWS → WRAP
+  ════════════════════════════════ */
+  .flex-row-actions {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* Prevent any element from overflowing */
+  .page > * {
+    max-width: 100% !important;
+  }
+}
+
+/* ─── Extra small screens ─── */
+@media (max-width: 420px) {
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .topbar-search {
+    max-width: 120px !important;
+  }
+
+  [style*="repeat(4, 1fr)"],
+  [style*="repeat(3, 1fr)"],
+  .grid-2-mobile {
+    grid-template-columns: 1fr !important;
+  }
+}
