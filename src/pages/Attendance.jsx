@@ -86,6 +86,7 @@ export default function Attendance() {
                 {filtered.length === 0 && <tr><td colSpan={5} className="empty-state">No records found</td></tr>}
               </tbody>
             </table>
+          </div>
         </>
       )}
 

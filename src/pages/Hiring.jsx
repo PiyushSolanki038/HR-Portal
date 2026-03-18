@@ -144,6 +144,7 @@ export default function Hiring() {
               ))}
             </tbody>
           </table>
+        </div>
       )}
 
       {showAdd && (

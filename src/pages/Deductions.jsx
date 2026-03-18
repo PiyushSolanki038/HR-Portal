@@ -219,6 +219,7 @@ export default function Deductions() {
                 ))}
               </tbody>
             </table>
+          </div>
         </div>
       )}
     </div>

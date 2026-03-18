@@ -269,6 +269,7 @@ export default function MyAttendance() {
             )}
           </tbody>
         </table>
+      </div>
 
       {selectedRecord && (
         <div style={{ 

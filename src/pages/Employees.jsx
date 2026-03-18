@@ -330,6 +330,7 @@ export default function Employees() {
               )}
             </tbody>
           </table>
+        </div>
       ) : (
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>

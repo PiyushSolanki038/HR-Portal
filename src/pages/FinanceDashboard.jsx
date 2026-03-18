@@ -155,6 +155,7 @@ export default function FinanceDashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
         </div>
 
         {/* Quick Links & Deduction Breakdown */}

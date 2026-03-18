@@ -40,7 +40,7 @@ export default function Leaves() {
         <div className="search-bar" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Search size={16} className="search-icon" style={{ minWidth: 16 }} />
           <input 
-            placeholder="Search by employee…" 
+            placeholder="Search by employeeâ€¦" 
             value={search} 
             onChange={e => setSearch(e.target.value)} 
             style={{ width: '100%', fontSize: 16, background: 'transparent', border: 'none', outline: 'none' }} 
@@ -78,19 +78,19 @@ export default function Leaves() {
               const statusKey = l.status?.toLowerCase() || 'pending'
               return (
                 <tr key={i}>
-                  <td style={{ fontWeight: 500 }}>{l.empName || '—'}</td>
-                  <td style={{ color: 'var(--muted)' }}>{l.dept || '—'}</td>
-                  <td>{l.startDate || l.date || '—'}</td>
-                  <td>{l.endDate || l.date || '—'}</td>
+                  <td style={{ fontWeight: 500 }}>{l.empName || 'â€”'}</td>
+                  <td style={{ color: 'var(--muted)' }}>{l.dept || 'â€”'}</td>
+                  <td>{l.startDate || l.date || 'â€”'}</td>
+                  <td>{l.endDate || l.date || 'â€”'}</td>
                   <td>{l.duration || '1 day'}</td>
                   <td><span className="badge badge-blue">{l.type || 'casual'}</span></td>
-                  <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-dim)' }}>{l.reason || '—'}</td>
+                  <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-dim)' }}>{l.reason || 'â€”'}</td>
                   <td>
                     <span className={`badge ${STATUS_BADGES[statusKey] || 'badge-muted'}`}>
                       {statusKey.charAt(0).toUpperCase() + statusKey.slice(1)}
                     </span>
                   </td>
-                  <td style={{ color: 'var(--muted)' }}>{l.approvedBy || '—'}</td>
+                  <td style={{ color: 'var(--muted)' }}>{l.approvedBy || 'â€”'}</td>
                 </tr>
               )
             })}
@@ -107,6 +107,7 @@ export default function Leaves() {
             )}
           </tbody>
         </table>
+      </div>
     </div>
   )
 }

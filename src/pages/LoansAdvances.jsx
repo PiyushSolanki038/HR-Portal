@@ -85,6 +85,7 @@ export default function LoansAdvances() {
                 ))}
              </tbody>
           </table>
+        </div>
       </div>
     </div>
   )

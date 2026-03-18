@@ -130,7 +130,7 @@ export default function MyLeaves() {
            <h3 style={{ fontSize: 16, fontWeight: 700 }}>Leave History</h3>
         </div>
         <div className="table-container" style={{ border: 'none', borderRadius: 0, overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
-          <table style={{ minWidth: 600 }}> cotton
+          <table style={{ minWidth: 600 }}> 
             <thead>
               <tr>
                 <th>Leave Type</th>
@@ -267,5 +267,6 @@ export default function MyLeaves() {
         </div>
       )}
     </div>
-  )
+  </div>
+)
 }

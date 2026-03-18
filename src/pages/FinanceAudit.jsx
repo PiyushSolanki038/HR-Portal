@@ -113,6 +113,7 @@ export default function FinanceAudit() {
                 ))}
              </tbody>
           </table>
+        </div>
         <div style={{ padding: '24px 32px', borderTop: '1px solid var(--line)', textAlign: 'center' }}>
            <button className="btn btn-ghost" style={{ fontSize: 12, fontWeight: 700 }}>
               LOAD ARCHIVED RECORDS

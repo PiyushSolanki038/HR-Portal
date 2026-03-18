@@ -61,6 +61,7 @@ export default function Audit() {
             {filtered.length === 0 && <tr><td colSpan={4}><div className="empty-state"><Shield size={40} /><h3>No events</h3></div></td></tr>}
           </tbody>
         </table>
+      </div>
     </div>
   )
 }
