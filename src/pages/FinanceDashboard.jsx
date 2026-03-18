@@ -4,7 +4,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import StatCard from '../components/ui/StatCard'
 import * as api from '../services/api'
-import { Wallet, Users, FileText, AlertCircle, ArrowRight, TrendingDown, TrendingUp, BookOpen } from 'lucide-react'
+import { Wallet, Users, FileText, AlertCircle, ArrowRight, TrendingUp, BookOpen } from 'lucide-react'
 
 export default function FinanceDashboard() {
   const { user } = useAuth()
@@ -95,7 +95,7 @@ export default function FinanceDashboard() {
           <StatCard
             title="Deductions This Mo."
             value={`₹${deducs.toLocaleString('en-IN')}`}
-            icon={TrendingDown}
+            icon={TrendingUp}
             color="var(--red)"
             bgColor="var(--red-dim)"
           />
