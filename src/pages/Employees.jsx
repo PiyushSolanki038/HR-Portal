@@ -130,7 +130,7 @@ export default function Employees() {
     }
   }
 
-  const handleSendAllCredentials = async () => {
+  const handleSendBulkCredentials = async () => {
     setSendingBulk(true)
     try {
       const data = await api.sendCredentialsToAll()
