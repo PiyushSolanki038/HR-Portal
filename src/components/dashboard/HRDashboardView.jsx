@@ -10,6 +10,9 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
   const { total, present, late, absent, onLeave, pendingLeaves } = stats
 
   const activeLeaves = (employees || []).filter(e => onLeaveIds?.has(e.id?.toLowerCase()))
+  
+  // Dynamic Spotlight: Find Top Performer
+  const topEmp = [...(employees || [])].sort((a,b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0))[0] || { name: '—', av: '??', role: '—', score: 0, color: 'var(--accent)' }
 
   return (
     <div className="hr-dashboard animate-in" style={{ paddingBottom: 40 }}>
@@ -106,16 +109,16 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
                  <span style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5 }}>Employee Spotlight</span>
                </div>
                <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
-                  <div style={{ width: 100, height: 100, borderRadius: 32, background: 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 900 }}>
-                    RV
+                  <div style={{ width: 100, height: 100, borderRadius: 32, background: topEmp.color || 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 900 }}>
+                    {topEmp.av || topEmp.name?.substring(0,2).toUpperCase()}
                   </div>
                   <div>
-                    <h2 style={{ fontSize: 32, fontWeight: 900, margin: 0 }}>Rohan Verma</h2>
-                    <p style={{ color: 'var(--accent)', margin: '8px 0 0 0', fontWeight: 700, fontSize: 16 }}>Senior Engineering Lead</p>
+                    <h2 style={{ fontSize: 32, fontWeight: 900, margin: 0 }}>{topEmp.name}</h2>
+                    <p style={{ color: 'var(--accent)', margin: '8px 0 0 0', fontWeight: 700, fontSize: 16 }}>{topEmp.role}</p>
                   </div>
                </div>
                <div style={{ marginTop: 32, display: 'flex', gap: 12 }}>
-                 <div className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}>98% Performance</div>
+                 <div className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}>{topEmp.score}% Performance</div>
                  <div className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}>Top Contributor</div>
                </div>
             </div>

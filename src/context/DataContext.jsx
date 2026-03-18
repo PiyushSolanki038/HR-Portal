@@ -100,7 +100,7 @@ export function DataProvider({ children }) {
     // Notification Polling every 45s
     const ntfsInterval = setInterval(() => {
       loadAll()
-    }, 45000)
+    }, 15000)
 
     return () => clearInterval(ntfsInterval)
   }, [loadAll])
