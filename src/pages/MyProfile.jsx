@@ -22,6 +22,7 @@ import {
   Send,
   ExternalLink
 } from 'lucide-react'
+import ChangePasswordModal from '../components/auth/ChangePasswordModal'
 
 export default function MyProfile() {
   const { user } = useAuth()
@@ -30,6 +31,7 @@ export default function MyProfile() {
   
   const [isEditing, setIsEditing] = useState(false)
   const [updating, setUpdating] = useState(false)
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     phone: '',
@@ -64,7 +66,7 @@ export default function MyProfile() {
   }
 
   const handleChangePassword = () => {
-    showToast('Password change link sent to email', 'success')
+    setIsPasswordModalOpen(true)
   }
 
   if (loading && employees.length === 0) return <LoadingSpinner />
@@ -282,6 +284,10 @@ export default function MyProfile() {
           </div>
         </div>
       </div>
+      <ChangePasswordModal 
+        isOpen={isPasswordModalOpen} 
+        onClose={() => setIsPasswordModalOpen(false)} 
+      />
     </div>
   )
 }

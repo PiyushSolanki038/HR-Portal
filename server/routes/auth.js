@@ -83,10 +83,22 @@ import { sendMessage } from '../telegram.js'
 
 router.post('/change-password', async (req, res) => {
   try {
-    const { empId, newPassword } = req.body
+    const { empId, currentPassword, newPassword } = req.body
     
     if (!empId || !newPassword) {
       return res.status(400).json({ error: 'Missing employee ID or new password' })
+    }
+
+    // 0. Verify current password if provided
+    const loginData = await readSheet('Login')
+    const user = loginData.find(u => u.id?.toString().trim().toUpperCase() === empId.toString().trim().toUpperCase())
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    if (currentPassword && user.password !== currentPassword) {
+      return res.status(401).json({ error: 'Current password incorrect' })
     }
 
     // 1. Update password AND flag in Login sheet

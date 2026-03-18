@@ -6,6 +6,7 @@ import {
   Mail, MessageSquare, Key, Database, Save, Eye, EyeOff, 
   Smartphone, Monitor, ChevronRight, Check
 } from 'lucide-react'
+import * as api from '../services/api'
 
 export default function Settings() {
   const { user, login } = useAuth()
@@ -93,10 +94,25 @@ export default function Settings() {
         showToast('Sheet ID updated. Refresh may be required for some components.', 'info')
       }
     } else if (section === 'security') {
-      setSecurity({ ...security, currentPassword: '', newPassword: '', confirmPassword: '' })
+      try {
+        await api.changePassword({ 
+          empId: user.id, 
+          currentPassword: security.currentPassword, 
+          newPassword: security.newPassword 
+        })
+        setSecurity({ ...security, currentPassword: '', newPassword: '', confirmPassword: '' })
+        showToast('Password updated successfully', 'success')
+      } catch (err) {
+        const msg = err.message.includes('401') ? 'Current password incorrect' : 'Failed to update password'
+        showToast(msg, 'error')
+        setLoading(false)
+        return
+      }
     }
     
-    showToast(`${section.charAt(0).toUpperCase() + section.slice(1)} settings updated successfully`, 'success')
+    if (section !== 'security') {
+       showToast(`${section.charAt(0).toUpperCase() + section.slice(1)} settings updated successfully`, 'success')
+    }
     setLoading(false)
   }
 
