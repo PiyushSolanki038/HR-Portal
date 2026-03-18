@@ -192,27 +192,27 @@ export default function App() {
                 {/* Employee Specific Routes */}
                 <Route path="/dashboard" element={<Navigate to="/" replace />} />
                 <Route path="/my-attendance" element={
-                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Admin', 'Finance']}>
+                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Finance']}>
                     <MyAttendance />
                   </RoleGate>
                 } />
                 <Route path="/my-tasks" element={
-                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Admin', 'Finance']}>
+                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Finance']}>
                     <MyTasks />
                   </RoleGate>
                 } />
                 <Route path="/my-leaves" element={
-                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Admin', 'Finance']}>
+                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Finance']}>
                     <MyLeaves />
                   </RoleGate>
                 } />
                 <Route path="/my-deductions" element={
-                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Admin', 'Finance']}>
+                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Finance']}>
                     <MyDeductions />
                   </RoleGate>
                 } />
                 <Route path="/my-profile" element={
-                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Admin', 'Finance']}>
+                  <RoleGate allowedRoles={['Employee', 'HR Manager', 'Finance']}>
                     <MyProfile />
                   </RoleGate>
                 } />

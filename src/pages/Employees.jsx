@@ -37,6 +37,9 @@ export default function Employees() {
   const depts = ['Developer', 'Marketing', 'HR', 'Design', 'Operations', 'Sales', 'Admin', 'Engineering']
 
   const filtered = employees.filter(e => {
+    // Hide admins from the employee list
+    if (e.role?.toLowerCase() === 'admin' || e.id?.toUpperCase().startsWith('ADM')) return false
+
     const matchSearch = (e.name || '').toLowerCase().includes(search.toLowerCase()) ||
                         (e.role || '').toLowerCase().includes(search.toLowerCase()) ||
                         (e.id || '').toLowerCase().includes(search.toLowerCase())
