@@ -60,7 +60,7 @@ router.post('/login', async (req, res) => {
          leavesQuota: empRecord?.leavesQuota || 12,
          av: empRecord?.av || rawId.substring(0,2),
          color: empRecord?.color || color, 
-         mustChangePassword: user.mustChangePassword === 'true',
+         mustChangePassword: user.mustChangePassword?.toString().toLowerCase() === 'true',
          token: 'direct_auth_token_ready'
       },
       route 
