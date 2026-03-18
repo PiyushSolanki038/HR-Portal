@@ -1,6 +1,6 @@
 import express from 'express'
 import dotenv from 'dotenv'
-import { readSheet } from '../sheets.js'
+import { readSheet, updateRowWhere } from '../sheets.js'
 
 dotenv.config()
 
