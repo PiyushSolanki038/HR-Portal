@@ -60,9 +60,11 @@ def sync_employee_stats(emp_id):
     sh = get_sheet()
     att_ws = sh.worksheet('Attendance')
     emp_ws = sh.worksheet('Employees')
+    lvs_ws = sh.worksheet('Leaves')
     
     att_records = att_ws.get_all_records()
     emp_records = emp_ws.get_all_records()
+    lvs_records = lvs_ws.get_all_records()
     
     # Find employee row index and joining date
     emp_row_idx = None
@@ -80,11 +82,16 @@ def sync_employee_stats(emp_id):
     p = len([r for r in recs if r.get('status') == 'p'])
     l = len([r for r in recs if r.get('status') == 'l'])
     
+    # Count approved leaves
+    emp_leaves = [lv for lv in lvs_records if str(lv.get('empId')) == str(emp_id) and (str(lv.get('status', '')).lower() == 'approved' or 'day' in str(lv.get('status', '')).lower())]
+    
+    attended = p + l + len(emp_leaves)
+    
     all_dates = sorted(list(set([r.get('date') for r in att_records if r.get('date')])))
     emp_working_days = len([d for d in all_dates if d >= emp_joining])
     
-    score = min(100, round(((p + l) / emp_working_days) * 100)) if emp_working_days > 0 else 100
-    absent = max(0, emp_working_days - (p + l))
+    score = min(100, round((attended / emp_working_days) * 100)) if emp_working_days > 0 else 100
+    absent = max(0, emp_working_days - attended)
     
     # Get column indices
     headers = emp_ws.row_values(1)

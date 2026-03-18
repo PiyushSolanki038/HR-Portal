@@ -22,7 +22,7 @@ function getAuth() {
 }
 
 const CACHE = {}
-const CACHE_TTL = 30000 // 30 seconds
+const CACHE_TTL = 2000 // 2 seconds
 
 // Read all rows from a tab, returns array of objects using row 1 as keys
 export async function readSheet(tabName) {

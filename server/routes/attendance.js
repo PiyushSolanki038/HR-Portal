@@ -35,24 +35,33 @@ router.get('/summary', async (req, res) => {
     const allDates = Array.from(new Set(attendance.map(r => r.date))).sort()
     
     const summary = {}
+    const leaves  = await readSheet('Leaves')
+    
     employees.forEach(emp => {
       const records = attendance.filter(r => r.empId === emp.id)
       const p = records.filter(r => r.status === 'p').length
       const l = records.filter(r => r.status === 'l').length
+      
+      const empLeaves = leaves.filter(lv => {
+        const isApproved = lv.status?.toLowerCase() === 'approved' || lv.status?.includes('day') || lv.approvedBy;
+        return lv.empId === emp.id && isApproved;
+      })
+      
+      const attended = p + l + empLeaves.length
       
       // Calculate working days for this specific employee since joining
       const empWorkingDays = allDates.filter(d => d >= (emp.joining || '1970-01-01')).length
       
       // Score = (Attended Days / Expected Days) * 100
       // We bound score between 0 and 100
-      const score = empWorkingDays > 0 ? Math.min(100, Math.round(((p + l) / empWorkingDays) * 100)) : 100
+      const score = empWorkingDays > 0 ? Math.min(100, Math.round((attended / empWorkingDays) * 100)) : 100
       
       summary[emp.id] = { 
         present: p, 
         late: l, 
         score: score,
         workingDays: empWorkingDays,
-        totalAttended: p + l
+        totalAttended: attended
       }
     })
     
@@ -167,6 +176,7 @@ async function syncEmployeeStats(empId) {
   try {
     const attendance = await readSheet('Attendance')
     const employees  = await readSheet('Employees')
+    const leaves     = await readSheet('Leaves')
     
     const emp = employees.find(e => e.id === empId)
     if (!emp) return
@@ -175,13 +185,20 @@ async function syncEmployeeStats(empId) {
     const p = records.filter(r => r.status === 'p').length
     const l = records.filter(r => r.status === 'l').length
     
+    const empLeaves = leaves.filter(lv => {
+      const isApproved = lv.status?.toLowerCase() === 'approved' || lv.status?.includes('day') || lv.approvedBy;
+      return lv.empId === empId && isApproved;
+    })
+
+    const attended = p + l + empLeaves.length
+
     // Get all unique working dates from attendance
     const allDates = Array.from(new Set(attendance.map(r => r.date))).sort()
     const empWorkingDays = allDates.filter(d => d >= (emp.joining || '1970-01-01')).length
     
     // Score = (Attended Days / Expected Days) * 100
-    const score = empWorkingDays > 0 ? Math.min(100, Math.round(((p + l) / empWorkingDays) * 100)) : 100
-    const absent = Math.max(0, empWorkingDays - (p + l))
+    const score = empWorkingDays > 0 ? Math.min(100, Math.round((attended / empWorkingDays) * 100)) : 100
+    const absent = Math.max(0, empWorkingDays - attended)
 
     await updateRowWhere('Employees', 'id', empId, {
       present: p,
