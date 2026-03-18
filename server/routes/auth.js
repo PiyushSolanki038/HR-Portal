@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import { readSheet, updateRowWhere } from '../sheets.js'
+import { sendMessage } from '../telegram.js'
 
 dotenv.config()
 
@@ -78,8 +79,6 @@ router.post('/verify-otp', (req, res) => {
 })
 
 // Change password endpoint
-import { updateRowWhere } from '../sheets.js'
-import { sendMessage } from '../telegram.js'
 
 router.post('/change-password', async (req, res) => {
   try {
