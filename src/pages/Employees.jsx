@@ -25,10 +25,10 @@ export default function Employees() {
   const [msgTarget, setMsgTarget] = useState(null)
   const [msgText, setMsgText] = useState('')
   const [msgChannel, setMsgChannel] = useState('portal')
-  const [showTempPassModal, setShowTempPassModal] = useState(false)
-  const [tempPassTarget, setTempPassTarget] = useState(null)
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [resetTarget, setResetTarget] = useState(null)
   const [tempPassword, setTempPassword] = useState('')
-  const [settingPass, setSettingPass] = useState(false)
+  const [resettingPass, setResettingPass] = useState(false)
 
   const depts = ['Developer', 'Marketing', 'HR', 'Design', 'Operations', 'Sales', 'Admin', 'Engineering']
 
@@ -119,18 +119,18 @@ export default function Employees() {
     }
   }
 
-  const handleSetTempPassword = async () => {
+  const handleResetPassword = async () => {
     if (!tempPassword.trim()) return
-    setSettingPass(true)
+    setResettingPass(true)
     try {
-      await api.setTempPassword({ empId: tempPassTarget.id, tempPassword })
-      showToast(`Temporary password set for ${tempPassTarget.name}`, 'success')
-      setShowTempPassModal(false)
+      await api.setTempPassword({ empId: resetTarget.id, tempPassword })
+      showToast(`Temporary password set for ${resetTarget.name}`, 'success')
+      setShowResetModal(false)
       setTempPassword('')
     } catch {
-      showToast('Failed to set temporary password', 'error')
+      showToast('Failed to reset password', 'error')
     } finally {
-      setSettingPass(false)
+      setResettingPass(false)
     }
   }
 
@@ -241,9 +241,9 @@ export default function Employees() {
                           <MessageSquare size={14} />
                         </button>
                         <button 
-                          onClick={() => { setTempPassTarget(emp); setShowTempPassModal(true); }}
+                          onClick={() => { setResetTarget(emp); setShowResetModal(true); }}
                           style={{ border: 'none', background: 'var(--bg-elevated)', color: 'var(--amber)', padding: 7, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
-                          title="Set Temporary Password"
+                          title="Reset Password"
                         >
                           <KeyRound size={14} />
                         </button>
@@ -310,9 +310,9 @@ export default function Employees() {
                       PROFILE
                     </button>
                     <button 
-                      onClick={() => { setTempPassTarget(emp); setShowTempPassModal(true); }}
+                      onClick={() => { setResetTarget(emp); setShowResetModal(true); }}
                       className="btn btn-ghost btn-sm" style={{ borderRadius: 10, padding: 8, color: 'var(--amber)' }}
-                      title="Set Temporary Password"
+                      title="Reset Password"
                     >
                       <KeyRound size={16} />
                     </button>
@@ -455,22 +455,22 @@ export default function Employees() {
           </div>
         </div>
       )}
-      {/* Set Temp Password Modal */}
-      {showTempPassModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setShowTempPassModal(false)}>
+      {/* Reset Password Modal */}
+      {showResetModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setShowResetModal(false)}>
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ padding: 8, background: 'var(--bg-elevated)', borderRadius: 10, color: 'var(--amber)' }}>
                   <KeyRound size={20} />
                 </div>
-                <h2 style={{ fontFamily: 'Syne, sans-serif', margin: 0, fontSize: '20px', fontWeight: 800 }}>Set Temp Password</h2>
+                <h2 style={{ fontFamily: 'Syne, sans-serif', margin: 0, fontSize: '20px', fontWeight: 800 }}>Reset Password</h2>
               </div>
-              <button onClick={() => setShowTempPassModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}><X size={20} /></button>
+              <button onClick={() => setShowResetModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
             <p style={{ fontSize: 13, color: 'var(--text-dim)', margin: 0 }}>
-              Setting a temporary password for <b>{tempPassTarget?.name}</b>. They will be forced to change it upon next login.
+              Setting a temporary password for <b>{resetTarget?.name}</b>. They will be forced to change it upon next login.
             </p>
 
             <div>
@@ -483,14 +483,14 @@ export default function Employees() {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
-              <button className="btn btn-ghost" onClick={() => setShowTempPassModal(false)}>Cancel</button>
+              <button className="btn btn-ghost" onClick={() => setShowResetModal(false)}>Cancel</button>
               <button 
                 className="btn btn-primary" 
-                onClick={handleSetTempPassword} 
-                disabled={settingPass || !tempPassword.trim()}
+                onClick={handleResetPassword} 
+                disabled={resettingPass || !tempPassword.trim()}
                 style={{ background: 'var(--amber)', color: '#000' }}
               >
-                {settingPass ? 'SETTING...' : 'SET PASSWORD'}
+                {resettingPass ? 'SETTING...' : 'SET PASSWORD'}
               </button>
             </div>
           </div>

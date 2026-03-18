@@ -20,23 +20,23 @@ router.post('/login', async (req, res) => {
     console.log(`[AUTH] Attempting login for ID: "${empId}"`)
     console.log(`[DEBUG] LoginData retrieved:`, JSON.stringify(loginData, null, 2))
     
-    // Find user with trimmed comparison
+    // Find user in Login sheet
     const user = loginData.find(u => {
       const matchId = u.id?.toString().trim().toUpperCase() === empId.toString().trim().toUpperCase()
       const matchPass = u.password?.toString().trim() === password.toString().trim()
-      console.log(`[DEBUG] checking user: "${u.id}" | Match ID: ${matchId} | Match Pass: ${matchPass}`)
       return matchId && matchPass
     })
 
     if (!user) {
-      console.warn(`[AUTH] Login failed for ID: "${empId}". No matching record found in 'Login' sheet.`)
+      console.warn(`[AUTH] Login failed for ID: "${empId}"`)
       return res.status(401).json({ error: 'Invalid Employee ID or Password' })
     }
 
-    console.log(`[AUTH] Login successful for: ${user.name} (${empId})`)
+    // Success: Fetch full employee record for role/dept
+    const allEmployees = await readSheet('Employees')
+    const empRecord = allEmployees.find(e => e.id?.toString().trim().toUpperCase() === empId.toString().trim().toUpperCase())
 
     // Determine Role and Redirect Path
-    // Handle both HR-001 and HR001 formats
     const rawId = empId.toUpperCase()
     let role = 'Employee', color = '#3b82f6', route = '/'
     
@@ -48,24 +48,18 @@ router.post('/login', async (req, res) => {
       role = 'HR Manager'; color = '#4f6ef7'; route = '/';
     }
 
-    // Success: Fetch full employee record for more details
-    const allEmployees = await readSheet('Employees')
-    const empRecord = allEmployees.find(e => e.id?.toString().trim().toUpperCase() === empId.toString().trim().toUpperCase())
-
-    console.log(`[AUTH] Login successful for: ${user.name} (${empId})`)
-
     // Success: Return user data and route
     res.json({ 
       success: true, 
       user: {
          id: empId, 
-         name: empRecord?.name || user.name || `${role} User`, 
-         role: role, 
+         name: user.name || empRecord?.name || `${role} User`, 
+         role: empRecord?.role || role, 
          dept: empRecord?.dept || 'Unknown',
          leavesQuota: empRecord?.leavesQuota || 12,
          av: empRecord?.av || rawId.substring(0,2),
          color: empRecord?.color || color, 
-         mustChangePassword: empRecord?.mustChangePassword === 'true',
+         mustChangePassword: user.mustChangePassword === 'true',
          token: 'direct_auth_token_ready'
       },
       route 
@@ -94,17 +88,15 @@ router.post('/change-password', async (req, res) => {
       return res.status(400).json({ error: 'Missing employee ID or new password' })
     }
 
-    // 1. Update password in Login sheet
-    await updateRowWhere('Login', 'id', empId, { password: newPassword })
+    // 1. Update password AND flag in Login sheet
+    await updateRowWhere('Login', 'id', empId, { 
+      password: newPassword,
+      mustChangePassword: 'false'
+    })
 
-    // 2. Update flag in Employees sheet
+    // 2. Fetch employee record for Telegram
     const allEmployees = await readSheet('Employees')
     const empRecord = allEmployees.find(e => e.id?.toString().trim().toUpperCase() === empId.toString().trim().toUpperCase())
-    
-    await updateRowWhere('Employees', 'id', empId, { 
-      mustChangePassword: 'false',
-      tempPassword: ''
-    })
 
     // 3. Send Telegram notification if chat ID is available
     if (empRecord && empRecord.telegramChatId) {
@@ -125,9 +117,9 @@ router.post('/set-temp-password', async (req, res) => {
     const { empId, tempPassword } = req.body
     if (!empId || !tempPassword) return res.status(400).json({ error: 'empId and tempPassword required' })
 
-    await updateRowWhere('Employees', 'id', empId, { 
-      mustChangePassword: 'true',
-      tempPassword: tempPassword
+    await updateRowWhere('Login', 'id', empId, { 
+      password: tempPassword,
+      mustChangePassword: 'true'
     })
 
     res.json({ success: true, message: `Temporary password set for ${empId}` })
