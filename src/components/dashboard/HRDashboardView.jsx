@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useScreenSize } from '../../hooks/useScreenSize'
 import StatCard from '../ui/StatCard'
 import ActivityFeed from '../ui/ActivityFeed'
 import { 
@@ -7,6 +8,7 @@ import {
 } from 'lucide-react'
 
 export default function HRDashboardView({ stats, employees, attendance, leaves, onLeaveIds, onRemindAbsent, onRemindAllAbsent, onApproveLeave, onRejectLeave }) {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { total, present, late, absent, onLeave, pendingLeaves } = stats
 
   const activeLeaves = (employees || []).filter(e => onLeaveIds?.has(e.id?.toLowerCase()))
@@ -15,24 +17,29 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
   const topEmp = [...(employees || [])].sort((a,b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0))[0] || { name: '—', av: '??', role: '—', score: 0, color: 'var(--accent)' }
 
   return (
-    <div className="hr-dashboard animate-in" style={{ paddingBottom: 40 }}>
-      <div className="page-header" style={{ marginBottom: 32 }}>
+    <div className="hr-dashboard animate-in" style={{ paddingBottom: 40, padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ marginBottom: 32, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', display: 'flex', justifyContent: 'space-between', gap: isMobile ? 16 : 24 }}>
         <div>
-          <h1 className="glow-text" style={{ fontSize: 32, fontWeight: 900 }}>HR Command Center</h1>
-          <p className="subtitle">Real-time organizational intelligence — {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+          <h1 className="glow-text" style={{ fontSize: isMobile ? 22 : 32, fontWeight: 900, margin: 0 }}>HR Command Center</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Real-time organizational intelligence — {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button className="btn btn-secondary" onClick={onRemindAllAbsent}>
-            <Bell size={16} /> Remind Absent
+        <div style={{ display: 'flex', gap: 12, width: isMobile ? '100%' : 'auto', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={onRemindAllAbsent} style={{ flex: isMobile ? 1 : 'none', padding: isMobile ? '10px 12px' : '10px 20px', fontSize: isMobile ? 13 : 14 }}>
+            <Bell size={16} /> {isMobile ? 'Remind' : 'Remind Absent'}
           </button>
-          <button className="btn btn-primary" style={{ boxShadow: 'var(--shadow-glow)' }}>
-            <Send size={16} /> Broadcast Hub
+          <button className="btn btn-primary" style={{ boxShadow: 'var(--shadow-glow)', flex: isMobile ? 1 : 'none', padding: isMobile ? '10px 12px' : '10px 20px', fontSize: isMobile ? 13 : 14 }} onClick={() => {}}>
+            <Send size={16} /> {isMobile ? 'Broadcast' : 'Broadcast Hub'}
           </button>
         </div>
       </div>
 
       {/* Premium Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+        gap: 16, 
+        marginBottom: 32 
+      }}>
         {[
           { label: 'Register Employee', icon: UserPlus, to: '/employees', color: 'var(--accent)' },
           { label: 'Review Leaves', icon: AlertTriangle, to: '/leaves', color: 'var(--blue)' },
@@ -50,7 +57,12 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
         ))}
       </div>
 
-      <div className="stats-grid" style={{ marginBottom: 32 }}>
+      <div className="stats-grid" style={{ 
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isTablet ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
+        gap: 16,
+        marginBottom: 32 
+      }}>
         <StatCard
           title="Total Force"
           value={total}
@@ -96,25 +108,38 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: (isMobile || isTablet) ? '1fr' : '1.2fr 1fr', gap: isMobile ? 16 : 32 }}>
         {/* Left Column: Spotlight & Activity */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 16 : 32 }}>
           {/* Spotlight Section */}
           <div className="card-premium" style={{ 
-            padding: 40, background: 'var(--text)', color: 'var(--bg)', border: 'none'
+            padding: isMobile ? 16 : 40, background: 'var(--text)', color: 'var(--bg)', border: 'none',
+            overflow: 'hidden'
           }}>
             <div style={{ position: 'relative', zIndex: 1 }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--accent)', marginBottom: 24 }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--accent)', marginBottom: isMobile ? 16 : 24 }}>
                  <Star size={16} fill="var(--accent)" />
                  <span style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5 }}>Employee Spotlight</span>
                </div>
-               <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
-                  <div style={{ width: 100, height: 100, borderRadius: 32, background: topEmp.color || 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 900 }}>
+               <div style={{ display: 'flex', gap: isMobile ? 16 : 32, alignItems: 'center', flexDirection: isMobile ? 'row' : 'row' }}>
+                  <div style={{ 
+                    width: isMobile ? 64 : 100, 
+                    height: isMobile ? 64 : 100, 
+                    minWidth: isMobile ? 64 : 100,
+                    borderRadius: isMobile ? 20 : 32, 
+                    background: topEmp.color || 'var(--accent)', 
+                    color: '#000', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    fontSize: isMobile ? 24 : 32, 
+                    fontWeight: 900 
+                  }}>
                     {topEmp.av || topEmp.name?.substring(0,2).toUpperCase()}
                   </div>
                   <div>
-                    <h2 style={{ fontSize: 32, fontWeight: 900, margin: 0 }}>{topEmp.name}</h2>
-                    <p style={{ color: 'var(--accent)', margin: '8px 0 0 0', fontWeight: 700, fontSize: 16 }}>{topEmp.role}</p>
+                    <h2 style={{ fontSize: isMobile ? 24 : 42, fontWeight: 900, margin: 0, lineHeight: 1 }}>{topEmp.name}</h2>
+                    <p style={{ color: 'var(--accent)', margin: '8px 0 0 0', fontWeight: 700, fontSize: isMobile ? 14 : 16 }}>{topEmp.role}</p>
                   </div>
                </div>
                <div style={{ marginTop: 32, display: 'flex', gap: 12 }}>
@@ -125,7 +150,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
             <Award size={200} style={{ position: 'absolute', right: -40, bottom: -40, opacity: 0.1, transform: 'rotate(-15deg)', color: '#fff' }} />
           </div>
 
-          <div className="card-premium">
+          <div className="card-premium" style={{ padding: isMobile ? 16 : 32 }}>
             <h3 style={{ margin: '0 0 24px 0', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
               <Zap size={20} color="var(--purple)" /> Intelligence Stream
             </h3>
@@ -134,8 +159,8 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
         </div>
 
         {/* Right Column: Critical Attention & Leaves */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-          <div className="card-premium">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 16 : 32 }}>
+          <div className="card-premium" style={{ padding: isMobile ? 16 : 32 }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <h3 style={{ fontSize: 16, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
                 <AlertTriangle size={18} color="var(--red)" /> Critical Attention
@@ -164,7 +189,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
             </div>
           </div>
 
-          <div className="card-premium">
+          <div className="card-premium" style={{ padding: isMobile ? 16 : 32 }}>
             <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
               <Users size={18} color="var(--blue)" /> Currently Out
             </h3>

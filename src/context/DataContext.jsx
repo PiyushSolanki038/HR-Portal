@@ -45,18 +45,25 @@ export function DataProvider({ children }) {
         api.getAuditLog()
       ])
 
-      const pick = (result, fallback) =>
-        result.status === 'fulfilled' ? result.value : fallback
+      const pick = (result, fallback, name) => {
+        if (result.status === 'fulfilled') return result.value
+        if (isInitialLoad.current) console.error(`[DATA_LOAD_ERROR] ${name}:`, result.reason)
+        return fallback
+      }
 
-      const emps = pick(empsR, employees)
-      const att  = pick(attR,  attendance)
-      const lvs  = pick(lvsR,  leaves)
-      const mnt  = pick(mntR,  mentors)
-      const tks  = pick(tksR,  tasks)
-      const summ = pick(summR, attendanceSummary)
-      const ntfs = pick(ntfsR, notifications)
-      const gov  = pick(govR,  governance)
-      const aud  = pick(audR,  auditLogs)
+      const emps = pick(empsR, employees, 'Employees')
+      const att  = pick(attR,  attendance, 'Attendance')
+      const lvs  = pick(lvsR,  leaves, 'Leaves')
+      const mnt  = pick(mntR,  mentors, 'Mentors')
+      const tks  = pick(tksR,  tasks, 'Tasks')
+      const summ = pick(summR, attendanceSummary, 'Summary')
+      const ntfs = pick(ntfsR, notifications, 'Notifications')
+      const gov  = pick(govR,  governance, 'Governance')
+      const aud  = pick(audR,  auditLogs, 'AuditLogs')
+
+      if (empsR.status === 'rejected' || attR.status === 'rejected' || lvsR.status === 'rejected') {
+        showToast('Some data failed to load. Check connection.', 'error')
+      }
 
       setEmployees(emps)
       setAttendance(att)

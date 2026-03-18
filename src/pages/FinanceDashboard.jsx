@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useAuth } from '../context/AuthContext'
 import { Navigate, useNavigate } from 'react-router-dom'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
@@ -7,6 +8,7 @@ import * as api from '../services/api'
 import { Wallet, Users, FileText, AlertCircle, ArrowRight, TrendingUp, BookOpen } from 'lucide-react'
 
 export default function FinanceDashboard() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [payroll, setPayroll] = useState([])
@@ -50,13 +52,13 @@ export default function FinanceDashboard() {
         </div>
       </div>
 
-      <div className="grid-2" style={{ marginBottom: 24 }}>
+      <div className={isMobile ? 'flex-col' : 'grid-2'} style={{ marginBottom: 24, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20 }}>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--muted)', fontSize: 13, fontWeight: 600, textTransform: 'uppercase' }}>
             <Wallet size={16} color="var(--accent)" /> Period Payroll Summary
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 24 }}>
             <div>
               <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 6 }}>Total Gross Payroll</div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 24, fontWeight: 700 }}>₹{gross.toLocaleString('en-IN')}</div>
@@ -109,7 +111,7 @@ export default function FinanceDashboard() {
         </div>
       </div>
 
-      <div className="grid-2">
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20 }}>
         {/* Payroll Processing Queue Table */}
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ padding: 20, borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

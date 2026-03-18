@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { 
@@ -9,6 +10,7 @@ import {
 import * as api from '../services/api'
 
 export default function Settings() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user, login } = useAuth()
   const { showToast } = useToast()
   
@@ -138,17 +140,17 @@ export default function Settings() {
   ]
 
   return (
-    <div className="animate-in" style={{ maxWidth: 1000, margin: '0 auto' }}>
-      <div className="page-header" style={{ marginBottom: 32 }}>
+    <div className="animate-in" style={{ maxWidth: isMobile ? '100%' : 1000, margin: '0 auto', padding: isMobile ? 12 : 28 }}>
+      <div className="page-header" style={{ marginBottom: 32, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: 16 }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 900 }}>Settings</h1>
-          <p className="subtitle">Configure your workspace and personal preferences</p>
+          <h1 style={{ fontSize: isMobile ? 28 : 32, fontWeight: 900 }}>Settings</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Configure your workspace and preferences</p>
         </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         {/* Navigation - Horizontal on mobile, vertical on desktop */}
-        <div style={{ display: 'flex', overflowX: 'auto', gap: 8, paddingBottom: 8, borderBottom: '1px solid var(--line)' }}>
+        <div style={{ display: 'flex', overflowX: 'auto', gap: 4, paddingBottom: 4, borderBottom: '1px solid var(--line)', WebkitOverflowScrolling: 'touch' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -168,30 +170,30 @@ export default function Settings() {
               }}
             >
               <tab.icon size={16} />
-              <span style={{ fontSize: 13 }}>{tab.label}</span>
+              <span style={{ fontSize: 13 }}>{isMobile && tab.id === 'notifications' ? 'Alerts' : tab.label}</span>
             </button>
           ))}
         </div>
 
         {/* Content */}
-        <div className="card-glass" style={{ padding: 32, borderRadius: 24 }}>
+        <div className="card-glass" style={{ padding: isMobile ? 20 : 32, borderRadius: 24, minHeight: 400 }}>
           {activeTab === 'general' && (
             <div className="animate-in">
               <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
                 <User size={20} color="var(--accent)" /> Public Profile
               </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid var(--line)' }}>
-                <div style={{ width: 80, height: 80, borderRadius: 24, background: 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900 }}>
+              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', gap: isMobile ? 16 : 24, marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid var(--line)', textAlign: isMobile ? 'center' : 'left' }}>
+                <div style={{ width: 80, height: 80, borderRadius: 24, background: 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900, flexShrink: 0 }}>
                   {profile.name.substring(0,2).toUpperCase()}
                 </div>
                 <div>
                   <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>{profile.name}</h3>
                   <p style={{ fontSize: 13, color: 'var(--muted)' }}>{profile.role} • {profile.location}</p>
-                  <button className="btn btn-ghost btn-sm" style={{ marginTop: 8, paddingLeft: 0, color: 'var(--accent)' }}>Change Avatar</button>
+                  <button className="btn btn-ghost btn-sm" style={{ marginTop: 8, color: 'var(--accent)', padding: isMobile ? '4px 0' : '0' }}>Change Avatar</button>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
                 <div className="form-group">
                   <label>Full Name</label>
                   <input value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
@@ -209,7 +211,7 @@ export default function Settings() {
                   <input value={profile.location} onChange={e => setProfile({...profile, location: e.target.value})} />
                 </div>
               </div>
-              <button className="btn btn-primary" onClick={() => handleSave('profile')} disabled={loading}>
+              <button className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => handleSave('profile')} disabled={loading}>
                 <Save size={16} /> Save Changes
               </button>
             </div>
@@ -246,7 +248,7 @@ export default function Settings() {
                   </div>
                 ))}
               </div>
-              <button className="btn btn-primary" onClick={() => handleSave('notifications')} disabled={loading}>Save Preferences</button>
+              <button className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => handleSave('notifications')} disabled={loading}>Save Preferences</button>
             </div>
           )}
 
@@ -285,7 +287,7 @@ export default function Settings() {
                 Changing your password will log you out of all other active sessions.
               </div>
 
-              <button className="btn btn-primary" onClick={() => handleSave('security')} disabled={loading}>Update Password</button>
+              <button className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => handleSave('security')} disabled={loading}>Update Password</button>
             </div>
           )}
 
@@ -299,17 +301,17 @@ export default function Settings() {
                 <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 16 }}>Backend Configuration</p>
                 <div className="form-group">
                   <label>Google Sheet Content ID</label>
-                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 12, flexDirection: isMobile ? 'column' : 'row' }}>
                     <input 
                       value={system.sheetId} 
                       onChange={e => setSystem({...system, sheetId: e.target.value})} 
-                      style={{ fontFamily: 'monospace', fontSize: 12, flex: 1, minWidth: 200 }} 
+                      style={{ fontFamily: 'monospace', fontSize: 13, flex: 1, minWidth: isMobile ? '100%' : 200, padding: 12 }} 
                     />
                     <button 
                       className="btn btn-secondary" 
                       onClick={handleTestConnection}
                       disabled={loading}
-                      style={{ flex: '1 1 auto' }}
+                      style={{ width: isMobile ? '100%' : 'auto' }}
                     >
                       {loading ? 'Testing...' : 'Test Connection'}
                     </button>
@@ -335,13 +337,13 @@ export default function Settings() {
                  </div>
               </div>
 
-              <button className="btn btn-primary" onClick={() => handleSave('system')} disabled={loading}>
+              <button className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => handleSave('system')} disabled={loading}>
                 <Save size={16} /> Save System Settings
               </button>
 
-              <div style={{ marginTop: 40, paddingTop: 32, borderTop: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ marginTop: 40, paddingTop: 32, borderTop: '1px solid var(--line)', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: 'center', gap: 20, textAlign: 'center' }}>
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>System Version: <strong>v2.4.8 Platinum</strong></span>
-                <button className="btn btn-danger btn-sm" onClick={() => showToast('Factory Reset initiated...', 'info')}>Factory Reset Hub</button>
+                <button className="btn btn-danger btn-sm" style={{ width: isMobile ? '100%' : 'auto' }} onClick={() => showToast('Factory Reset initiated...', 'info')}>Factory Reset Hub</button>
               </div>
             </div>
           )}

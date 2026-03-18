@@ -47,7 +47,8 @@ export async function readSheet(tabName) {
       console.warn(`Tab "${tabName}" not found or invalid request. Returning empty.`)
       return []
     }
-    console.error(`SHEET_READ_ERROR [${tabName}]:`, err.message)
+    console.error(`[SHEETS_READ_ERROR] Tab: "${tabName}", ID: "${SHEET_ID}":`, err.message)
+    if (err.response?.data) console.error('[SHEETS_DETAIL]:', JSON.stringify(err.response.data))
     throw err
   }
   const rows = res.data.values || []
@@ -161,12 +162,18 @@ export async function updateRowWhere(tabName, field, value, updates) {
     if (colIdx !== -1) rows[rowIdx][colIdx] = val
   })
 
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: SHEET_ID,
-    range: `${tabName}!A${rowIdx + 1}`,
-    valueInputOption: 'USER_ENTERED',
-    resource: { values: [rows[rowIdx]] },
-  })
+  try {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: SHEET_ID,
+      range: `${tabName}!A${rowIdx + 1}`,
+      valueInputOption: 'USER_ENTERED',
+      resource: { values: [rows[rowIdx]] },
+    })
+  } catch (err) {
+    console.error(`[SHEETS_UPDATE_ERROR] Tab: "${tabName}", Field: "${field}", Value: "${value}":`, err.message)
+    if (err.response?.data) console.error('[SHEETS_DETAIL]:', JSON.stringify(err.response.data))
+    throw err
+  }
 }
 
 // Delete a specific row by matching a field value

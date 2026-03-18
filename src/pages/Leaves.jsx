@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useData } from '../context/DataContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { Search, CalendarOff } from 'lucide-react'
@@ -6,6 +7,7 @@ import { Search, CalendarOff } from 'lucide-react'
 const STATUS_BADGES = { pending: 'badge-amber', approved: 'badge-green', rejected: 'badge-red' }
 
 export default function Leaves() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { leaves, loading, error } = useData()
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
@@ -20,20 +22,35 @@ export default function Leaves() {
   })
 
   return (
-    <div className="animate-in">
-      <div className="page-header">
+    <div className="animate-in" style={{ padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ marginBottom: 24 }}>
         <div>
-          <h1>Leaves</h1>
-          <p className="subtitle">All leave requests across the organization</p>
+          <h1 style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800 }}>Leaves</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>All leave requests across the organization</p>
         </div>
       </div>
 
-      <div className="filter-bar" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-        <div className="search-bar" style={{ maxWidth: '100%' }}>
-          <Search size={16} className="search-icon" />
-          <input placeholder="Search by employee…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%' }} />
+      <div className="filter-bar" style={{ 
+        flexDirection: isMobile ? 'column' : 'row', 
+        alignItems: isMobile ? 'stretch' : 'center',
+        padding: isMobile ? 12 : 16,
+        marginBottom: 24,
+        gap: 12
+      }}>
+        <div className="search-bar" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Search size={16} className="search-icon" style={{ minWidth: 16 }} />
+          <input 
+            placeholder="Search by employee…" 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            style={{ width: '100%', fontSize: 16, background: 'transparent', border: 'none', outline: 'none' }} 
+          />
         </div>
-        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ maxWidth: '100%' }}>
+        <select 
+          value={filterStatus} 
+          onChange={e => setFilterStatus(e.target.value)} 
+          style={{ width: isMobile ? '100%' : 'auto', fontSize: 16, border: isMobile ? '1px solid var(--line)' : 'none', borderRadius: isMobile ? 10 : 0, padding: isMobile ? 10 : 0, fontWeight: 700 }}
+        >
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
@@ -41,8 +58,8 @@ export default function Leaves() {
         </select>
       </div>
 
-      <div className="table-container">
-        <table>
+      <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 16 }}>
+        <table style={{ minWidth: 800 }}>
           <thead>
             <tr>
               <th>Employee</th>

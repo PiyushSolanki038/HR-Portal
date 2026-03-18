@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { Navigate } from 'react-router-dom'
@@ -7,6 +8,7 @@ import * as api from '../services/api'
 import { TrendingUp, AlertCircle, History, Settings, XCircle } from 'lucide-react'
 
 export default function Deductions() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user } = useAuth()
   const { showToast } = useToast()
   const [payroll, setPayroll] = useState([])
@@ -75,8 +77,8 @@ export default function Deductions() {
   return (
     <div className="animate-in">
       <div className="page-header">
-        <div>
-          <h1>Deductions & Penalties</h1>
+        <div style={{ padding: isMobile ? '0 16px' : '0' }}>
+          <h1 style={{ fontSize: isMobile ? 24 : 28 }}>Deductions & Penalties</h1>
           <p className="subtitle">
             {payroll.length} employees tracked in this cycle
           </p>
@@ -87,7 +89,7 @@ export default function Deductions() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginBottom: 24 }}>
         <div className="card">
           <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 8 }}>Total Deductions Amount</div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 32, fontWeight: 700, color: 'var(--red)' }}>₹{totalDeductionsAmount.toLocaleString('en-IN')}</div>

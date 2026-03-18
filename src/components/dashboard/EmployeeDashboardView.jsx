@@ -1,4 +1,5 @@
 import React from 'react'
+import { useScreenSize } from '../../hooks/useScreenSize'
 import StatCard from '../ui/StatCard'
 import AttendanceHeatmap from '../ui/AttendanceHeatmap'
 import { 
@@ -15,6 +16,7 @@ import {
 import { Link } from 'react-router-dom'
 
 export default function EmployeeDashboardView({ user, stats, tasks, history, messages = [], leaves = [], onStartBot }) {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const firstName = user?.name?.split(' ')[0]
   const today = new Date()
   const todayStr = today.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -29,15 +31,15 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
   const todayRecord = history.find(rec => new Date(rec.date).toDateString() === today.toDateString())
 
   return (
-    <div className="employee-dashboard animate-in">
-      <div className="page-header">
+    <div className="employee-dashboard animate-in" style={{ padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 12, marginBottom: 24, display: 'flex', justifyContent: 'space-between' }}>
         <div>
-          <h1 style={{ fontFamily: 'Syne, sans-serif' }}>
+          <h1 style={{ fontFamily: 'Syne, sans-serif', fontSize: isMobile ? 24 : 32, margin: 0 }}>
             {today.getHours() < 12 ? 'Good morning' : today.getHours() < 17 ? 'Good afternoon' : 'Good evening'}, {firstName}
           </h1>
-          <p className="subtitle">{dayName}, {todayStr}</p>
+          <p className="subtitle" style={{ fontSize: isMobile ? 13 : 16 }}>{dayName}, {todayStr}</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: isMobile ? '100%' : 'auto' }}>
           <span className="badge badge-green" style={{ textTransform: 'none', padding: '6px 14px' }}>
             👤 Employee
           </span>
@@ -50,32 +52,32 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
       </div>
 
       {/* Today's Status Card */}
-      <div className="card" style={{ marginBottom: 24, border: hasSubmittedToday ? 'var(--border)' : '1px solid var(--amber)' }}>
+      <div className="card" style={{ marginBottom: 24, border: hasSubmittedToday ? 'var(--border)' : '1px solid var(--amber)', padding: isMobile ? 16 : 24 }}>
         {!hasSubmittedToday ? (
-          <div style={{ padding: '8px 4px' }}>
+          <div style={{ padding: '0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--amber-dim)', color: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--amber-dim)', color: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 40 }}>
                 <AlertTriangle size={20} />
               </div>
               <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700 }}>You haven't submitted attendance today</h3>
+                <h3 style={{ fontSize: isMobile ? 15 : 16, fontWeight: 700 }}>You haven't submitted attendance today</h3>
                 <p style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>
                   On Time: 1:00 AM to 11:58 PM
                 </p>
               </div>
             </div>
-            <Link to="/my-attendance" className="btn btn-primary">
+            <Link to="/my-attendance" className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}>
               <CheckCircle size={16} /> Mark Attendance Now
             </Link>
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
+          <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', padding: '0', flexDirection: isMobile ? 'column' : 'row', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ 
                 width: 48, height: 48, borderRadius: 12, 
                 background: todayRecord?.status === 'l' ? 'var(--amber-dim)' : 'var(--green-dim)', 
                 color: todayRecord?.status === 'l' ? 'var(--amber)' : 'var(--green)', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 48
               }}>
                 <CheckCircle size={24} />
               </div>
@@ -91,13 +93,18 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
                 </p>
               </div>
             </div>
-            <Link to="/my-attendance" className="btn btn-ghost btn-sm">View Details</Link>
+            <Link to="/my-attendance" className="btn btn-ghost btn-sm" style={{ width: isMobile ? '100%' : 'auto', textAlign: isMobile ? 'center' : 'right' }}>View Details</Link>
           </div>
         )}
       </div>
 
-      <div className="stats-grid">
-        <div className="card" style={{ padding: 16 }}>
+      <div className="stats-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', 
+        gap: 16,
+        marginBottom: 24
+      }}>
+        <div className="card" style={{ padding: isMobile ? 16 : 20 }}>
           <div style={{ color: 'var(--muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Attendance</div>
           <div style={{ fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-mono)' }}>{stats.attendance} Days</div>
           <div style={{ marginTop: 8, fontSize: 12, display: 'flex', gap: 12 }}>
@@ -123,17 +130,25 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
         </div>
       </div>
 
-      <div className="grid-2" style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 24 }}>
-        <div className="card">
-          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+      <div className="grid-2" style={{ marginTop: 24, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 24 }}>
+        <div className="card" style={{ padding: isMobile ? 16 : 24 }}>
+          <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20, flexDirection: isMobile ? 'column' : 'row', gap: 12 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700 }}>Attendance Heatmap</h3>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: 'var(--muted)' }}>
-              <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--green)' }}></div> Present
-              <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--amber)' }}></div> Late
-              <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--red)' }}></div> Absent
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11, color: 'var(--muted)', flexWrap: 'wrap' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--green)' }}></div> Present
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--amber)' }}></div> Late
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--red)' }}></div> Absent
+              </div>
             </div>
           </div>
-          <AttendanceHeatmap records={history} />
+          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <AttendanceHeatmap records={history} />
+          </div>
           <div style={{ marginTop: 20, paddingTop: 16, borderTop: 'var(--border)' }}>
             <p style={{ color: 'var(--muted)', fontSize: 13 }}>
               Daily log across the month. Green marks represent on-time, amber for late.
@@ -141,7 +156,7 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
           </div>
         </div>
 
-        <div className="card">
+        <div className="card" style={{ padding: isMobile ? 16 : 24 }}>
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700 }}>My Tasks Preview</h3>
             <Link to="/my-tasks" className="btn btn-ghost btn-sm" style={{ padding: '4px 8px' }}>
@@ -170,8 +185,8 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
         </div>
       </div>
 
-      <div className="grid-2" style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        <div className="card">
+      <div className="grid-2" style={{ marginTop: 24, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 24 }}>
+        <div className="card" style={{ padding: isMobile ? 16 : 24 }}>
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700 }}>Recent Messages</h3>
             <Link to="/communication" className="btn btn-ghost btn-sm">Open Chat</Link>
@@ -199,7 +214,7 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
           </div>
         </div>
 
-        <div className="card">
+        <div className="card" style={{ padding: isMobile ? 16 : 24 }}>
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700 }}>My Leaves</h3>
             <Link to="/my-leaves" className="btn btn-ghost btn-sm">View All</Link>
@@ -226,17 +241,17 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
         </div>
       </div>
 
-      <div className="grid-2-mobile" style={{ marginTop: 32, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-        <Link to="/my-attendance" className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center', background: 'var(--green-dim)', border: '1px solid var(--green)' }}>
+      <div className="grid-2-mobile" style={{ marginTop: 32, display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 12 }}>
+        <Link to="/my-attendance" className="btn btn-secondary" style={{ justifyContent: 'center', background: 'var(--green-dim)', border: '1px solid var(--green)', fontSize: isMobile ? 12 : 14, padding: isMobile ? '12px 8px' : '12px 16px' }}>
           <Clock size={16} /> Mark Attendance
         </Link>
-        <Link to="/my-leaves" className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center', background: 'var(--blue-dim)', border: '1px solid var(--blue)' }}>
+        <Link to="/my-leaves" className="btn btn-secondary" style={{ justifyContent: 'center', background: 'var(--blue-dim)', border: '1px solid var(--blue)', fontSize: isMobile ? 12 : 14, padding: isMobile ? '12px 8px' : '12px 16px' }}>
           <Calendar size={16} /> Apply Leave
         </Link>
-        <button className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center', background: 'var(--purple-dim)', border: '1px solid var(--purple)' }}>
-          <ArrowRight size={16} /> View My Report
+        <button className="btn btn-secondary" style={{ justifyContent: 'center', background: 'var(--purple-dim)', border: '1px solid var(--purple)', fontSize: isMobile ? 12 : 14, padding: isMobile ? '12px 8px' : '12px 16px' }}>
+          <ArrowRight size={16} /> My Report
         </button>
-        <button className="btn btn-secondary" style={{ flex: 1, justifyContent: 'center', background: 'var(--amber-dim)', border: '1px solid var(--amber)' }} onClick={onStartBot}>
+        <button className="btn btn-secondary" style={{ justifyContent: 'center', background: 'var(--amber-dim)', border: '1px solid var(--amber)', fontSize: isMobile ? 12 : 14, padding: isMobile ? '12px 8px' : '12px 16px' }} onClick={onStartBot}>
           <Send size={16} /> Message HR
         </button>
       </div>

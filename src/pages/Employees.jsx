@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
@@ -9,6 +10,7 @@ import * as api from '../services/api'
 import { useToast } from '../context/ToastContext'
 
 export default function Employees() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { employees, leaves, attendanceSummary, loading, error, refresh } = useData()
   const { user } = useAuth()
   const { showToast } = useToast()
@@ -163,11 +165,11 @@ export default function Employees() {
   if (error) return <div className="empty-state">Error: {error}</div>
 
   return (
-    <div className="animate-in" style={{ paddingBottom: 60 }}>
-      <div className="page-header">
+    <div className="animate-in" style={{ paddingBottom: 60, padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 24, marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 32 }}>Staff Directory</h1>
-          <p className="subtitle">{employees.length} enterprise team members linked</p>
+          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: isMobile ? 24 : 32, margin: 0 }}>Staff Directory</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>{employees.length} enterprise team members linked</p>
         </div>
         <div className="page-header-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
           <div style={{ background: 'var(--bg-elevated)', padding: 4, borderRadius: 12, display: 'flex', border: '1px solid var(--line)' }}>
@@ -200,20 +202,38 @@ export default function Employees() {
         </div>
       </div>
 
-      <div className="filter-bar" style={{ background: 'var(--bg-card)', padding: '16px 24px', borderRadius: 20, border: '1px solid var(--line)', marginBottom: 32 }}>
-        <div className="search-bar" style={{ flex: 1 }}>
-          <Search size={16} className="search-icon" />
-          <input placeholder="Search by name, role, ID or handle…" value={search} onChange={e => setSearch(e.target.value)} style={{ border: 'none', background: 'transparent' }} />
+      <div className="filter-bar" style={{ 
+        background: 'var(--bg-card)', 
+        padding: isMobile ? '12px' : '16px 24px', 
+        borderRadius: 20, 
+        border: '1px solid var(--line)', 
+        marginBottom: 32,
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: 12
+      }}>
+        <div className="search-bar" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Search size={16} className="search-icon" style={{ minWidth: 16 }} />
+          <input 
+            placeholder="Search by name, role, ID or handle…" 
+            value={search} 
+            onChange={e => setSearch(e.target.value)} 
+            style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: 16 }} 
+          />
         </div>
-        <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} style={{ width: 'auto', border: 'none', fontWeight: 700, color: 'var(--text-dim)' }}>
+        <select 
+          value={deptFilter} 
+          onChange={e => setDeptFilter(e.target.value)} 
+          style={{ width: isMobile ? '100%' : 'auto', border: 'none', fontWeight: 700, color: 'var(--text-dim)', background: isMobile ? 'var(--bg-elevated)' : 'transparent', padding: isMobile ? '10px' : '0', borderRadius: isMobile ? '10px' : '0' }}
+        >
           <option value="all">All Departments</option>
           {depts.map(d => <option key={d} value={d}>{d}</option>)}
         </select>
       </div>
 
       {viewMode === 'list' ? (
-        <div className="table-container" style={{ borderRadius: 24 }}>
-          <table>
+        <div className="table-container" style={{ borderRadius: 24, overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+          <table style={{ minWidth: isMobile ? 600 : '100%' }}>
             <thead>
               <tr>
                 <th>Employee</th>
@@ -383,29 +403,43 @@ export default function Employees() {
       )}
       {/* Add Employee Modal */}
       {showAddModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setShowAddModal(false)}>
-          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '520px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' }} onClick={e => e.stopPropagation()}>
+        <div style={{ 
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.4)', display: 'flex', 
+          alignItems: isMobile ? 'flex-end' : 'center', 
+          justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' 
+        }} onClick={() => setShowAddModal(false)}>
+          <div style={{ 
+            background: 'var(--bg-card)', border: '1px solid var(--border)', 
+            borderRadius: isMobile ? '24px 24px 0 0' : '24px', 
+            padding: isMobile ? '24px' : '32px', 
+            width: isMobile ? '100%' : '95%', 
+            maxWidth: isMobile ? '100%' : '520px', 
+            maxHeight: isMobile ? '90vh' : 'auto',
+            overflowY: 'auto',
+            display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' 
+          }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontFamily: 'Syne, sans-serif', margin: 0, fontSize: '24px', fontWeight: 800 }}>Enlist Team Member</h2>
+              <h2 style={{ fontFamily: 'Syne, sans-serif', margin: 0, fontSize: isMobile ? '20px' : '24px', fontWeight: 800 }}>Enlist Team Member</h2>
               <button onClick={() => setShowAddModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <div style={{ gridColumn: 'span 2' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
+              <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Full Name</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
                   value={newEmp.name} onChange={e => setNewEmp({...newEmp, name: e.target.value})} placeholder="E.g. John Doe" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Role</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
                   value={newEmp.role} onChange={e => setNewEmp({...newEmp, role: e.target.value})} placeholder="E.g. Senior Developer" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Department</label>
-                <select style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
+                <select style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
                   value={newEmp.dept} onChange={e => setNewEmp({...newEmp, dept: e.target.value})}>
                   <option value="">Select Dept</option>
                   {depts.map(d => <option key={d} value={d}>{d}</option>)}
@@ -414,55 +448,67 @@ export default function Employees() {
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Email</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
                   value={newEmp.email} onChange={e => setNewEmp({...newEmp, email: e.target.value})} placeholder="john@company.com" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>WhatsApp</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
                   value={newEmp.wa} onChange={e => setNewEmp({...newEmp, wa: e.target.value})} placeholder="+91..." />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Telegram Handle</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
                   value={newEmp.tg} onChange={e => setNewEmp({...newEmp, tg: e.target.value})} placeholder="@username" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Telegram Chat ID</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
                   value={newEmp.telegramChatId} onChange={e => setNewEmp({...newEmp, telegramChatId: e.target.value})} placeholder="e.g. 123456789" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Joining Date</label>
-                <input type="date" style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
+                <input type="date" style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
                   value={newEmp.joining} onChange={e => setNewEmp({...newEmp, joining: e.target.value})} />
               </div>
 
-              <div style={{ gridColumn: 'span 2' }}>
+              <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Salary (CTC Yearly)</label>
-                <input type="number" style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
+                <input type="number" style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
                   value={newEmp.salary} onChange={e => setNewEmp({...newEmp, salary: e.target.value})} placeholder="E.g. 1200000" />
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
-              <button className="btn btn-ghost" style={{ padding: '12px 24px' }} onClick={() => setShowAddModal(false)}>Cancel</button>
-              <button className="btn btn-primary" style={{ padding: '12px 28px' }} onClick={handleAddEmployee}>Enlist Member</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px', flexDirection: isMobile ? 'column' : 'row' }}>
+              <button className="btn btn-ghost" style={{ padding: '12px 24px', order: isMobile ? 2 : 1 }} onClick={() => setShowAddModal(false)}>Cancel</button>
+              <button className="btn btn-primary" style={{ padding: '12px 28px', order: isMobile ? 1 : 2 }} onClick={handleAddEmployee}>Enlist Member</button>
             </div>
           </div>
         </div>
       )}
       {/* Quick Message Modal */}
       {showMsgModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setShowMsgModal(false)}>
-          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' }} onClick={e => e.stopPropagation()}>
+        <div style={{ 
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.4)', display: 'flex', 
+          alignItems: isMobile ? 'flex-end' : 'center', 
+          justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' 
+        }} onClick={() => setShowMsgModal(false)}>
+          <div style={{ 
+            background: 'var(--bg-card)', border: '1px solid var(--border)', 
+            borderRadius: isMobile ? '24px 24px 0 0' : '24px', 
+            padding: isMobile ? '24px' : '32px', 
+            width: isMobile ? '100%' : '95%', 
+            maxWidth: isMobile ? '100%' : '480px', 
+            display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' 
+          }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontFamily: 'Syne, sans-serif', margin: 0, fontSize: '24px', fontWeight: 800 }}>
-                {msgTarget === 'broadcast' ? 'Broadcast Message' : `Message to ${msgTarget?.name}`}
+              <h2 style={{ fontFamily: 'Syne, sans-serif', margin: 0, fontSize: isMobile ? '20px' : '24px', fontWeight: 800 }}>
+                {msgTarget === 'broadcast' ? 'Broadcast Message' : isMobile ? `Msg: ${msgTarget?.name?.split(' ')[0]}` : `Message to ${msgTarget?.name}`}
               </h2>
               <button onClick={() => setShowMsgModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}><X size={20} /></button>
             </div>
@@ -486,15 +532,15 @@ export default function Employees() {
 
             <textarea 
               rows={5} 
-              style={{ width: '100%', padding: '14px', borderRadius: '16px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', resize: 'none' }}
+              style={{ width: '100%', padding: '14px', borderRadius: '16px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', resize: 'none', fontSize: 16 }}
               placeholder="Type your message here..."
               value={msgText}
               onChange={e => setMsgText(e.target.value)}
             />
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
-              <button className="btn btn-ghost" onClick={() => setShowMsgModal(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSendMessage} style={{ gap: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px', flexDirection: isMobile ? 'column' : 'row' }}>
+              <button className="btn btn-ghost" style={{ order: isMobile ? 2 : 1 }} onClick={() => setShowMsgModal(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSendMessage} style={{ gap: 8, order: isMobile ? 1 : 2 }}>
                 <Send size={16} /> Send Message
               </button>
             </div>

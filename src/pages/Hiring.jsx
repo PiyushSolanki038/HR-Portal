@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useToast } from '../context/ToastContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import Modal from '../components/ui/Modal'
@@ -15,6 +16,7 @@ const STAGE_COLORS = {
 }
 
 export default function Hiring() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { showToast } = useToast()
   const [candidates, setCandidates] = useState([])
   const [loading, setLoading] = useState(true)
@@ -60,16 +62,16 @@ export default function Hiring() {
   if (loading) return <LoadingSpinner />
 
   return (
-    <div className="animate-in">
-      <div className="page-header">
+    <div className="animate-in" style={{ padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 24, marginBottom: 24 }}>
         <div>
-          <h1>Hiring Pipeline</h1>
-          <p className="subtitle">{candidates.length} candidates in pipeline</p>
+          <h1 style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800 }}>Hiring Pipeline</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>{candidates.length} candidates in pipeline</p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button className={`btn ${view === 'pipeline' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setView('pipeline')}>Pipeline</button>
-          <button className={`btn ${view === 'table' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setView('table')}>Table</button>
-          <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+        <div style={{ display: 'flex', gap: 8, width: isMobile ? '100%' : 'auto', flexWrap: 'wrap' }}>
+          <button className={`btn ${view === 'pipeline' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: isMobile ? 1 : 'none', fontSize: isMobile ? 12 : 14 }} onClick={() => setView('pipeline')}>Pipeline</button>
+          <button className={`btn ${view === 'table' ? 'btn-primary' : 'btn-secondary'}`} style={{ flex: isMobile ? 1 : 'none', fontSize: isMobile ? 12 : 14 }} onClick={() => setView('table')}>Table</button>
+          <button className="btn btn-primary" style={{ flex: isMobile ? '1 1 100%' : 'none', fontSize: isMobile ? 12 : 14, justifyContent: 'center', marginTop: isMobile ? 4 : 0 }} onClick={() => setShowAdd(true)}>
             <UserPlus size={16} /> Add Candidate
           </button>
         </div>
@@ -107,8 +109,8 @@ export default function Hiring() {
       )}
 
       {view === 'table' && (
-        <div className="table-container">
-          <table>
+        <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 16 }}>
+          <table style={{ minWidth: 800 }}>
             <thead>
               <tr>
                 <th>Name</th>
@@ -157,22 +159,42 @@ export default function Hiring() {
           }
         >
           <div className="form-group">
-            <label>Full Name</label>
-            <input value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="John Doe" />
+            <label style={{ fontSize: 13, fontWeight: 600 }}>Full Name</label>
+            <input 
+              value={form.name} 
+              onChange={e => setForm({...form, name: e.target.value})} 
+              placeholder="John Doe" 
+              style={{ fontSize: 16, width: '100%', padding: '12px', borderRadius: '10px' }}
+            />
           </div>
-          <div className="form-row">
+          <div className="form-row" style={{ gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
             <div className="form-group">
-              <label>Applied For</label>
-              <input value={form.appliedFor} onChange={e => setForm({...form, appliedFor: e.target.value})} placeholder="Frontend Developer" />
+              <label style={{ fontSize: 13, fontWeight: 600 }}>Applied For</label>
+              <input 
+                value={form.appliedFor} 
+                onChange={e => setForm({...form, appliedFor: e.target.value})} 
+                placeholder="Frontend Developer" 
+                style={{ fontSize: 16, width: '100%', padding: '12px', borderRadius: '10px' }}
+              />
             </div>
             <div className="form-group">
-              <label>Department</label>
-              <input value={form.dept} onChange={e => setForm({...form, dept: e.target.value})} placeholder="Engineering" />
+              <label style={{ fontSize: 13, fontWeight: 600 }}>Department</label>
+              <input 
+                value={form.dept} 
+                onChange={e => setForm({...form, dept: e.target.value})} 
+                placeholder="Engineering" 
+                style={{ fontSize: 16, width: '100%', padding: '12px', borderRadius: '10px' }}
+              />
             </div>
           </div>
           <div className="form-group">
-            <label>Contact</label>
-            <input value={form.contact} onChange={e => setForm({...form, contact: e.target.value})} placeholder="email or phone" />
+            <label style={{ fontSize: 13, fontWeight: 600 }}>Contact</label>
+            <input 
+              value={form.contact} 
+              onChange={e => setForm({...form, contact: e.target.value})} 
+              placeholder="email or phone" 
+              style={{ fontSize: 16, width: '100%', padding: '12px', borderRadius: '10px' }}
+            />
           </div>
         </Modal>
       )}

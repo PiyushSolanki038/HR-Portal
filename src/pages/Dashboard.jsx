@@ -26,7 +26,20 @@ export default function Dashboard() {
   }, [isHR, user?.id])
 
   if (loading) return <LoadingSpinner />
-  if (error) return <div className="empty-state">Error loading data: {error}</div>
+  
+  if (error || (isHR && employees.length === 0)) {
+    return (
+      <div className="empty-state">
+        <div style={{ background: 'var(--red-dim)', color: 'var(--red)', padding: '20px', borderRadius: '16px', maxWidth: '400px' }}>
+          <h3>Data Unavailable</h3>
+          <p>{error || 'No employee data found. This might be a connection issue with Google Sheets.'}</p>
+          <button className="btn btn-primary" onClick={() => refresh()} style={{ marginTop: '16px' }}>
+            Retry Loading Data
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const today = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD (safe local)
   const onLeaveEmps = (leaves || []).filter(l => {

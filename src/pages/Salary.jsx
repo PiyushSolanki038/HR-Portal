@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { Navigate } from 'react-router-dom'
@@ -7,6 +8,7 @@ import * as api from '../services/api'
 import { Send, Download, Mail, MessageCircle, FileText, CheckCircle2 } from 'lucide-react'
 
 export default function Salary() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user } = useAuth()
   const { showToast } = useToast()
   const [payroll, setPayroll] = useState([])
@@ -54,33 +56,37 @@ export default function Salary() {
   }
 
   return (
-    <div className="animate-in">
-      <div className="page-header">
+    <div className="animate-in" style={{ padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 24, marginBottom: 32 }}>
         <div>
-          <h1>Salary Slips</h1>
-          <p className="subtitle" style={{ fontFamily: 'var(--font-mono)' }}>
+          <h1 style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800 }}>Salary Slips</h1>
+          <p className="subtitle" style={{ fontFamily: 'var(--font-mono)', fontSize: isMobile ? 12 : 14 }}>
             {monthStr} • {pendingCount} Pending Dispatches
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={() => handleBulkAction('Email All')}>
-            <Mail size={16} /> Email Slips
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', width: isMobile ? '100%' : 'auto' }}>
+          <button className="btn btn-secondary" style={{ flex: isMobile ? '1 1 45%' : 'none', fontSize: isMobile ? 12 : 14 }} onClick={() => handleBulkAction('Email All')}>
+            <Mail size={16} /> {isMobile ? 'Email' : 'Email Slips'}
           </button>
-          <button className="btn btn-secondary" onClick={() => handleBulkAction('Download ZIP')}>
-            <Download size={16} /> Download ZIP
+          <button className="btn btn-secondary" style={{ flex: isMobile ? '1 1 45%' : 'none', fontSize: isMobile ? 12 : 14 }} onClick={() => handleBulkAction('Download ZIP')}>
+            <Download size={16} /> {isMobile ? 'ZIP' : 'Download ZIP'}
           </button>
-          <button className="btn btn-secondary" onClick={() => handleBulkAction('Send All WA')}>
-            <MessageCircle size={16} color="var(--green)" /> WhatsApp
+          <button className="btn btn-secondary" style={{ flex: isMobile ? '1 1 45%' : 'none', fontSize: isMobile ? 12 : 14 }} onClick={() => handleBulkAction('Send All WA')}>
+            <MessageCircle size={16} color="var(--green)" /> {isMobile ? 'WhatsApp' : 'WhatsApp'}
           </button>
-          <button className="btn btn-primary" onClick={() => handleBulkAction('Send All TG')}>
-            <Send size={16} /> Telegram
+          <button className="btn btn-primary" style={{ flex: isMobile ? '1 1 45%' : 'none', fontSize: isMobile ? 12 : 14 }} onClick={() => handleBulkAction('Send All TG')}>
+            <Send size={16} /> {isMobile ? 'Telegram' : 'Telegram'}
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
+      <div style={{ 
+        display: 'grid', 
+        gap: 20, 
+        gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(340px, 1fr))' 
+      }}>
         {payroll.map((p, i) => (
-          <div key={i} className="card" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div key={i} className="card" style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: isMobile ? 16 : 24 }}>
             
             {/* Header info */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

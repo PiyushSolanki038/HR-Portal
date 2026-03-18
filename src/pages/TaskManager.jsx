@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -23,6 +24,7 @@ import {
 import { Link } from 'react-router-dom'
 
 export default function TaskManager() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { tasks, employees, loading, error, refresh } = useData()
   const { user } = useAuth()
   const { showToast } = useToast()
@@ -77,8 +79,8 @@ export default function TaskManager() {
   return (
     <div className="animate-in">
       <div className="page-header">
-        <div>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 32 }}>Task Command Center</h1>
+        <div style={{ padding: isMobile ? '0 16px' : '0' }}>
+          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: isMobile ? 24 : 32 }}>Task Command Center</h1>
           <p className="subtitle">Global oversight of all organizational objectives</p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
@@ -89,18 +91,22 @@ export default function TaskManager() {
         </div>
       </div>
 
-      <div className="filter-bar" style={{ background: 'var(--bg-card)', padding: '16px 24px', borderRadius: 24, border: '1px solid var(--line)', marginBottom: 32 }}>
-        <div className="search-bar" style={{ flex: 1 }}>
+      <div className="filter-bar" style={{ 
+        background: 'var(--bg-card)', padding: isMobile ? '12px 16px' : '16px 24px', 
+        borderRadius: 24, border: '1px solid var(--line)', marginBottom: 32,
+        flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center'
+      }}>
+        <div className="search-bar" style={{ flex: 1, width: '100%' }}>
           <Search size={16} className="search-icon" />
-          <input placeholder="Search tasks or employees..." value={search} onChange={e => setSearch(e.target.value)} style={{ border: 'none', background: 'transparent' }} />
+          <input placeholder="Search tasks or employees..." value={search} onChange={e => setSearch(e.target.value)} style={{ border: 'none', background: 'transparent', width: '100%' }} />
         </div>
-        <div style={{ display: 'flex', gap: 16 }}>
+        <div style={{ display: 'flex', gap: 16, width: isMobile ? '100%' : 'auto', justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
           <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} style={{ width: 'auto', border: 'none', fontWeight: 700, color: 'var(--text-dim)', background: 'transparent' }}>
-            <option value="all">Everywhere</option>
+            <option value="all">{isMobile ? 'Dept' : 'Everywhere'}</option>
             {depts.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
           <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: 'auto', border: 'none', fontWeight: 700, color: 'var(--text-dim)', background: 'transparent' }}>
-            <option value="all">All Status</option>
+            <option value="all">{isMobile ? 'Status' : 'All Status'}</option>
             <option value="pending">Pending</option>
             <option value="done">Completed</option>
           </select>

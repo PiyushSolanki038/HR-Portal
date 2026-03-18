@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useData } from '../context/DataContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import * as api from '../services/api'
@@ -8,6 +9,7 @@ const STATUS_LABELS = { p: 'Present', l: 'Late', a: 'Absent', x: 'Leave' }
 const STATUS_BADGES = { p: 'badge-green', l: 'badge-amber', a: 'badge-red', x: 'badge-blue' }
 
 export default function Attendance() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { attendance, employees, loading, error } = useData()
   const [weeklyGrid, setWeeklyGrid] = useState([])
   const [search, setSearch] = useState('')
@@ -26,30 +28,35 @@ export default function Attendance() {
   )
 
   return (
-    <div className="animate-in">
-      <div className="page-header">
+    <div className="animate-in" style={{ padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ marginBottom: 24 }}>
         <div>
-          <h1>Attendance</h1>
-          <p className="subtitle">Track daily attendance and work reports</p>
+          <h1 style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800 }}>Attendance</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Track daily attendance and work reports</p>
         </div>
       </div>
 
-      <div className="tabs">
-        <button className={`tab ${tab === 'today' ? 'active' : ''}`} onClick={() => setTab('today')}>Today</button>
-        <button className={`tab ${tab === 'weekly' ? 'active' : ''}`} onClick={() => setTab('weekly')}>Weekly Grid</button>
+      <div className="tabs" style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <button className={`tab ${tab === 'today' ? 'active' : ''}`} style={{ flex: isMobile ? 1 : 'none', textAlign: 'center' }} onClick={() => setTab('today')}>Today</button>
+        <button className={`tab ${tab === 'weekly' ? 'active' : ''}`} style={{ flex: isMobile ? 1 : 'none', textAlign: 'center' }} onClick={() => setTab('weekly')}>Weekly Grid</button>
       </div>
 
       {tab === 'today' && (
         <>
-          <div className="filter-bar" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-            <div className="search-bar" style={{ maxWidth: '100%' }}>
-              <Search size={16} className="search-icon" />
-              <input placeholder="Search by name or department…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: '100%' }} />
+          <div className="filter-bar" style={{ flexDirection: 'column', alignItems: 'stretch', padding: isMobile ? 12 : 16, marginBottom: 24 }}>
+            <div className="search-bar" style={{ maxWidth: '100%', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Search size={16} className="search-icon" style={{ minWidth: 16 }} />
+              <input 
+                placeholder="Search by name or department…" 
+                value={search} 
+                onChange={e => setSearch(e.target.value)} 
+                style={{ width: '100%', fontSize: 16, background: 'transparent', border: 'none', outline: 'none' }} 
+              />
             </div>
           </div>
 
-          <div className="table-container">
-            <table>
+          <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 16 }}>
+            <table style={{ minWidth: 600 }}>
               <thead>
                 <tr>
                   <th>Employee</th>
@@ -84,11 +91,11 @@ export default function Attendance() {
       )}
 
       {tab === 'weekly' && (
-        <div className="card" style={{ overflow: 'hidden' }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Last 5 Working Days</h3>
+        <div className="card" style={{ overflow: 'hidden', padding: isMobile ? 16 : 24 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>Last 5 Working Days</h3>
           {weeklyGrid.length > 0 && (
-            <div className="table-container">
-              <div className="weekly-grid">
+            <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+              <div className="weekly-grid" style={{ minWidth: 500 }}>
                 <div className="grid-row" style={{ marginBottom: 4 }}>
                   <div className="grid-name" style={{ color: 'var(--muted)', fontSize: 11, fontWeight: 600 }}>EMPLOYEE</div>
                   {weeklyGrid[0]?.dates?.map((d, i) => (

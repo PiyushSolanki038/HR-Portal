@@ -1,4 +1,5 @@
 import { useData } from '../context/DataContext'
+import { useScreenSize } from '../hooks/useScreenSize'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { 
   Users, Clock, CalendarOff, TrendingUp, Award, Activity, 
@@ -52,6 +53,7 @@ const TrendLine = ({ data, color, height = 60 }) => {
 };
 
 export default function Analytics() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user } = useAuth()
   const { employees, attendance, leaves, attendanceSummary, loading, error } = useData()
 
@@ -87,25 +89,25 @@ export default function Analytics() {
   const trendData = [65, 78, 72, 85, 82, 90, 88]
 
   return (
-    <div className="animate-in" style={{ paddingBottom: 40 }}>
-      <div className="page-header" style={{ marginBottom: 32 }}>
+    <div className="animate-in" style={{ padding: isMobile ? 12 : 28, paddingBottom: 60, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 24, marginBottom: 32 }}>
         <div>
-          <h1 className="glow-text" style={{ fontSize: 32, fontWeight: 900 }}>KPI & Intelligence</h1>
-          <p className="subtitle">Real-time organizational performance & behavioral analytics</p>
+          <h1 className="glow-text" style={{ fontSize: isMobile ? 24 : 32, fontWeight: 900 }}>KPI & Intelligence</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Real-time organizational performance & behavioral analytics</p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-           <button className="btn btn-secondary"><Clock size={16} /> History</button>
-           <button className="btn btn-premium"><Target size={16} /> Export Intelligence</button>
+        <div style={{ display: 'flex', gap: 12, width: isMobile ? '100%' : 'auto' }}>
+           <button className="btn btn-secondary" style={{ flex: isMobile ? 1 : 'none', fontSize: isMobile ? 12 : 14 }}><Clock size={16} /> History</button>
+           <button className="btn btn-premium" style={{ flex: isMobile ? 1 : 'none', fontSize: isMobile ? 12 : 14 }}><Target size={16} /> Export Intelligence</button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, marginBottom: 24 }}>
-        <div className="card card-glass" style={{ padding: 40, display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-          <StatRing value={avgAttendance} label="Global Attendance" sub="Avg Present %" color="var(--accent)" />
-          <div style={{ width: 1, height: 100, background: 'var(--line)', opacity: 0.5 }} />
-          <StatRing value={avgOrgScore} label="Organization Score" sub="Health Index" color="var(--green)" />
-          <div style={{ width: 1, height: 100, background: 'var(--line)', opacity: 0.5 }} />
-          <StatRing value={92} label="Task Velocity" sub="On-time completion" color="var(--purple)" />
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.8fr 1fr', gap: 24, marginBottom: 24 }}>
+        <div className="card card-glass" style={{ padding: isMobile ? 20 : 40, display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-around', alignItems: 'center', gap: isMobile ? 32 : 16 }}>
+          <StatRing value={avgAttendance} label="Global Attendance" sub="Avg Present %" color="var(--accent)" size={isMobile ? 100 : 120} />
+          {!isMobile && <div style={{ width: 1, height: 100, background: 'var(--line)', opacity: 0.5 }} />}
+          <StatRing value={avgOrgScore} label="Organization Score" sub="Health Index" color="var(--green)" size={isMobile ? 100 : 120} />
+          {!isMobile && <div style={{ width: 1, height: 100, background: 'var(--line)', opacity: 0.5 }} />}
+          <StatRing value={92} label="Task Velocity" sub="On-time completion" color="var(--purple)" size={isMobile ? 100 : 120} />
         </div>
         
         <div className="card card-glass" style={{ padding: 24, background: 'linear-gradient(135deg, var(--accent), #6366f1)', color: '#fff', position: 'relative', overflow: 'hidden' }}>
@@ -113,16 +115,16 @@ export default function Analytics() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontSize: 12, fontWeight: 800, textTransform: 'uppercase', opacity: 0.9 }}>
               <Zap size={14} /> Critical Alert
             </div>
-            <div style={{ fontSize: 44, fontWeight: 900, marginBottom: 4 }}>{pendingLeaves}</div>
-            <div style={{ fontSize: 16, fontWeight: 700 }}>Leaves Awaiting Review</div>
-            <p style={{ fontSize: 13, marginTop: 16, opacity: 0.9, lineHeight: 1.6 }}>Direct impact on departmental peak capacity detected. Review recommended within 2 hours.</p>
-            <button className="btn btn-sm" style={{ marginTop: 24, background: '#fff', color: 'var(--accent)', fontWeight: 800 }}>TAKE ACTION</button>
+            <div style={{ fontSize: isMobile ? 32 : 44, fontWeight: 900, marginBottom: 4 }}>{pendingLeaves}</div>
+            <div style={{ fontSize: isMobile ? 14 : 16, fontWeight: 700 }}>Leaves Awaiting Review</div>
+            <p style={{ fontSize: 12, marginTop: 12, opacity: 0.9, lineHeight: 1.6 }}>Direct impact on departmental peak capacity detected.</p>
+            <button className="btn btn-sm" style={{ marginTop: 20, background: '#fff', color: 'var(--accent)', fontWeight: 800, width: isMobile ? '100%' : 'auto' }}>TAKE ACTION</button>
           </div>
           <CalendarOff size={160} style={{ position: 'absolute', right: -30, bottom: -30, opacity: 0.1, transform: 'rotate(-15deg)' }} />
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 24, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr', gap: 24, marginBottom: 24 }}>
         {/* Dept Matrix */}
         <div className="card card-glass" style={{ padding: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
@@ -179,7 +181,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.5fr', gap: 24 }}>
         {/* Global Leaderboard */}
         <div className="card card-glass" style={{ padding: 24 }}>
           <h3 style={{ margin: '0 0 24px 0', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -214,16 +216,16 @@ export default function Analytics() {
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <h4 style={{ margin: 0, fontSize: 13, fontWeight: 800, textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: 2 }}>System Presence Distribution</h4>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: isMobile ? 24 : 32 }}>
             {[
               { label: 'Verified', val: attendance.filter(a => a.status === 'p').length, icon: CheckCircle, color: 'var(--green)' },
               { label: 'Delayed', val: attendance.filter(a => a.status === 'l').length, icon: Clock, color: 'var(--amber)' },
               { label: 'Approved', val: attendance.filter(a => a.status === 'leave').length, icon: Briefcase, color: 'var(--blue)' },
-              { label: 'Idle', val: total - attendance.filter(a => a.status === 'p' || a.status === 'l' || a.status === 'leave').length, icon: Activity, color: 'var(--red)' },
+              { label: 'Idle', val: Math.max(0, total - attendance.length), icon: Activity, color: 'var(--red)' },
             ].map(stat => (
               <div key={stat.label} style={{ textAlign: 'center' }}>
-                <div className="animate-float" style={{ color: stat.color, marginBottom: 12, display: 'flex', justifyContent: 'center' }}><stat.icon size={28} /></div>
-                <div style={{ fontSize: 32, fontWeight: 900 }}>{stat.val}</div>
+                <div className="animate-float" style={{ color: stat.color, marginBottom: 12, display: 'flex', justifyContent: 'center' }}><stat.icon size={24} /></div>
+                <div style={{ fontSize: isMobile ? 24 : 32, fontWeight: 900 }}>{stat.val}</div>
                 <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 8, fontWeight: 800, textTransform: 'uppercase' }}>{stat.label}</div>
               </div>
             ))}

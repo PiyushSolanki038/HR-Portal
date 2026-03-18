@@ -16,6 +16,11 @@ export default function ForcePasswordModal() {
     e.preventDefault()
     setError('')
 
+    if (!user?.id) {
+      setError('Session expired. Please log in again.')
+      return
+    }
+
     if (password.length < 6) {
       setError('Password must be at least 6 characters long')
       return

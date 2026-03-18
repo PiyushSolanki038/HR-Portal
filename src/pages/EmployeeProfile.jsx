@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useToast } from '../context/ToastContext'
 import { useData } from '../context/DataContext'
@@ -187,6 +188,7 @@ const primaryBtn = {
 
 // ── MAIN ─────────────────────────────────────────────────────
 export default function EmployeeProfile() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { id } = useParams()
   const navigate = useNavigate()
   const { showToast } = useToast()
@@ -459,7 +461,7 @@ export default function EmployeeProfile() {
     <div style={{ fontFamily: 'var(--font)', background: 'var(--bg)', minHeight: '100vh', paddingBottom: 60, color: 'var(--text)' }}>
 
       {/* ── EMPLOYEE SWITCHER ── */}
-      <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '16px 20px', marginBottom: 20, alignItems: 'center', borderBottom: 'var(--border)', background: 'var(--bg-glass)', backdropFilter: 'blur(8px)', position: 'sticky', top: 0, zIndex: 40 }}>
+      <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: isMobile ? '12px 16px' : '16px 20px', marginBottom: 20, alignItems: 'center', borderBottom: 'var(--border)', background: 'var(--bg-glass)', backdropFilter: 'blur(8px)', position: 'sticky', top: 0, zIndex: 40, WebkitOverflowScrolling: 'touch' }}>
         <button onClick={() => navigate('/employees')}
           style={{ ...outlineBtn, padding: '8px 14px', flexShrink: 0 }}>
           <ArrowLeft size={14} /> Back
@@ -487,7 +489,7 @@ export default function EmployeeProfile() {
         </div>
       </div>
 
-      <div style={{ padding: '0 24px' }}>
+      <div style={{ padding: isMobile ? '0 12px' : '0 24px' }}>
 
         {/* ── HERO ── */}
         <div style={{ ...card, marginBottom: 24, border: 'none', background: 'transparent' }}>
@@ -497,7 +499,7 @@ export default function EmployeeProfile() {
           }}>
             {/* Banner */}
             {/* Banner */}
-            <div style={{ height: 160, background: 'var(--bg-elevated)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ height: isMobile ? 100 : 160, background: 'var(--bg-elevated)', position: 'relative', overflow: 'hidden' }}>
               <img 
                 src="/profile_banner_abstract.png" 
                 alt="Banner" 
@@ -508,11 +510,11 @@ export default function EmployeeProfile() {
             </div>
 
             {/* Profile Content */}
-            <div style={{ padding: '0 32px 32px', marginTop: -50, position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 24, flex: 1, minWidth: 300 }}>
+            <div style={{ padding: isMobile ? '0 16px 24px' : '0 32px 32px', marginTop: isMobile ? -40 : -50, position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'center' : 'flex-end', justifyContent: 'space-between', gap: 24 }}>
+                <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'center' : 'flex-end', gap: isMobile ? 12 : 24, flex: 1, textAlign: isMobile ? 'center' : 'left' }}>
                   <div style={{ 
-                    width: 110, height: 110, borderRadius: 'var(--r-xl)', 
+                    width: isMobile ? 90 : 110, height: isMobile ? 90 : 110, borderRadius: 'var(--r-xl)', 
                     background: `linear-gradient(135deg, ${emp.color}, var(--accent))`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 40, fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)',
@@ -521,14 +523,15 @@ export default function EmployeeProfile() {
 
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                      <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: 28, fontWeight: 800, letterSpacing: -1 }}>{emp.name}</h1>
+                      <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: isMobile ? 24 : 28, fontWeight: 800, letterSpacing: -1 }}>{emp.name}</h1>
                       <span style={{ 
-                        padding: '4px 12px', borderRadius: 100, fontSize: 11, fontWeight: 700, 
+                        padding: '4px 10px', borderRadius: 100, fontSize: 10, fontWeight: 700, 
                         background: statusBadge.bg === '#edfaf3' ? 'var(--green-dim)' : statusBadge.bg === '#ecfeff' ? 'var(--blue-dim)' : 'var(--red-dim)',
-                        color: statusBadge.color, border: `1px solid ${statusBadge.color}33`
+                        color: statusBadge.color, border: `1px solid ${statusBadge.color}33`,
+                        marginLeft: isMobile ? 'auto' : 0, marginRight: isMobile ? 'auto' : 0
                       }}>{statusBadge.label}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', justifyContent: isMobile ? 'center' : 'flex-start' }}>
                       <span style={{ fontSize: 14, color: 'var(--text-dim)', fontWeight: 500 }}>{emp.role}</span>
                       <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--line)' }} />
                       <span style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 600 }}>{emp.dept}</span>
@@ -536,7 +539,7 @@ export default function EmployeeProfile() {
                       <code style={{ fontSize: 12, color: 'var(--muted)', background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: 6 }}>{emp.id}</code>
                     </div>
                     {teamLeaderEmp && (
-                      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8, justifyContent: isMobile ? 'center' : 'flex-start' }}>
                         <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>TEAM LEADER:</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--bg-elevated)', padding: '4px 10px', borderRadius: '100px', border: 'var(--border)' }}>
                           <div style={{ width: 14, height: 14, borderRadius: '50%', background: teamLeaderEmp.color || 'var(--accent)', fontSize: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>{teamLeaderEmp.av}</div>
@@ -548,24 +551,24 @@ export default function EmployeeProfile() {
                       </div>
                     )}
                     {!teamLeaderEmp && isHR && (
-                      <div style={{ marginTop: 12 }}>
+                      <div style={{ marginTop: 12, textAlign: isMobile ? 'center' : 'left' }}>
                         <button onClick={() => setShowTeamLeaderModal(true)} style={{ background: 'none', border: '1px dashed var(--line)', color: 'var(--muted)', padding: '4px 10px', borderRadius: '100px', cursor: 'pointer', fontSize: 11, fontWeight: 600 }}>+ Assign Team Leader</button>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: 10, paddingBottom: 8, alignItems: 'center' }}>
-                  <button onClick={() => { setMsgChannel('telegram'); setShowMsgModal(true); }} style={primaryBtn}>
+                <div style={{ display: 'flex', gap: 10, paddingBottom: 8, alignItems: 'center', width: isMobile ? '100%' : 'auto' }}>
+                  <button onClick={() => { setMsgChannel('telegram'); setShowMsgModal(true); }} style={{ ...primaryBtn, flex: isMobile ? 1 : 'none', justifyContent: 'center' }}>
                     <MessageSquare size={14} /> Message
                   </button>
-                  <button onClick={openEditModal} style={outlineBtn}><Edit size={14} /> Edit Profile</button>
+                  <button onClick={openEditModal} style={{ ...outlineBtn, flex: isMobile ? 1 : 'none', justifyContent: 'center' }}><Edit size={14} /> Edit Profile</button>
                 </div>
               </div>
 
               <div style={{ 
-                display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-                gap: 16, marginTop: 32
+                display: 'grid', gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(120px, 1fr))', 
+                gap: isMobile ? 10 : 16, marginTop: 32
               }}>
                 {[
                   { val: stats.present, label: 'Present', color: 'var(--green)', icon: 'CheckCircle2' },
@@ -576,12 +579,12 @@ export default function EmployeeProfile() {
                   { val: parseInt(emp.score) || stats.score || 0, label: 'Score', color: scoreColor(parseInt(emp.score) || stats.score || 0), icon: 'Target' },
                 ].map((s) => (
                   <div key={s.label} style={{ 
-                    background: 'var(--bg-elevated)', padding: '20px 16px', borderRadius: '20px', 
+                    background: 'var(--bg-elevated)', padding: isMobile ? '12px 8px' : '20px 16px', borderRadius: '20px', 
                     textAlign: 'center', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
                     transition: 'transform 0.2s', cursor: 'default'
                   }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-                    <div style={{ fontSize: 24, fontWeight: 900, color: s.color, fontFamily: 'Syne,sans-serif', marginBottom: 2 }}>{s.val}</div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 1 }}>{s.label}</div>
+                    <div style={{ fontSize: isMobile ? 18 : 24, fontWeight: 900, color: s.color, fontFamily: 'Syne,sans-serif', marginBottom: 2 }}>{s.val}</div>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 1 }}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -590,7 +593,7 @@ export default function EmployeeProfile() {
         </div>
 
         {/* ── MAIN GRID ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
 
           {/* LEFT COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -600,16 +603,9 @@ export default function EmployeeProfile() {
               <div style={cardHdr}>
                 <div>
                   <div style={cardTitle}>Task Manager</div>
-                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>Deadline tracking & priority</div>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <button onClick={() => { setMsgChannel('telegram'); setShowMsgModal(true); }} style={{ ...outlineBtn, padding: '6px 14px', fontSize: 12 }}>
-                    <MessageSquare size={14} /> Message
-                  </button>
-                  <button onClick={() => setShowMentorModal(true)} style={{ ...outlineBtn, padding: '6px 14px', fontSize: 12, borderColor: 'var(--accent)', color: 'var(--accent)' }}>
-                    <Users size={14} /> Mentor
-                  </button>
-                  <button onClick={() => setShowTaskModal(true)} style={{ ...primaryBtn, padding: '6px 14px', fontSize: 12 }}>+ New Task</button>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  <button onClick={() => setShowTaskModal(true)} style={{ ...primaryBtn, padding: '6px 14px', fontSize: 11 }}>+ New</button>
                 </div>
               </div>
 
@@ -680,12 +676,12 @@ export default function EmployeeProfile() {
                 })}
               </div>
 
-              <div style={{ display: 'flex', gap: 10, padding: '16px 20px', borderTop: 'var(--border)', background: 'var(--bg-glass)' }}>
+              <div style={{ display: 'flex', gap: 10, padding: '16px 20px', borderTop: 'var(--border)', background: 'var(--bg-glass)', flexDirection: isMobile ? 'column' : 'row' }}>
                 <input value={quickAdd} onChange={e => setQuickAdd(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && addQuickTask()}
                   placeholder="Quick task... Hit Enter"
                   style={{ ...formInput, flex: 1, height: 38 }} />
-                <button onClick={addQuickTask} style={{ ...primaryBtn, height: 38 }}>Add</button>
+                <button onClick={addQuickTask} style={{ ...primaryBtn, height: 38, width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}>Add</button>
               </div>
             </div>
 
@@ -701,14 +697,14 @@ export default function EmployeeProfile() {
                 </button>
               </div>
 
-              <div style={{ display: 'flex', borderBottom: 'var(--border)', background: 'var(--bg-elevated)', gap: 4, padding: '0 12px' }}>
+              <div style={{ display: 'flex', borderBottom: 'var(--border)', background: 'var(--bg-elevated)', gap: 4, padding: '0 12px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                 {[['heatmap', 'Pattern'], ['log', 'Daily Log'], ['stats', 'Analytics']].map(([key, label]) => (
                   <div key={key} onClick={() => setAttTab(key)}
                     style={{
                       padding: '12px 16px', fontSize: 13, fontWeight: attTab === key ? 700 : 500,
                       color: attTab === key ? 'var(--accent)' : 'var(--text-dim)', cursor: 'pointer',
                       borderBottom: attTab === key ? '2px solid var(--accent)' : '2px solid transparent',
-                      transition: 'all .25s'
+                      transition: 'all .25s', flexShrink: 0
                     }}>{label}</div>
                 ))}
               </div>
@@ -793,18 +789,20 @@ export default function EmployeeProfile() {
                 </select>
               </div>
               <div style={{ padding: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 20 }}>
+                <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', gap: 24, marginBottom: 20 }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 48, fontWeight: 900, color: scoreColor(parseInt(emp.score) || stats.score || 0), letterSpacing: -2, lineHeight: 1 }}>{parseInt(emp.score) || stats.score || 0}</div>
+                    <div style={{ fontSize: isMobile ? 36 : 48, fontWeight: 900, color: scoreColor(parseInt(emp.score) || stats.score || 0), letterSpacing: -2, lineHeight: 1 }}>{parseInt(emp.score) || stats.score || 0}</div>
                     <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Current Rating</div>
                   </div>
                   <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                    <PerfRing score={stats.score} size={90} stroke={10} />
+                    <PerfRing score={stats.score} size={isMobile ? 80 : 90} stroke={10} />
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ padding: '4px 10px', borderRadius: 'var(--r-sm)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: 12, fontWeight: 800 }}>↑ +4</div>
-                    <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>Growth</div>
-                  </div>
+                  {!isMobile && (
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ padding: '4px 10px', borderRadius: 'var(--r-sm)', background: 'var(--green-dim)', color: 'var(--green)', fontSize: 12, fontWeight: 800 }}>↑ +4</div>
+                      <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>Growth</div>
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <PB label="Attendance" value={attendRate} color="var(--green)" />
@@ -847,7 +845,7 @@ export default function EmployeeProfile() {
                     ))}
                   </div>
                   <div style={{ borderTop: '1px solid var(--line)', paddingTop: 16, marginTop: 4 }}>
-                    <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <MessageSquare size={12} /> Recent Feedback
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -940,7 +938,7 @@ export default function EmployeeProfile() {
             <div style={card}>
               <div style={cardHdr}><div style={cardTitle}>Leave Tracker</div></div>
               <div style={{ padding: '20px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
                   {[
                     ['Allowed', '3', 'var(--green)'],
                     ['Taken', takenCount, takenCount > 3 ? 'var(--red)' : 'var(--accent)'],
@@ -948,7 +946,7 @@ export default function EmployeeProfile() {
                   ].map(([label, val, color]) => (
                     <div key={label} style={{ textAlign: 'center', padding: '12px 8px', background: 'var(--bg-elevated)', borderRadius: 'var(--r-md)', border: 'var(--border)' }}>
                       <div style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>{label}</div>
-                      <div style={{ fontSize: 20, fontWeight: 900, color: color }}>{val}</div>
+                      <div style={{ fontSize: isMobile ? 18 : 20, fontWeight: 900, color: color }}>{val}</div>
                     </div>
                   ))}
                 </div>
@@ -968,7 +966,7 @@ export default function EmployeeProfile() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div><label style={formLabel}>Title</label><input value={newTask.title} onChange={e => setNewTask(t => ({ ...t, title: e.target.value }))} style={formInput} /></div>
           <div><label style={formLabel}>Description</label><textarea rows={3} value={newTask.desc} onChange={e => setNewTask(t => ({ ...t, desc: e.target.value }))} style={{ ...formInput, resize: 'none' }} /></div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
             <div><label style={formLabel}>Deadline</label><input type="date" value={newTask.deadline} onChange={e => setNewTask(t => ({ ...t, deadline: e.target.value }))} style={formInput} /></div>
             <div><label style={formLabel}>Priority</label>
               <select value={newTask.priority} onChange={e => setNewTask(t => ({ ...t, priority: e.target.value }))} style={formInput}>
@@ -1024,7 +1022,7 @@ export default function EmployeeProfile() {
 
       <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Profile"
         footer={<><button onClick={() => setShowEditModal(false)} style={outlineBtn}>Cancel</button><button onClick={saveProfile} style={primaryBtn}>Apply Changes</button></>}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
           {[
             ['name', 'Name'], ['role', 'Role'], ['dept', 'Dept'], 
             ['tg', 'Telegram Handle'], ['telegramChatId', 'Telegram Chat ID'], 
@@ -1108,7 +1106,7 @@ export default function EmployeeProfile() {
               <option value="other">Other</option>
             </select>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
             <div><label style={formLabel}>Start Date</label><input type="date" value={newLeave.startDate} onChange={e => setNewLeave(prev => ({ ...prev, startDate: e.target.value }))} style={formInput} /></div>
             <div><label style={formLabel}>End Date</label><input type="date" value={newLeave.endDate} onChange={e => setNewLeave(prev => ({ ...prev, endDate: e.target.value }))} style={formInput} /></div>
           </div>

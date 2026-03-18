@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { readSheet, appendRow } from '../sheets.js'
+import { readSheet, appendRow, updateRowWhere } from '../sheets.js'
 import { sendMessage, sendBulkMessage } from '../telegram.js'
 import { appendAudit } from './audit.js'
 
@@ -128,7 +128,6 @@ router.post('/send', async (req, res) => {
 
     // Automated Telegram Relay for Portal Notifications
     try {
-      const { readSheet } = await import('../sheets.js')
       const employees = await readSheet('Employees')
       const targetEmp = employees.find(e => e.id === toId)
       
@@ -177,7 +176,6 @@ router.get('/notifications/:userId', async (req, res) => {
 router.patch('/:id/read', async (req, res) => {
   try {
     const { id } = req.params
-    const { updateRowWhere } = await import('../sheets.js') // Ensure it is available
     await updateRowWhere('Messages', 'id', id, { read: 'true' })
     res.json({ success: true })
   } catch (err) {

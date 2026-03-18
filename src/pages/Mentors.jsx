@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useData } from '../context/DataContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import * as api from '../services/api'
@@ -35,6 +36,7 @@ const styles = {
 }
 
 export default function Mentors() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { mentors, employees, loading, error, refresh } = useData()
   const { showToast } = useToast()
   
@@ -109,26 +111,26 @@ export default function Mentors() {
   const getUnassigned = () => employees.filter(e => !e.mentorId || e.mentorId === '')
 
   return (
-    <div style={styles.container} className="animate-in">
-      <div style={styles.header}>
+    <div style={{ ...styles.container, padding: isMobile ? '16px 12px' : '0' }} className="animate-in">
+      <div style={{ ...styles.header, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center' }}>
         <div>
-          <h1 style={{ ...styles.title, fontSize: '28px' }}>External Mentors</h1>
+          <h1 style={{ ...styles.title, fontSize: isMobile ? '24px' : '28px' }}>External Mentors</h1>
           <p style={{ color: theme.muted, fontSize: '12px', fontWeight: 600, marginTop: '4px' }}>
             {mentors.length} specialized industry mentors available for employee assignment.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-           <div style={{ ...styles.inputContainer, minWidth: '250px', height: '42px' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: isMobile ? '100%' : 'auto', flexDirection: isMobile ? 'column' : 'row' }}>
+           <div style={{ ...styles.inputContainer, minWidth: isMobile ? '100%' : '250px', height: '42px' }}>
              <Search size={14} color={theme.muted} />
              <input style={styles.input} placeholder="Search mentors..." value={search} onChange={e => setSearch(e.target.value)} />
            </div>
-           <button style={{ ...styles.btnPrimary, height: '42px', padding: '0 16px', fontSize: '13px' }} onClick={() => setShowAddModal(true)}>
+           <button style={{ ...styles.btnPrimary, height: '42px', padding: '0 16px', fontSize: '13px', width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => setShowAddModal(true)}>
              <UserPlus size={16} /> ENLIST
            </button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(380px, 1fr))', gap: '24px' }}>
         {filtered.map(mentor => {
           const mentees = getMentees(mentor.id)
           return (
@@ -165,7 +167,7 @@ export default function Mentors() {
                  </div>
                </div>
 
-               <div style={{ padding: '56px 24px 24px' }}>
+               <div style={{ padding: isMobile ? '48px 16px 16px' : '56px 24px 24px' }}>
                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div>
                          <h3 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: 'var(--text)' }}>{mentor.name}</h3>

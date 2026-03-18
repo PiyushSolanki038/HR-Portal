@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useData } from '../context/DataContext'
 import { useToast } from '../context/ToastContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
@@ -7,6 +8,7 @@ import * as api from '../services/api'
 import { Check, X, Clock } from 'lucide-react'
 
 export default function Approvals() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { leaves, loading, error, refresh } = useData()
   const { showToast } = useToast()
   const [rejectModal, setRejectModal] = useState(null)
@@ -58,7 +60,11 @@ export default function Approvals() {
       ) : (
         <div style={{ display: 'grid', gap: 16 }}>
           {pending.map((leave, i) => (
-            <div key={i} className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div key={i} className="card" style={{ 
+              display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', 
+              justifyContent: 'space-between', gap: 16, 
+              flexDirection: isMobile ? 'column' : 'row' 
+            }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1 }}>
                 <div className="avatar" style={{ background: 'var(--amber-dim)', color: 'var(--amber)' }}>
                   <Clock size={18} />
@@ -78,11 +84,11 @@ export default function Approvals() {
                   )}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-success btn-sm" onClick={() => handleApprove(leave.id)}>
+              <div style={{ display: 'flex', gap: 8, width: isMobile ? '100%' : 'auto' }}>
+                <button className="btn btn-success btn-sm" style={{ flex: isMobile ? 1 : 'none', justifyContent: 'center' }} onClick={() => handleApprove(leave.id)}>
                   <Check size={14} /> Approve
                 </button>
-                <button className="btn btn-danger btn-sm" onClick={() => setRejectModal(leave.id)}>
+                <button className="btn btn-danger btn-sm" style={{ flex: isMobile ? 1 : 'none', justifyContent: 'center' }} onClick={() => setRejectModal(leave.id)}>
                   <X size={14} /> Reject
                 </button>
               </div>

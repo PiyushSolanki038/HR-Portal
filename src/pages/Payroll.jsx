@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { Navigate } from 'react-router-dom'
@@ -7,6 +8,7 @@ import * as api from '../services/api'
 import { Download, PlayCircle, Eye, History, CheckSquare, Search, Filter } from 'lucide-react'
 
 export default function Payroll() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user } = useAuth()
   const { showToast } = useToast()
   const [payroll, setPayroll] = useState([])
@@ -81,13 +83,13 @@ export default function Payroll() {
   }
 
   return (
-    <div className="animate-in">
-      <div className="page-header">
+    <div className="animate-in" style={{ padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 24, marginBottom: 32 }}>
         <div>
-          <h1>Payroll Processing</h1>
-          <p className="subtitle">Monthly precision register for {monthStr}</p>
+          <h1 style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800 }}>Payroll Processing</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Monthly precision register for {monthStr}</p>
         </div>
-        <div className="page-header-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
+        <div className="page-header-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', width: isMobile ? '100%' : 'auto', justifyContent: 'flex-start' }}>
           <button className="btn btn-secondary" style={{ flex: '1 1 auto' }}>
             <Eye size={16} /> Preview
           </button>
@@ -100,7 +102,12 @@ export default function Payroll() {
         </div>
       </div>
 
-      <div className="stats-grid">
+      <div className="stats-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+        gap: 16, 
+        marginBottom: 32 
+      }}>
         <div className="card">
           <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 8 }}>Total Payroll (Gross)</div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 24, fontWeight: 600 }}>₹{totalGross.toLocaleString('en-IN')}</div>
@@ -121,15 +128,16 @@ export default function Payroll() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: 24 }}>
+      <div className="card" style={{ padding: isMobile ? 16 : 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20, alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <div className="search-bar" style={{ flex: 1, maxWidth: '100%' }}>
-            <Search size={16} className="search-icon" />
+          <div className="search-bar" style={{ flex: 1, maxWidth: '100%', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Search size={16} className="search-icon" style={{ minWidth: 16 }} />
             <input 
               type="text" 
-              placeholder="Search by Employee ID or Name..." 
+              placeholder="Search ID or Name..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ width: '100%', fontSize: 16, border: 'none', background: 'transparent', outline: 'none' }}
             />
           </div>
           <button className="btn btn-secondary">
@@ -137,8 +145,8 @@ export default function Payroll() {
           </button>
         </div>
 
-        <div className="table-container">
-          <table>
+        <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 16 }}>
+          <table style={{ minWidth: 600 }}>
             <thead>
               <tr>
                 <th style={{ width: 40 }}>

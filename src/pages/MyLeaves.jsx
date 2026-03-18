@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -23,6 +24,7 @@ const LEAVE_TYPES = [
 ]
 
 export default function MyLeaves() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user } = useAuth()
   const { leaves, refresh, loading, error } = useData()
   const { showToast } = useToast()
@@ -88,18 +90,23 @@ export default function MyLeaves() {
   }
 
   return (
-    <div className="animate-in">
-      <div className="page-header">
+    <div className="animate-in" style={{ padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 24, marginBottom: 24 }}>
         <div>
-          <h1>My Leaves</h1>
-          <p className="subtitle">Manage leave balances and applications.</p>
+          <h1 style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800 }}>My Leaves</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Manage leave balances and applications.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowApplyModal(true)}>
+        <button className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => setShowApplyModal(true)}>
           <Plus size={16} /> Apply for Leave
         </button>
       </div>
 
-      <div className="stats-grid" style={{ marginBottom: 24 }}>
+      <div className="stats-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+        gap: 16, 
+        marginBottom: 32 
+      }}>
         {[
           { label: 'Available', value: stats.available, icon: CheckCircle, color: 'var(--green)', bg: 'var(--green-dim)' },
           { label: 'Used', value: stats.used, icon: Briefcase, color: 'var(--blue)', bg: 'var(--blue-dim)' },
@@ -122,8 +129,8 @@ export default function MyLeaves() {
         <div className="card-header" style={{ padding: '16px 20px', borderBottom: 'var(--border)', background: 'var(--bg-elevated)' }}>
            <h3 style={{ fontSize: 16, fontWeight: 700 }}>Leave History</h3>
         </div>
-        <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
-          <table>
+        <div className="table-container" style={{ border: 'none', borderRadius: 0, overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+          <table style={{ minWidth: 600 }}> cotton
             <thead>
               <tr>
                 <th>Leave Type</th>
@@ -163,8 +170,20 @@ export default function MyLeaves() {
       </div>
 
       {showApplyModal && (
-        <div className="modal-overlay" onClick={() => setShowApplyModal(false)}>
-           <div className="modal-content card" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, width: '90%' }}>
+        <div style={{ 
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.4)', display: 'flex', 
+          alignItems: isMobile ? 'flex-end' : 'center', 
+          justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' 
+        }} onClick={() => setShowApplyModal(false)}>
+           <div className="card" onClick={e => e.stopPropagation()} style={{ 
+             maxWidth: isMobile ? '100%' : 500, 
+             width: isMobile ? '100%' : '90%',
+             borderRadius: isMobile ? '24px 24px 0 0' : '24px',
+             padding: isMobile ? '20px' : '32px',
+             maxHeight: isMobile ? '90vh' : 'auto',
+             overflowY: 'auto'
+           }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                  <h2 style={{ fontSize: 20, fontWeight: 700 }}>Apply for Leave</h2>
                  <button className="btn-icon btn-sm" onClick={() => setShowApplyModal(false)}>×</button>
@@ -173,7 +192,7 @@ export default function MyLeaves() {
               <form onSubmit={handleSubmit}>
                  <div style={{ marginBottom: 20 }}>
                     <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>Leave Type</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 10 }}>
                        {LEAVE_TYPES.map(type => (
                          <div 
                            key={type.id}
@@ -181,17 +200,18 @@ export default function MyLeaves() {
                            style={{ 
                              padding: 12, borderRadius: 8, border: `1px solid ${formData.type === type.id ? type.color : 'var(--line)'}`,
                              background: formData.type === type.id ? `${type.color}10` : 'transparent',
-                             cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s'
+                             cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s',
+                             display: 'flex', flexDirection: isMobile ? 'row' : 'column', alignItems: 'center', justifyContent: isMobile ? 'flex-start' : 'center', gap: isMobile ? 12 : 6
                            }}
                          >
-                            <type.icon size={18} color={formData.type === type.id ? type.color : 'var(--muted)'} style={{ margin: '0 auto 6px' }} />
-                            <div style={{ fontSize: 11, fontWeight: 600, color: formData.type === type.id ? type.color : 'var(--muted)' }}>{type.label.split(' ')[0]}</div>
+                            <type.icon size={18} color={formData.type === type.id ? type.color : 'var(--muted)'} style={{ margin: isMobile ? '0' : '0 auto 6px' }} />
+                            <div style={{ fontSize: 12, fontWeight: 700, color: formData.type === type.id ? type.color : 'var(--muted)' }}>{type.label}</div>
                          </div>
                        ))}
                     </div>
                  </div>
 
-                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 20 }}>
                     <div>
                        <label style={{ display: 'block', fontSize: 13, color: 'var(--text-dim)', marginBottom: 8 }}>Start Date</label>
                        <input 
@@ -199,6 +219,7 @@ export default function MyLeaves() {
                          className="input" 
                          value={formData.startDate}
                          onChange={e => setFormData({ ...formData, startDate: e.target.value })}
+                         style={{ fontSize: 16, width: '100%' }}
                        />
                     </div>
                     <div>
@@ -208,6 +229,7 @@ export default function MyLeaves() {
                          className="input" 
                          value={formData.endDate}
                          onChange={e => setFormData({ ...formData, endDate: e.target.value })}
+                         style={{ fontSize: 16, width: '100%' }}
                        />
                     </div>
                  </div>
@@ -217,13 +239,13 @@ export default function MyLeaves() {
                     <textarea 
                       className="input" 
                       placeholder="e.g. Family event, medical checkup, etc." 
-                      style={{ minHeight: 100, fontSize: 14 }}
+                      style={{ minHeight: 100, fontSize: 16, width: '100%', padding: 12, borderRadius: 12 }}
                       value={formData.reason}
                       onChange={e => setFormData({ ...formData, reason: e.target.value })}
                     />
                  </div>
 
-                 <div style={{ display: 'flex', gap: 12 }}>
+                 <div style={{ display: 'flex', gap: 12, flexDirection: isMobile ? 'column-reverse' : 'row' }}>
                     <button 
                       type="button" 
                       className="btn btn-secondary" 

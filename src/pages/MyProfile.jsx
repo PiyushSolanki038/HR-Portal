@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -25,6 +26,7 @@ import {
 import ChangePasswordModal from '../components/auth/ChangePasswordModal'
 
 export default function MyProfile() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user } = useAuth()
   const { employees, loading, error, refresh } = useData()
   const { showToast } = useToast()
@@ -73,29 +75,29 @@ export default function MyProfile() {
   if (error) return <div className="p-6">Error: {error}</div>
 
   return (
-    <div className="animate-in">
-      <div className="page-header">
+    <div className="animate-in" style={{ padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 24, marginBottom: 24 }}>
         <div>
-          <h1>My Profile</h1>
-          <p className="subtitle">Manage your personal and professional information.</p>
+          <h1 style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800 }}>My Profile</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Manage your personal and professional information.</p>
         </div>
         {!isEditing ? (
-          <button className="btn btn-secondary" onClick={startEditing}>
+          <button className="btn btn-secondary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={startEditing}>
             <Edit2 size={16} /> Edit Profile
           </button>
         ) : (
-          <div style={{ display: 'flex', gap: 12 }}>
-            <button className="btn btn-ghost" onClick={() => setIsEditing(false)} disabled={updating}>
+          <div style={{ display: 'flex', gap: 12, width: isMobile ? '100%' : 'auto' }}>
+            <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setIsEditing(false)} disabled={updating}>
               Cancel
             </button>
-            <button className="btn btn-primary" onClick={handleUpdateProfile} disabled={updating}>
+            <button className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handleUpdateProfile} disabled={updating}>
               {updating ? <LoadingSpinner size={16} /> : 'Save Changes'}
             </button>
           </div>
         )}
       </div>
 
-      <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginBottom: 24 }}>
+      <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '320px 1fr', gap: 24, marginBottom: 24 }}>
         {/* Sidebar Profile Card */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div className="card" style={{ textAlign: 'center' }}>
@@ -135,9 +137,9 @@ export default function MyProfile() {
 
         {/* Main Info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          <div className="card" style={{ border: isEditing ? '1px solid var(--accent)' : 'var(--border)', transition: 'all 0.3s ease' }}>
+          <div className="card" style={{ padding: isMobile ? 20 : 32, border: isEditing ? '1px solid var(--accent)' : 'var(--border)', transition: 'all 0.3s ease' }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>Personal Information</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 24 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBottom: 6, fontWeight: 600 }}>EMAIL ADDRESS</label>
                 {!isEditing ? (
@@ -170,7 +172,7 @@ export default function MyProfile() {
                   />
                 )}
               </div>
-              <div style={{ gridColumn: 'span 2' }}>
+              <div style={{ gridColumn: isMobile ? 'span 1' : 'span 2' }}>
                 <label style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBottom: 6, fontWeight: 600 }}>TELEGRAM CHAT ID</label>
                 {!isEditing ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -194,7 +196,7 @@ export default function MyProfile() {
                   </div>
                 )}
               </div>
-              <div style={{ gridColumn: 'span 2' }}>
+              <div style={{ gridColumn: isMobile ? 'span 1' : 'span 2' }}>
                 <label style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBottom: 6, fontWeight: 600 }}>RESIDENTIAL ADDRESS</label>
                 {!isEditing ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -215,9 +217,9 @@ export default function MyProfile() {
             </div>
           </div>
 
-          <div className="card">
+          <div className="card" style={{ padding: isMobile ? 20 : 32 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>Employment Details</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', gap: isMobile ? 16 : 24 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 12, color: 'var(--muted)', marginBottom: 6, fontWeight: 600 }}>EMPLOYEE ID</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -249,7 +251,7 @@ export default function MyProfile() {
             </div>
           </div>
 
-          <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+          <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 24 }}>
              <div className="card">
                 <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Bell size={18} /> Notifications

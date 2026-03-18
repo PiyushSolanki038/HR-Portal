@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
@@ -173,7 +174,9 @@ export default function Communication() {
   const location = useLocation()
   const navigate = useNavigate()
 
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const [activeChat, setActiveChat] = useState(null)
+  const [showChatMobile, setShowChatMobile] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
@@ -208,9 +211,10 @@ export default function Communication() {
       if (contact) {
         setActiveChat(contact)
         setChatMode('direct')
+        if (isMobile) setShowChatMobile(true)
       }
     }
-  }, [location.search, allContacts])
+  }, [location.search, allContacts, isMobile])
 
   // Fetch history for active chat
   const fetchHistory = async () => {
@@ -317,10 +321,21 @@ export default function Communication() {
   const depts = [...new Set(employees.map(e => e.dept).filter(Boolean))]
 
   return (
-    <div style={styles.wrapper}>
+    <div style={{ 
+      ...styles.wrapper, 
+      height: isMobile ? 'calc(100vh - 120px)' : 'calc(100vh - 180px)',
+      borderRadius: isMobile ? 0 : '24px',
+      border: isMobile ? 'none' : theme.border,
+      margin: isMobile ? '-16px' : 0
+    }}>
       
       {/* ─── SIDEBAR ─── */}
-      <div style={styles.sidebar}>
+      <div style={{ 
+        ...styles.sidebar, 
+        display: isMobile && showChatMobile ? 'none' : 'flex',
+        width: isMobile ? '100%' : '320px',
+        borderRight: isMobile ? 'none' : theme.border
+      }}>
         <div style={{ padding: '24px 20px 0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h2 style={{ fontFamily: theme.fontHeading, fontSize: '24px', fontWeight: 800 }}>Hub</h2>
@@ -367,7 +382,7 @@ export default function Communication() {
                     background: activeChat?.id === emp.id ? 'rgba(255,255,255,0.06)' : 'transparent',
                     boxShadow: activeChat?.id === emp.id ? 'inset 0 0 0 1px rgba(255,255,255,0.05)' : 'none'
                   }}
-                  onClick={() => setActiveChat(emp)}
+                  onClick={() => { setActiveChat(emp); if (isMobile) setShowChatMobile(true); }}
                 >
                   <div style={{ ...styles.avatar, background: emp.color || `linear-gradient(135deg, ${dynamicAccent}, #1e3a8a)`, position: 'relative' }}>
                     {emp.av}
@@ -394,7 +409,7 @@ export default function Communication() {
                     ...styles.contactItem, 
                     background: activeChat?.id === emp.id ? 'rgba(255,255,255,0.06)' : 'transparent'
                   }}
-                  onClick={() => setActiveChat(emp)}
+                  onClick={() => { setActiveChat(emp); if (isMobile) setShowChatMobile(true); }}
                 >
                   <div style={{ ...styles.avatar, background: emp.color || 'var(--accent)', boxShadow: `0 4px 12px ${emp.color || 'var(--accent)'}40` }}>
                     {emp.av}
@@ -435,21 +450,32 @@ export default function Communication() {
       </div>
 
       {/* ─── CHAT AREA ─── */}
-      <div style={styles.chatArea}>
+      <div style={{ 
+        ...styles.chatArea,
+        display: isMobile && !showChatMobile ? 'none' : 'flex'
+      }}>
         {activeChat ? (
           <>
             {/* Header */}
-            <div style={{ padding: '24px 32px', borderBottom: theme.border, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.1)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ padding: isMobile ? '16px' : '24px 32px', borderBottom: theme.border, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '16px' }}>
+                {isMobile && (
+                  <button 
+                    onClick={() => setShowChatMobile(false)}
+                    style={{ background: 'none', border: 'none', color: theme.muted, cursor: 'pointer', padding: '4px' }}
+                  >
+                    <ChevronRight size={24} style={{ transform: 'rotate(180deg)' }} />
+                  </button>
+                )}
                 {chatMode === 'direct' ? (
                   <>
-                    <div style={{ ...styles.avatar, background: activeChat.color || dynamicAccent, width: '48px', height: '48px' }}>
+                    <div style={{ ...styles.avatar, background: activeChat.color || dynamicAccent, width: isMobile ? '36px' : '48px', height: isMobile ? '36px' : '48px' }}>
                       {activeChat.av}
                     </div>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>{activeChat.name}</h3>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: theme.green, fontWeight: 500 }}>
-                        <Circle size={8} fill={theme.green} /> Secured Proxy Gateway
+                      <h3 style={{ margin: 0, fontSize: isMobile ? '14px' : '18px', fontWeight: 700 }}>{activeChat.name}</h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: isMobile ? '11px' : '13px', color: theme.green, fontWeight: 500 }}>
+                        <Circle size={isMobile ? 6 : 8} fill={theme.green} /> Secured
                       </div>
                     </div>
                   </>
@@ -465,15 +491,19 @@ export default function Communication() {
                   </>
                 )}
               </div>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button style={{ ...styles.iconBtn, width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', border: 'none' }}><Phone size={18} /></button>
-                <button style={{ ...styles.iconBtn, width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', border: 'none' }}><Video size={18} /></button>
-                <button style={{ ...styles.iconBtn, width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', border: 'none' }}><MoreVertical size={18} /></button>
+              <div style={{ display: 'flex', gap: isMobile ? '4px' : '12px' }}>
+                {!isMobile && (
+                  <>
+                    <button style={{ ...styles.iconBtn, width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', border: 'none' }}><Phone size={18} /></button>
+                    <button style={{ ...styles.iconBtn, width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', border: 'none' }}><Video size={18} /></button>
+                  </>
+                )}
+                <button style={{ ...styles.iconBtn, width: isMobile ? '32px' : '40px', height: isMobile ? '32px' : '40px', background: 'rgba(255,255,255,0.05)', border: 'none' }}><MoreVertical size={18} /></button>
               </div>
             </div>
 
             {/* Messages */}
-            <div style={styles.messageArea}>
+            <div style={{ ...styles.messageArea, padding: isMobile ? '16px' : '24px 32px' }}>
               {chatMode === 'direct' ? (
                 <>
                    <div style={{ textAlign: 'center', margin: '10px 0 20px' }}>
@@ -504,7 +534,7 @@ export default function Communication() {
             </div>
 
             {/* Input */}
-            <div style={styles.inputSurface}>
+            <div style={{ ...styles.inputSurface, padding: isMobile ? '12px 16px 20px' : '20px 32px 32px' }}>
               <div style={styles.inputBar}>
                 <button style={{ background: 'transparent', border: 'none', color: theme.muted, cursor: 'pointer' }}><Smile size={22} /></button>
                 <button style={{ background: 'transparent', border: 'none', color: theme.muted, cursor: 'pointer' }}><Paperclip size={22} /></button>

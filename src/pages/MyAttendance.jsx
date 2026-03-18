@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useScreenSize } from '../hooks/useScreenSize'
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -11,6 +12,7 @@ const STATUS_LABELS = { p: 'Present', l: 'Late', a: 'Absent', x: 'On Leave' }
 const STATUS_BADGES = { p: 'badge-green', l: 'badge-amber', a: 'badge-red', x: 'badge-blue' }
 
 export default function MyAttendance() {
+  const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user } = useAuth()
   const { employees, attendance, refresh, loading, error } = useData()
   const { showToast } = useToast()
@@ -82,38 +84,38 @@ export default function MyAttendance() {
   }
 
   return (
-    <div className="animate-in">
-      <div className="page-header">
+    <div className="animate-in" style={{ padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="page-header" style={{ flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: isMobile ? 16 : 24, marginBottom: 24 }}>
         <div>
-          <h1>My Attendance</h1>
-          <p className="subtitle">Detailed presence logs and history tracking.</p>
+          <h1 style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800 }}>My Attendance</h1>
+          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Detailed presence logs and history tracking.</p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div style={{ display: 'flex', gap: 12, width: isMobile ? '100%' : 'auto', flexWrap: 'wrap' }}>
           <select 
             className="btn btn-secondary btn-sm" 
             value={month} 
             onChange={e => setMonth(e.target.value)}
-            style={{ width: 'auto' }}
+            style={{ flex: isMobile ? 1 : 'none', fontSize: 16, height: 'auto', padding: '8px 12px' }}
           >
             {months.map(m => (
               <option key={m.value} value={m.value}>{m.label}</option>
             ))}
           </select>
-          <button className="btn btn-secondary btn-sm" onClick={handleExport}>
-            <Download size={14} /> Export Report
+          <button className="btn btn-secondary btn-sm" style={{ flex: isMobile ? 1 : 'none', height: 'auto', padding: '8px 12px' }} onClick={handleExport}>
+            <Download size={14} /> {isMobile ? 'Export' : 'Export Report'}
           </button>
         </div>
       </div>
 
-      <div className="card" style={{ marginBottom: 24, border: hasSubmittedToday ? 'var(--border)' : '1px solid var(--accent)' }}>
+      <div className="card" style={{ marginBottom: 24, border: hasSubmittedToday ? 'var(--border)' : '1px solid var(--accent)', padding: isMobile ? 16 : 24 }}>
         {hasSubmittedToday ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', flexDirection: isMobile ? 'column' : 'row', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ 
                 width: 48, height: 48, borderRadius: 12, 
                 background: todayRecord.status === 'l' ? 'var(--amber-dim)' : 'var(--green-dim)', 
                 color: todayRecord.status === 'l' ? 'var(--amber)' : 'var(--green)', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 48
               }}>
                 <CheckCircle size={24} />
               </div>
@@ -129,7 +131,7 @@ export default function MyAttendance() {
                 </p>
               </div>
             </div>
-            <span className={`badge ${STATUS_BADGES[todayRecord.status]}`}>{STATUS_LABELS[todayRecord.status]}</span>
+            <span className={`badge ${STATUS_BADGES[todayRecord.status]}`} style={{ width: isMobile ? '100%' : 'auto', textAlign: 'center' }}>{STATUS_LABELS[todayRecord.status]}</span>
           </div>
         ) : (
           <div>
@@ -151,8 +153,11 @@ export default function MyAttendance() {
                   onChange={e => setReportText(e.target.value)}
                   style={{ 
                     minHeight: 100, 
-                    fontSize: 14,
-                    borderColor: reportText.length > 0 && reportText.trim().length < 10 ? 'var(--red)' : 'var(--line)'
+                    fontSize: 16,
+                    borderColor: reportText.length > 0 && reportText.trim().length < 10 ? 'var(--red)' : 'var(--line)',
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '12px'
                   }}
                 />
                 {reportText.length > 0 && reportText.trim().length < 10 && (
@@ -177,6 +182,7 @@ export default function MyAttendance() {
               className="btn btn-primary" 
               onClick={handleSubmit} 
               disabled={submitting || reportText.trim().length < 10}
+              style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }}
             >
                 {submitting ? 'Submitting...' : 'Submit Attendance'}
             </button>
@@ -184,7 +190,12 @@ export default function MyAttendance() {
         )}
       </div>
 
-      <div className="stats-grid" style={{ marginBottom: 24 }}>
+      <div className="stats-grid" style={{ 
+        display: 'grid', 
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+        gap: 16, 
+        marginBottom: 32 
+      }}>
         {[
           { label: 'Present', value: stats.present, icon: CheckCircle, color: 'var(--green)', bg: 'var(--green-dim)' },
           { label: 'Late', value: stats.late, icon: Clock, color: 'var(--amber)', bg: 'var(--amber-dim)' },
@@ -203,27 +214,29 @@ export default function MyAttendance() {
         ))}
       </div>
 
-      <div className="card" style={{ marginBottom: 24 }}>
+      <div className="card" style={{ marginBottom: 24, padding: isMobile ? 12 : 24 }}>
         <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>Attendance Heatmap</h3>
-        <AttendanceHeatmap records={history} />
-        <div style={{ marginTop: 20, display: 'flex', gap: 16, fontSize: 12, color: 'var(--muted)' }}>
-           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--blue)' }}></div> Present
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+          <AttendanceHeatmap records={history} />
+        </div>
+        <div style={{ marginTop: 20, display: 'flex', gap: 12, fontSize: 11, color: 'var(--muted)', flexWrap: 'wrap' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--blue)' }}></div> Present
            </div>
-           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--amber)' }}></div> Late
+           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--amber)' }}></div> Late
            </div>
-           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--red)' }}></div> Absent
+           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--red)' }}></div> Absent
            </div>
-           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 12, height: 12, borderRadius: 2, background: 'var(--bg-elevated)', border: 'var(--border)' }}></div> Weekend/Holiday
+           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div style={{ width: 10, height: 10, borderRadius: 2, background: 'var(--bg-elevated)', border: 'var(--border)' }}></div> Weekend/Holiday
            </div>
         </div>
       </div>
 
-      <div className="table-container">
-        <table>
+      <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 16 }}>
+        <table style={{ minWidth: 700 }}>
           <thead>
             <tr>
               <th>Date</th>
@@ -259,8 +272,20 @@ export default function MyAttendance() {
       </div>
 
       {selectedRecord && (
-        <div className="modal-overlay" onClick={() => setSelectedRecord(null)}>
-           <div className="modal-content card" onClick={e => e.stopPropagation()} style={{ maxWidth: 500, width: '90%' }}>
+        <div style={{ 
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.4)', display: 'flex', 
+          alignItems: isMobile ? 'flex-end' : 'center', 
+          justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' 
+        }} onClick={() => setSelectedRecord(null)}>
+           <div className="card" onClick={e => e.stopPropagation()} style={{ 
+             maxWidth: isMobile ? '100%' : 500, 
+             width: isMobile ? '100%' : '90%',
+             borderRadius: isMobile ? '24px 24px 0 0' : '24px',
+             padding: isMobile ? '20px' : '32px',
+             maxHeight: isMobile ? '90vh' : 'auto',
+             overflowY: 'auto'
+           }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                  <h3 style={{ fontSize: 18, fontWeight: 700 }}>Attendance Details</h3>
                  <button className="btn-icon btn-sm" onClick={() => setSelectedRecord(null)}>×</button>
@@ -271,7 +296,7 @@ export default function MyAttendance() {
                    width: 64, height: 64, borderRadius: 16, 
                    background: STATUS_BADGES[selectedRecord.status].includes('green') ? 'var(--green-dim)' : 'var(--amber-dim)',
                    color: STATUS_BADGES[selectedRecord.status].includes('green') ? 'var(--green)' : 'var(--amber)',
-                   display: 'flex', alignItems: 'center', justifyContent: 'center'
+                   display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 64
                  }}>
                     <CheckCircle size={32} />
                  </div>
@@ -283,7 +308,7 @@ export default function MyAttendance() {
                  </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16, marginBottom: 24 }}>
                  <div className="card-glass" style={{ padding: 12 }}>
                     <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 4 }}>Time</div>
                     <div style={{ fontSize: 14, fontWeight: 600 }}>{selectedRecord.time || '--:--'}</div>
@@ -303,8 +328,8 @@ export default function MyAttendance() {
                  </div>
               </div>
 
-              <div style={{ marginTop: 32, display: 'flex', justifyContent: 'flex-end' }}>
-                 <button className="btn btn-secondary" onClick={() => setSelectedRecord(null)}>Close</button>
+              <div style={{ marginTop: 32, display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                 <button className="btn btn-secondary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => setSelectedRecord(null)}>Close</button>
               </div>
            </div>
         </div>
