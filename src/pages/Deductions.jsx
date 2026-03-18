@@ -78,7 +78,7 @@ export default function Deductions() {
         <div>
           <h1>Deductions & Penalties</h1>
           <p className="subtitle">
-            {withDeductions.length} employees penalized this cycle
+            {payroll.length} employees tracked in this cycle
           </p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
@@ -148,7 +148,7 @@ export default function Deductions() {
         </div>
       </div>
 
-      {withDeductions.length === 0 ? (
+      {payroll.length === 0 ? (
         <div className="card empty-state" style={{ padding: '60px 20px' }}>
           <TrendingUp size={64} style={{ color: 'var(--muted)', opacity: 0.5, marginBottom: 16 }} />
           <h3>No Pending Deductions</h3>
@@ -158,7 +158,7 @@ export default function Deductions() {
         </div>
       ) : (
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 20px 0' }}>Affected Employees</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 20px 0' }}>Employee Deductions Overview</h3>
           <div className="table-container">
             <table>
               <thead>
@@ -173,7 +173,7 @@ export default function Deductions() {
                 </tr>
               </thead>
               <tbody>
-                {withDeductions.map((p, i) => (
+                {payroll.map((p, i) => (
                   <tr key={i}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -202,7 +202,7 @@ export default function Deductions() {
                     <td style={{ color: p.deductionBreakdown.lateDeduction > 0 ? 'var(--amber)' : 'var(--muted)' }}>
                       {p.deductionBreakdown.lateDeduction > 0 ? `₹${p.deductionBreakdown.lateDeduction}` : '—'}
                     </td>
-                    <td style={{ fontWeight: 700, color: 'var(--red)', fontSize: 15, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                    <td style={{ fontWeight: 700, color: p.deductionBreakdown.total > 0 ? 'var(--red)' : 'var(--text)', fontSize: 15, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
                       ₹{p.deductionBreakdown.total.toLocaleString('en-IN')}
                     </td>
                     <td style={{ textAlign: 'right' }}>
