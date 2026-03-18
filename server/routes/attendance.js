@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { readSheet, appendRow, updateRowWhere } from '../sheets.js'
+import { sendMessage, sendBulkMessage } from '../telegram.js'
 
 const router = Router()
 
@@ -164,6 +165,49 @@ router.post('/mark', async (req, res) => {
 
     // Sync stats to Employees sheet
     await syncEmployeeStats(empId)
+
+    // 🔔 Notify HR and Employee via Telegram
+    try {
+      const employees = await readSheet('Employees')
+      const targetEmp = employees.find(e => e.id === empId)
+      
+      const hrEmployees = employees.filter(e => 
+        ['hr manager', 'admin'].includes(e.role?.toLowerCase())
+      )
+      const hrChatIds = Array.from(new Set(hrEmployees.map(e => e.telegramChatId).filter(id => id)))
+
+      const displayTime = now.toLocaleTimeString('en-IN', { 
+        timeZone: 'Asia/Kolkata',
+        hour12: true, 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })
+
+      const statusLabel = status === 'p' ? '✅ Present' : '⚠️ Late'
+      
+      // Notify HR
+      const hrMsg = `🔔 <b>New Attendance Marked (Portal)</b>\n\n` +
+                    `👤 <b>Name:</b> ${empName}\n` +
+                    `🏢 <b>Dept:</b> ${dept}\n` +
+                    `🕒 <b>Time:</b> ${displayTime}\n` +
+                    `📅 <b>Date:</b> ${date}\n` +
+                    `📊 <b>Status:</b> ${statusLabel}\n` +
+                    `📝 <b>Report:</b> ${report}`
+      
+      await sendBulkMessage(hrChatIds, hrMsg)
+
+      // Notify Employee (Personal Confirmation)
+      if (targetEmp?.telegramChatId) {
+        const empMsg = `✅ <b>Attendance Recorded (Portal)</b>\n\n` +
+                       `🕒 <b>Time:</b> ${displayTime}\n` +
+                       `📅 <b>Date:</b> ${date}\n` +
+                       `📊 <b>Status:</b> ${status === 'p' ? 'On Time' : 'Late'}\n` +
+                       `📝 <b>Report:</b> ${report}`
+        await sendMessage(targetEmp.telegramChatId, empMsg)
+      }
+    } catch (teleErr) {
+      console.error('[TELEGRAM NOTIFICATION ERROR]', teleErr)
+    }
 
     res.json({ success: true, date, time, status })
   } catch (err) {
