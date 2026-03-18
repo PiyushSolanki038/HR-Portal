@@ -285,7 +285,7 @@ export default function EmployeeProfile() {
 
   const stats = attendanceSummary[activeId] || { present: 0, late: 0, score: 0, totalAttended: 0 }
   const totalDays = stats.workingDays || 0
-  const attendRate = stats.score || 0
+  const attendRate = parseInt(emp.score) || stats.score || 0
   const punctRate = stats.totalAttended > 0 ? Math.round(((stats.present || 0) / stats.totalAttended) * 100) : 100
   const doneCount = empTasks.filter(t => t.done === 'true' || t.done === true).length
   const taskRate = empTasks.length > 0 ? Math.round(doneCount / empTasks.length * 100) : 0
@@ -573,7 +573,7 @@ export default function EmployeeProfile() {
                   { val: Math.max(0, (stats.workingDays || 0) - (stats.totalAttended || 0)), label: 'Absent', color: 'var(--red)', icon: 'AlertTriangle' },
                   { val: streak, label: 'Streak', color: 'var(--blue)', icon: 'Flame' },
                   { val: takenCount, label: 'Leaves', color: 'var(--purple)', icon: 'Calendar' },
-                  { val: stats.score, label: 'Score', color: scoreColor(stats.score), icon: 'Target' },
+                  { val: parseInt(emp.score) || stats.score || 0, label: 'Score', color: scoreColor(parseInt(emp.score) || stats.score || 0), icon: 'Target' },
                 ].map((s) => (
                   <div key={s.label} style={{ 
                     background: 'var(--bg-elevated)', padding: '20px 16px', borderRadius: '20px', 
@@ -795,7 +795,7 @@ export default function EmployeeProfile() {
               <div style={{ padding: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 20 }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 48, fontWeight: 900, color: scoreColor(stats.score), letterSpacing: -2, lineHeight: 1 }}>{stats.score}</div>
+                    <div style={{ fontSize: 48, fontWeight: 900, color: scoreColor(parseInt(emp.score) || stats.score || 0), letterSpacing: -2, lineHeight: 1 }}>{parseInt(emp.score) || stats.score || 0}</div>
                     <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>Current Rating</div>
                   </div>
                   <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>

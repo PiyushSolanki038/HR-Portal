@@ -251,7 +251,7 @@ export default function Employees() {
                     <td style={{ fontWeight: 600 }}>{emp.role}</td>
                     <td className="hidden-mobile" style={{ color: 'var(--text-dim)' }}>{emp.dept}</td>
                     <td className="hidden-mobile">
-                      <PerformanceRing score={parseInt(stats.score) || 0} size={32} strokeWidth={3} />
+                      <PerformanceRing score={parseInt(emp.score) || parseInt(stats.score) || 0} size={32} strokeWidth={3} />
                     </td>
                     <td>
                       <span style={{ color: 'var(--green)', fontWeight: 700 }}>{stats.present || 0}</span>
