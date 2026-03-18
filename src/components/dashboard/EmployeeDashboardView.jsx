@@ -100,7 +100,7 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
 
       <div className="stats-grid" style={{ 
         display: 'grid', 
-        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', 
+        gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)', 
         gap: 16,
         marginBottom: 24
       }}>
@@ -130,7 +130,7 @@ export default function EmployeeDashboardView({ user, stats, tasks, history, mes
         </div>
       </div>
 
-      <div className="grid-2" style={{ marginTop: 24, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 24 }}>
+      <div className="grid-2" style={{ marginTop: 24, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.5fr 1fr', gap: 24 }}>
         <div className="card" style={{ padding: isMobile ? 16 : 24 }}>
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20, flexDirection: isMobile ? 'column' : 'row', gap: 12 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700 }}>Attendance Heatmap</h3>

@@ -191,15 +191,15 @@ export default function Employees() {
           </div>
           <button 
             className="btn btn-secondary" 
-            style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', gap: 8 }}
+            style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
             onClick={() => setShowBulkModal(true)}
           >
             <MessageSquare size={16} /> 📨 Send Login Credentials
           </button>
-          <button className="btn btn-secondary" style={{ flex: '1 1 auto' }} onClick={() => { setMsgTarget('broadcast'); setShowMsgModal(true); }}>
+          <button className="btn btn-secondary" style={{ flex: 'none' }} onClick={() => { setMsgTarget('broadcast'); setShowMsgModal(true); }}>
             <Radio size={16} /> Broadcast
           </button>
-          <button className="btn btn-primary" style={{ flex: '1 1 auto' }} onClick={() => setShowAddModal(true)}>
+          <button className="btn btn-primary" style={{ flex: 'none' }} onClick={() => setShowAddModal(true)}>
             <UserPlus size={18} /> Add Employee
           </button>
         </div>

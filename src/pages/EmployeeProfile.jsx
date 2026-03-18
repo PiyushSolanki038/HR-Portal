@@ -514,16 +514,16 @@ export default function EmployeeProfile() {
               <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'center' : 'flex-end', justifyContent: 'space-between', gap: 24 }}>
                 <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'center' : 'flex-end', gap: isMobile ? 12 : 24, flex: 1, textAlign: isMobile ? 'center' : 'left' }}>
                   <div style={{ 
-                    width: isMobile ? 90 : 110, height: isMobile ? 90 : 110, borderRadius: 'var(--r-xl)', 
+                    width: isMobile ? 80 : 100, height: isMobile ? 80 : 100, borderRadius: 'var(--r-xl)', 
                     background: `linear-gradient(135deg, ${emp.color}, var(--accent))`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 40, fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)',
                     border: '5px solid var(--bg-card)', boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
                   }}>{emp.av}</div>
 
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                      <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: isMobile ? 24 : 28, fontWeight: 800, letterSpacing: -1 }}>{emp.name}</h1>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
+                      <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: isMobile ? 20 : 28, fontWeight: 800, letterSpacing: -1, overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', whiteSpace: 'nowrap' }}>{emp.name}</h1>
                       <span style={{ 
                         padding: '4px 10px', borderRadius: 100, fontSize: 10, fontWeight: 700, 
                         background: statusBadge.bg === '#edfaf3' ? 'var(--green-dim)' : statusBadge.bg === '#ecfeff' ? 'var(--blue-dim)' : 'var(--red-dim)',
@@ -558,11 +558,11 @@ export default function EmployeeProfile() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: 10, paddingBottom: 8, alignItems: 'center', width: isMobile ? '100%' : 'auto' }}>
-                  <button onClick={() => { setMsgChannel('telegram'); setShowMsgModal(true); }} style={{ ...primaryBtn, flex: isMobile ? 1 : 'none', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', gap: 8, paddingBottom: 8, alignItems: 'center', width: isMobile ? '100%' : 'auto', flexWrap: 'wrap' }}>
+                  <button onClick={() => { setMsgChannel('telegram'); setShowMsgModal(true); }} style={{ ...primaryBtn, flex: isMobile ? '1 1 calc(50% - 4px)' : 'none', justifyContent: 'center' }}>
                     <MessageSquare size={14} /> Message
                   </button>
-                  <button onClick={openEditModal} style={{ ...outlineBtn, flex: isMobile ? 1 : 'none', justifyContent: 'center' }}><Edit size={14} /> Edit Profile</button>
+                  <button onClick={openEditModal} style={{ ...outlineBtn, flex: isMobile ? '1 1 calc(50% - 4px)' : 'none', justifyContent: 'center' }}><Edit size={14} /> Edit Profile</button>
                 </div>
               </div>
 
@@ -593,7 +593,7 @@ export default function EmployeeProfile() {
         </div>
 
         {/* ── MAIN GRID ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 16 : 24 }}>
 
           {/* LEFT COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

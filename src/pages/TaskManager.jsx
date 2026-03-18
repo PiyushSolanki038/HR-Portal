@@ -114,7 +114,8 @@ export default function TaskManager() {
       </div>
 
       <div className="table-container" style={{ borderRadius: 24 }}>
-        <table>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 12 }}>
+  <table style={{ minWidth: 580, width: '100%' }}>
           <thead>
             <tr>
               <th>Task Objective</th>
@@ -198,6 +199,7 @@ export default function TaskManager() {
             })}
           </tbody>
         </table>
+</div>
         {filteredTasks.length === 0 && (
           <div className="empty-state" style={{ padding: 60 }}>
             <CheckSquare size={40} color="var(--muted)" />

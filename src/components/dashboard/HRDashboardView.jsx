@@ -36,7 +36,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
       {/* Premium Quick Actions */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', 
+        gridTemplateColumns: isMobile ? '1fr 1fr' : isTablet ? '1fr 1fr' : 'repeat(4, 1fr)', 
         gap: 16, 
         marginBottom: 32 
       }}>
@@ -59,7 +59,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
 
       <div className="stats-grid" style={{ 
         display: 'grid',
-        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isTablet ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
+        gridTemplateColumns: isMobile ? '1fr 1fr' : isTablet ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
         gap: 16,
         marginBottom: 32 
       }}>
@@ -138,7 +138,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
                     {topEmp.av || topEmp.name?.substring(0,2).toUpperCase()}
                   </div>
                   <div>
-                    <h2 style={{ fontSize: isMobile ? 24 : 42, fontWeight: 900, margin: 0, lineHeight: 1 }}>{topEmp.name}</h2>
+                    <h2 style={{ fontSize: isMobile ? 26 : 42, fontWeight: 900, margin: 0, lineHeight: 1 }}>{topEmp.name}</h2>
                     <p style={{ color: 'var(--accent)', margin: '8px 0 0 0', fontWeight: 700, fontSize: isMobile ? 14 : 16 }}>{topEmp.role}</p>
                   </div>
                </div>
@@ -167,7 +167,8 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
               </h3>
             </div>
             <div className="table-container" style={{ border: 'none' }}>
-               <table style={{ minWidth: 0 }}>
+               <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 12 }}>
+  <table style={{ minWidth: 580, width: '100%' }}>
                   <tbody style={{ background: 'transparent' }}>
                     {attendance
                       .filter(a => a.status === 'a' && !onLeaveIds?.has(a.empId?.toLowerCase()))
@@ -186,6 +187,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
                     )}
                   </tbody>
                </table>
+</div>
             </div>
           </div>
 
