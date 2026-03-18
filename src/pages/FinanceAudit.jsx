@@ -72,8 +72,7 @@ export default function FinanceAudit() {
            </div>
         </div>
         <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
-          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 12 }}>
-  <table style={{ minWidth: 580, width: '100%' }}>
+          <table style={{ minWidth: 600, width: '100%' }}>
              <thead>
                 <tr style={{ background: 'transparent' }}>
                    <th style={{ background: 'transparent', padding: '12px 16px' }}>Timestamp</th>
@@ -114,8 +113,6 @@ export default function FinanceAudit() {
                 ))}
              </tbody>
           </table>
-</div>
-        </div>
         <div style={{ padding: '24px 32px', borderTop: '1px solid var(--line)', textAlign: 'center' }}>
            <button className="btn btn-ghost" style={{ fontSize: 12, fontWeight: 700 }}>
               LOAD ARCHIVED RECORDS

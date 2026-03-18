@@ -43,8 +43,7 @@ export default function LoansAdvances() {
 
       <div className="card" style={{ padding: 24 }}>
         <div className="table-container">
-          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 12 }}>
-  <table style={{ minWidth: 580, width: '100%' }}>
+          <table style={{ minWidth: 600, width: '100%' }}>
              <thead>
                 <tr>
                    <th>Loan ID</th>
@@ -86,8 +85,6 @@ export default function LoansAdvances() {
                 ))}
              </tbody>
           </table>
-</div>
-        </div>
       </div>
     </div>
   )

@@ -75,7 +75,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  max-width: 100vw;
+  max-width: 100%;
   /* Universal protection */
 }
 
@@ -95,7 +95,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   overflow-x: hidden;
-  max-width: 100vw;
+  max-width: 100%;
   /* Strict width control */
   width: 100%;
 }
@@ -447,12 +447,14 @@ select {
   overflow-x: auto;
   border: var(--border);
   border-radius: var(--r-lg);
-  background: var(--bg-card);
+  background: transparent;
 }
 
 table {
   width: 100%;
+  min-width: max-content;
   border-collapse: collapse;
+  background: var(--bg-card);
 }
 
 thead th {
@@ -686,13 +688,10 @@ tbody tr:hover {
 
   /* Components: Tables */
   .table-container {
-    margin: 0 -16px;
-    /* Bleed to edges on mobile */
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
+    margin: 0;
+    border-radius: 12px;
+    border: 1px solid var(--line);
     overflow-x: auto !important;
-    /* Force scroll */
     -webkit-overflow-scrolling: touch;
   }
 

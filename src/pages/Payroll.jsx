@@ -211,7 +211,6 @@ export default function Payroll() {
               )}
             </tbody>
           </table>
-        </div>
       </div>
     </div>
   )

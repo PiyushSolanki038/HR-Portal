@@ -107,7 +107,6 @@ export default function Leaves() {
             )}
           </tbody>
         </table>
-      </div>
     </div>
   )
 }

@@ -166,7 +166,6 @@ export default function MyLeaves() {
               )}
             </tbody>
           </table>
-        </div>
       </div>
 
       {showApplyModal && (

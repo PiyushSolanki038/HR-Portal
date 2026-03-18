@@ -167,8 +167,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
               </h3>
             </div>
             <div className="table-container" style={{ border: 'none' }}>
-               <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 12 }}>
-  <table style={{ minWidth: 580, width: '100%' }}>
+               <table style={{ minWidth: 600, width: '100%' }}>
                   <tbody style={{ background: 'transparent' }}>
                     {attendance
                       .filter(a => a.status === 'a' && !onLeaveIds?.has(a.empId?.toLowerCase()))
@@ -187,8 +186,6 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
                     )}
                   </tbody>
                </table>
-</div>
-            </div>
           </div>
 
           <div className="card-premium" style={{ padding: isMobile ? 16 : 32 }}>

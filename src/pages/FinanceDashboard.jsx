@@ -123,8 +123,7 @@ export default function FinanceDashboard() {
             </button>
           </div>
           <div className="table-container" style={{ border: 'none', borderRadius: 0 }}>
-            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 12 }}>
-  <table style={{ minWidth: 580, width: '100%' }}>
+            <table style={{ minWidth: 600, width: '100%' }}>
               <thead>
                 <tr>
                   <th>Employee</th>
@@ -156,8 +155,6 @@ export default function FinanceDashboard() {
                 ))}
               </tbody>
             </table>
-</div>
-          </div>
         </div>
 
         {/* Quick Links & Deduction Breakdown */}

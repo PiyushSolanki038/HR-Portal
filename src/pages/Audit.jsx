@@ -47,8 +47,7 @@ export default function Audit() {
         </select>
       </div>
       <div className="table-container">
-        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 12 }}>
-  <table style={{ minWidth: 580, width: '100%' }}>
+        <table style={{ minWidth: 600, width: '100%' }}>
           <thead><tr><th>Type</th><th>Description</th><th>Actor</th><th>Time</th></tr></thead>
           <tbody>
             {filtered.map((evt, i) => (
@@ -62,8 +61,6 @@ export default function Audit() {
             {filtered.length === 0 && <tr><td colSpan={4}><div className="empty-state"><Shield size={40} /><h3>No events</h3></div></td></tr>}
           </tbody>
         </table>
-</div>
-      </div>
     </div>
   )
 }

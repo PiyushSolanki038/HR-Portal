@@ -162,8 +162,7 @@ export default function Deductions() {
         <div className="card" style={{ padding: 24 }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 20px 0' }}>Employee Deductions Overview</h3>
           <div className="table-container">
-            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 12 }}>
-  <table style={{ minWidth: 580, width: '100%' }}>
+            <table style={{ minWidth: 600, width: '100%' }}>
               <thead>
                 <tr>
                   <th>Employee</th>
@@ -220,8 +219,6 @@ export default function Deductions() {
                 ))}
               </tbody>
             </table>
-</div>
-          </div>
         </div>
       )}
     </div>
