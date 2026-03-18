@@ -156,3 +156,16 @@ def get_employee_stats(emp_id):
     on_leave = len(month_leaves)
 
     return { 'present': present, 'late': late, 'leaves': on_leave }
+
+def get_hr_chat_ids():
+    sh = get_sheet()
+    ws = sh.worksheet('Employees')
+    records = ws.get_all_records()
+    hr_roles = ['hr manager', 'admin']
+    ids = []
+    for emp in records:
+        role = str(emp.get('role', '')).lower()
+        chat_id = emp.get('telegramChatId')
+        if role in hr_roles and chat_id:
+            ids.append(str(chat_id))
+    return list(set(ids)) # Unique IDs

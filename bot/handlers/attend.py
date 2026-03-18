@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from datetime import datetime
-from sheets import get_employee_by_chat_id, add_attendance, get_today_attendance
+from sheets import get_employee_by_chat_id, add_attendance, get_today_attendance, get_hr_chat_ids
 from config import ATTENDANCE_START_HOUR, ATTENDANCE_END_HOUR, ATTENDANCE_END_MINUTE
 
 async def attend_handler(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
@@ -36,10 +36,10 @@ async def attend_handler(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
 
     now   = datetime.now()
     hour  = now.hour
-    min   = now.minute
+    min_val = now.minute
     
     # Calculate minutes since midnight
-    current_mins = hour * 60 + min
+    current_mins = hour * 60 + min_val
     start_mins   = ATTENDANCE_START_HOUR * 60
     end_mins     = ATTENDANCE_END_HOUR * 60 + ATTENDANCE_END_MINUTE
 
@@ -54,6 +54,25 @@ async def attend_handler(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         date_str, time_str, status, report
     )
 
+    # 🔔 Notify HR/Admins
+    hr_ids = get_hr_chat_ids()
+    hr_msg = (
+        f"🔔 <b>New Attendance Marked</b>\n\n"
+        f"👤 <b>Name:</b> {emp['name']}\n"
+        f"🏢 <b>Dept:</b> {emp['dept']}\n"
+        f"🕒 <b>Time:</b> {time_str}\n"
+        f"📅 <b>Date:</b> {date_str}\n"
+        f"📊 <b>Status:</b> {'✅ Present' if status == 'p' else '⚠️ Late'}\n"
+        f"📝 <b>Report:</b> {report}"
+    )
+    for hr_id in hr_ids:
+        try:
+            # Don't send double notification if the HR manager is marks their own attendance
+            if str(hr_id) != str(chat_id):
+                await ctx.bot.send_message(chat_id=hr_id, text=hr_msg, parse_mode='HTML')
+        except:
+            pass
+
     if status == 'p':
         await update.message.reply_text(
             f"✅ <b>Attendance Recorded — On Time!</b>\n\n"
@@ -64,8 +83,6 @@ async def attend_handler(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             parse_mode='HTML'
         )
     else:
-        # User defined 12 AM - 1 AM as Late
-        # And "start from 1 AM to 11:58 PM" as the window
         await update.message.reply_text(
             f"⚠️ <b>Attendance Recorded — Late</b>\n\n"
             f"👤 {emp['name']}\n"
