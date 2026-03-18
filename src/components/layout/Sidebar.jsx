@@ -2,7 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Clock, CalendarOff, CheckSquare,
   MessageSquare, UserPlus, FileCheck, FileText,
-  Users, Wallet, TrendingUp, TrendingDown, Shield, Settings,
+  Users, Wallet, TrendingUp, Shield, Settings,
   LogOut, Briefcase, ShieldAlert, Award
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
@@ -65,7 +65,7 @@ const EMPLOYEE_NAV = [
   {
     section: 'PERSONAL',
     items: [
-      { to: '/my-deductions',  icon: TrendingDown,   label: 'My Deductions' },
+      { to: '/my-deductions',  icon: TrendingUp,   label: 'My Deductions' },
       { to: '/my-profile',     icon: UserPlus,       label: 'My Profile' },
     ]
   },

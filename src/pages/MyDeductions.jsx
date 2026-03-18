@@ -4,7 +4,7 @@ import { useToast } from '../context/ToastContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import * as api from '../services/api'
 import { 
-  TrendingDown, 
+  TrendingUp, 
   AlertCircle, 
   History, 
   Info,
@@ -73,7 +73,7 @@ export default function MyDeductions() {
 
       {!currentSlip ? (
         <div className="card empty-state" style={{ padding: '60px 20px' }}>
-          <TrendingDown size={64} style={{ color: 'var(--muted)', opacity: 0.5, marginBottom: 16 }} />
+          <TrendingUp size={64} style={{ color: 'var(--muted)', opacity: 0.5, marginBottom: 16 }} />
           <h3>No Records Found</h3>
           <p style={{ color: 'var(--muted)', maxWidth: 400 }}>
             You don't have any recorded deductions or salary slips for the selected period.

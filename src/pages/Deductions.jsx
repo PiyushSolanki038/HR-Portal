@@ -4,7 +4,7 @@ import { useToast } from '../context/ToastContext'
 import { Navigate } from 'react-router-dom'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import * as api from '../services/api'
-import { TrendingDown, AlertCircle, History, Settings, XCircle } from 'lucide-react'
+import { TrendingUp, AlertCircle, History, Settings, XCircle } from 'lucide-react'
 
 export default function Deductions() {
   const { user } = useAuth()
@@ -150,7 +150,7 @@ export default function Deductions() {
 
       {withDeductions.length === 0 ? (
         <div className="card empty-state" style={{ padding: '60px 20px' }}>
-          <TrendingDown size={64} style={{ color: 'var(--muted)', opacity: 0.5, marginBottom: 16 }} />
+          <TrendingUp size={64} style={{ color: 'var(--muted)', opacity: 0.5, marginBottom: 16 }} />
           <h3>No Pending Deductions</h3>
           <p style={{ color: 'var(--muted)', maxWidth: 400 }}>
             All employees have remained within their permitted leave quotas and punctuality boundaries for this period.
