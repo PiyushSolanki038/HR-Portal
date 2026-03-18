@@ -20,6 +20,7 @@ const ADMIN_NAV = [
     { to: '/disciplinary', icon: ShieldAlert,   label: 'Disciplinary' },
     { to: '/communication', icon: MessageSquare, label: 'Communication', badge: 'unreadNotifs' },
     { to: '/mentors',     icon: Users,         label: 'Mentors' },
+    { to: '/deductions',  icon: TrendingUp,    label: 'Deductions' },
   ]},
   { section: 'Talent', roles: ['Admin', 'HR Manager'], items: [
     { to: '/hiring',      icon: UserPlus,      label: 'Hiring' },
@@ -33,7 +34,6 @@ const ADMIN_NAV = [
     { to: '/finance-dashboard', icon: LayoutDashboard, label: 'Finance Hub' },
     { to: '/payroll',     icon: Wallet,        label: 'Payroll' },
     { to: '/salary',      icon: Briefcase,     label: 'Salary Slips' },
-    { to: '/deductions',  icon: TrendingUp,    label: 'Deductions' },
     { to: '/tax-management', icon: FileText,   label: 'Tax & Form 16' },
     { to: '/financial-reports', icon: FileCheck, label: 'Reports' },
     { to: '/loans-advances', icon: Users,      label: 'Loans & EMI' },
@@ -65,7 +65,7 @@ const EMPLOYEE_NAV = [
   {
     section: 'PERSONAL',
     items: [
-      { to: '/my-salary',      icon: Wallet,         label: 'My Salary' },
+      { to: '/my-deductions',  icon: TrendingDown,   label: 'My Deductions' },
       { to: '/my-profile',     icon: UserPlus,       label: 'My Profile' },
     ]
   },

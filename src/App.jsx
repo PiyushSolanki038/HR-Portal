@@ -35,7 +35,7 @@ import TaskManager from './pages/TaskManager'
 import MyAttendance from './pages/MyAttendance'
 import MyTasks from './pages/MyTasks'
 import MyLeaves from './pages/MyLeaves'
-import MySalary from './pages/MySalary'
+import MyDeductions from './pages/MyDeductions'
 import MyProfile from './pages/MyProfile'
 
 function ProtectedRoute({ children }) {
@@ -142,7 +142,7 @@ export default function App() {
                   </RoleGate>
                 } />
                 <Route path="/deductions" element={
-                  <RoleGate allowedRoles={['Admin', 'Finance']}>
+                  <RoleGate allowedRoles={['Admin', 'Finance', 'HR Manager']}>
                     <Deductions />
                   </RoleGate>
                 } />
@@ -206,9 +206,9 @@ export default function App() {
                     <MyLeaves />
                   </RoleGate>
                 } />
-                <Route path="/my-salary" element={
+                <Route path="/my-deductions" element={
                   <RoleGate allowedRoles={['Employee']}>
-                    <MySalary />
+                    <MyDeductions />
                   </RoleGate>
                 } />
                 <Route path="/my-profile" element={
