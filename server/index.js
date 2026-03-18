@@ -21,6 +21,7 @@ import messagesRouter from './routes/messages.js'
 import mentorsRouter from './routes/mentors.js'
 import authRouter from './routes/auth.js'
 import governanceRouter from './routes/governance.js'
+import { spawn } from 'child_process'
 
 const app  = express()
 const PORT = process.env.PORT || 3001
@@ -73,4 +74,23 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'))
 })
 
-app.listen(PORT, () => console.log(`SISWIT API running on port ${PORT}`))
+app.listen(PORT, () => {
+  console.log(`SISWIT API running on port ${PORT}`)
+  
+  // Optional: Spawn Telegram Bot as a child process if requested
+  if (process.env.START_BOT === 'true') {
+    console.log('[BOT] Starting Telegram Bot process...')
+    const botProcess = spawn('python', ['bot/bot.py'], {
+      stdio: 'inherit',
+      shell: true
+    })
+
+    botProcess.on('error', (err) => {
+      console.error('[BOT_ERROR] Failed to start bot:', err.message)
+    })
+
+    botProcess.on('close', (code) => {
+      console.log(`[BOT] Bot process exited with code ${code}`)
+    })
+  }
+})

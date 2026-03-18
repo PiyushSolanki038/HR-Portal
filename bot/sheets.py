@@ -1,6 +1,7 @@
 import gspread
+import json
 from google.oauth2.service_account import Credentials
-from config import SHEET_ID, SERVICE_ACCOUNT_FILE
+from config import SHEET_ID, SERVICE_ACCOUNT_FILE, SERVICE_ACCOUNT_JSON
 from datetime import datetime
 
 SCOPES = [
@@ -9,9 +10,18 @@ SCOPES = [
 ]
 
 def get_sheet():
-    creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    gc = gspread.authorize(creds)
-    return gc.open_by_key(SHEET_ID)
+    try:
+        if SERVICE_ACCOUNT_JSON:
+            info = json.loads(SERVICE_ACCOUNT_JSON)
+            creds = Credentials.from_service_account_info(info, scopes=SCOPES)
+        else:
+            creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+        
+        gc = gspread.authorize(creds)
+        return gc.open_by_key(SHEET_ID)
+    except Exception as e:
+        print(f"❌ [SHEETS_ERROR] Failed to connect to Google Sheets: {str(e)}")
+        raise
 
 def get_employee_by_chat_id(chat_id):
     sh = get_sheet()

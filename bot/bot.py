@@ -7,8 +7,18 @@ from handlers.register import start_handler
 from handlers.help     import help_handler
 
 def main():
-    print("🤖 SISWIT Bot starting...")
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    print("🤖 SISWIT Bot initializing...")
+    
+    if not BOT_TOKEN:
+        print("❌ [CRITICAL] TELEGRAM_BOT_TOKEN not found in environment variables!")
+        print("Check your .env file in the project root.")
+        return
+
+    try:
+        app = ApplicationBuilder().token(BOT_TOKEN).build()
+    except Exception as e:
+        print(f"❌ [CRITICAL] Failed to build application: {str(e)}")
+        return
 
     app.add_handler(CommandHandler('start',  start_handler))
     app.add_handler(CommandHandler('attend', attend_handler))
