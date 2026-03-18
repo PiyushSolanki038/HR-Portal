@@ -146,6 +146,34 @@ router.post('/send-credentials-all', async (req, res) => {
     console.error('[API_ERROR] POST /api/auth/send-credentials-all:', err.message)
     res.status(500).json({ error: 'Failed to send credentials' })
   }
+// Send Credentials to Individual via Telegram
+router.post('/send-credentials-single', async (req, res) => {
+  try {
+    const { empId } = req.body
+    if (!empId) return res.status(400).json({ error: 'empId required' })
+
+    const loginData = await readSheet('Login')
+    const employees = await readSheet('Employees')
+    
+    const loginUser = loginData.find(u => u.id?.toString().trim().toUpperCase() === empId.toString().trim().toUpperCase())
+    if (!loginUser || !loginUser.password) {
+      return res.status(404).json({ error: 'User credentials not found' })
+    }
+
+    const emp = employees.find(e => e.id?.toString().trim().toUpperCase() === empId.toString().trim().toUpperCase())
+    
+    if (!emp || !emp.telegramChatId) {
+      return res.status(400).json({ error: 'Employee Telegram Chat ID not found' })
+    }
+
+    const msg = `🔐 <b>SISWIT Portal Login Credentials</b>\n\nHello ${emp.name || loginUser.name}! Your account is ready.\n\n🌐 Portal: https://hr-portal-production-4b10.up.railway.app\n👤 Employee ID: ${loginUser.id}\n🔑 Temporary Password: ${loginUser.password}\n\n⚠️ You will be asked to set a new password when you login.\nPlease change it immediately for security.\n\n- SISWIT HR Team`
+    
+    await sendMessage(emp.telegramChatId, msg)
+    res.json({ success: true, message: `Credentials sent to ${empId}` })
+  } catch (err) {
+    console.error('[API_ERROR] POST /api/auth/send-credentials-single:', err.message)
+    res.status(500).json({ error: 'Failed to send credentials' })
+  }
 })
 
 export default router

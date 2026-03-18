@@ -13,7 +13,8 @@ async function req(path, options = {}) {
 export const loginUser              = (data)      => req('/auth/login', { method:'POST', body:JSON.stringify(data) })
 export const changePassword         = (data)      => req('/auth/change-password', { method:'POST', body:JSON.stringify(data) })
 export const setTempPassword        = (data)      => req('/auth/set-temp-password', { method:'POST', body:JSON.stringify(data) })
-export const sendCredentialsToAll  = ()           => req('/auth/send-credentials-all', { method:'POST' })
+export const sendCredentialsToAll   = ()           => req('/auth/send-credentials-all', { method:'POST' })
+export const sendCredentialsSingle  = (data)       => req('/auth/send-credentials-single', { method:'POST', body:JSON.stringify(data) })
 
 // Employees
 export const getEmployees       = ()           => req('/employees')

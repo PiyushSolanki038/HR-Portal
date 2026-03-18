@@ -121,7 +121,14 @@ export default function Employees() {
     }
   }
 
-  const handleSendAllCredentials = async () => {
+  const handleSendSingleCredentials = async (empId, empName) => {
+    try {
+      await api.sendCredentialsSingle({ empId })
+      showToast(`Credentials sent to ${empName}`, 'success')
+    } catch (err) {
+      showToast('Failed to send credentials', 'error')
+    }
+  }
     setSendingBulk(true)
     try {
       const data = await api.sendCredentialsToAll()
@@ -248,6 +255,13 @@ export default function Employees() {
                           <MessageSquare size={14} />
                         </button>
                         <button 
+                          onClick={() => handleSendSingleCredentials(emp.id, emp.name)}
+                          style={{ border: 'none', background: 'var(--bg-elevated)', color: 'var(--blue)', padding: 7, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
+                          title="Send Credentials"
+                        >
+                          <Mail size={14} />
+                        </button>
+                        <button 
                           onClick={() => { setResetTarget(emp); setShowResetModal(true); }}
                           style={{ border: 'none', background: 'var(--bg-elevated)', color: 'var(--amber)', padding: 7, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
                           title="Reset Password"
@@ -315,6 +329,13 @@ export default function Employees() {
                       className="btn btn-secondary btn-sm" style={{ flex: 1, borderRadius: 10, fontWeight: 800 }}
                     >
                       PROFILE
+                    </button>
+                    <button 
+                      onClick={() => handleSendSingleCredentials(emp.id, emp.name)}
+                      className="btn btn-ghost btn-sm" style={{ borderRadius: 10, padding: 8, color: 'var(--blue)' }}
+                      title="Send Credentials"
+                    >
+                      <Mail size={16} />
                     </button>
                     <button 
                       onClick={() => { setResetTarget(emp); setShowResetModal(true); }}
