@@ -44,6 +44,11 @@ const ADMIN_NAV = [
     { to: '/audit',       icon: Shield,        label: 'Audit Log' },
     { to: '/settings',    icon: Settings,      label: 'Settings', roles: ['Admin'] },
   ]},
+  { section: 'Personal Workspace', roles: ['Admin', 'HR Manager', 'Finance'], items: [
+    { to: '/my-attendance', icon: Clock, label: 'My Attendance' },
+    { to: '/my-tasks', icon: CheckSquare, label: 'My Tasks' },
+    { to: '/my-leaves', icon: CalendarOff, label: 'My Leaves' },
+  ]},
 ]
 
 const EMPLOYEE_NAV = [

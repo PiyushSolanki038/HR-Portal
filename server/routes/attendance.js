@@ -11,7 +11,9 @@ router.get('/today', async (req, res) => {
     const records = await readSheet('Attendance')
     const todayRecs = records.filter(r => r.date === today)
 
-    const employees = await readSheet('Employees')
+    let employees = await readSheet('Employees')
+    // Remove Admin from attendance tracking
+    employees = employees.filter(emp => !emp.id.toUpperCase().startsWith('ADM') && emp.role !== 'Admin')
     const merged = employees.map(emp => {
       const rec = todayRecs.find(r => r.empId === emp.id)
       return rec || {
@@ -30,7 +32,9 @@ router.get('/today', async (req, res) => {
 router.get('/summary', async (req, res) => {
   try {
     const attendance = await readSheet('Attendance')
-    const employees  = await readSheet('Employees')
+    let employees  = await readSheet('Employees')
+    // Remove Admin from attendance summary
+    employees = employees.filter(emp => !emp.id.toUpperCase().startsWith('ADM') && emp.role !== 'Admin')
     
     // Get all unique working dates from attendance
     const allDates = Array.from(new Set(attendance.map(r => r.date))).sort()
@@ -90,7 +94,9 @@ router.get('/employee/:empId', async (req, res) => {
 router.get('/weekly', async (req, res) => {
   try {
     const records   = await readSheet('Attendance')
-    const employees = await readSheet('Employees')
+    let employees = await readSheet('Employees')
+    // Remove Admin from weekly grid
+    employees = employees.filter(emp => !emp.id.toUpperCase().startsWith('ADM') && emp.role !== 'Admin')
 
     // Get last 5 weekdays — use IST date to match written records
     const days = []
