@@ -186,6 +186,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
                     )}
                   </tbody>
                </table>
+            </div>
           </div>
 
           <div className="card-premium" style={{ padding: isMobile ? 16 : 32 }}>
