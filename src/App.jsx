@@ -69,7 +69,7 @@ export default function App() {
             <AppShell>
               <Routes>
                 <Route path="/" element={
-                  <RoleGate allowedRoles={['Admin', 'HR Manager', 'Finance']}>
+                  <RoleGate allowedRoles={['Admin', 'HR Manager', 'Finance', 'Employee']}>
                     <Dashboard />
                   </RoleGate>
                 } />

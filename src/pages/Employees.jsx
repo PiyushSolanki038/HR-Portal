@@ -142,6 +142,22 @@ export default function Employees() {
       setSendingBulk(false)
     }
   }
+  
+  const handleResetPassword = async () => {
+    if (!tempPassword.trim()) return
+    setResettingPass(true)
+    try {
+      await api.setTempPassword({ empId: resetTarget.id, tempPassword })
+      showToast(`Temporary password set for ${resetTarget.name}`, 'success')
+      setShowResetModal(false)
+      setTempPassword('')
+      refresh()
+    } catch (err) {
+      showToast('Failed to reset password', 'error')
+    } finally {
+      setResettingPass(false)
+    }
+  }
 
   if (loading) return <LoadingSpinner />
   if (error) return <div className="empty-state">Error: {error}</div>

@@ -112,6 +112,27 @@ router.post('/change-password', async (req, res) => {
   }
 })
 
+// Set temporary password (HR/Admin action)
+router.post('/set-temp-password', async (req, res) => {
+  try {
+    const { empId, tempPassword } = req.body
+    
+    if (!empId || !tempPassword) {
+      return res.status(400).json({ error: 'Missing employee ID or temporary password' })
+    }
+
+    await updateRowWhere('Login', 'id', empId, { 
+      password: tempPassword,
+      mustChangePassword: 'true'
+    })
+
+    res.json({ success: true, message: 'Temporary password set successfully' })
+  } catch (err) {
+    console.error('[API_ERROR] POST /api/auth/set-temp-password:', err.message)
+    res.status(500).json({ error: 'Failed to set temporary password' })
+  }
+})
+
 // Send Credentials to All via Telegram
 router.post('/send-credentials-all', async (req, res) => {
   try {

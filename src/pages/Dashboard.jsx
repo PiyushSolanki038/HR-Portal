@@ -8,7 +8,7 @@ import HRDashboardView from '../components/dashboard/HRDashboardView'
 import EmployeeDashboardView from '../components/dashboard/EmployeeDashboardView'
 
 export default function Dashboard() {
-  const { employees, attendance, leaves, tasks, governance, auditLogs, loading, error, refresh } = useData()
+  const { employees, attendance, leaves, tasks, loading, error, refresh } = useData()
   const { user } = useAuth()
   const { showToast } = useToast()
   
@@ -30,12 +30,8 @@ export default function Dashboard() {
 
   const today = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD (safe local)
   const onLeaveEmps = (leaves || []).filter(l => {
-    if (l.status?.toLowerCase() !== 'approved') return false
-    // Support both bot format (single 'date') and portal format ('startDate'/'endDate')
-    const leaveStart = l.startDate || l.date || ''
-    const leaveEnd   = l.endDate   || leaveStart
-    if (!leaveStart) return false
-    return today >= leaveStart && today <= leaveEnd
+    const isApproved = l.status?.toLowerCase() === 'approved' || l.status?.includes('day') || l.approvedBy
+    return isApproved && today >= l.startDate && today <= (l.endDate || l.startDate)
   })
   const onLeaveIds = new Set(onLeaveEmps.map(l => l.empId?.toLowerCase()))
 
@@ -45,7 +41,7 @@ export default function Dashboard() {
     late: attendance.filter(a => a.status === 'l').length,
     absent: attendance.filter(a => a.status === 'a' && !onLeaveIds.has(a.empId?.toLowerCase())).length,
     onLeave: onLeaveIds.size,
-    pendingLeaves: (leaves || []).filter(l => l.status?.toLowerCase() === 'pending').length,
+    pendingLeaves: leaves.filter(l => l.status?.toLowerCase() === 'pending').length,
   }
 
   const handleRemindAbsent = async (empId) => {
@@ -102,20 +98,17 @@ export default function Dashboard() {
     late: history.filter(h => h.status === 'l').length,
     leavesUsed: leaves.filter(l => l.empId === user?.id && l.status === 'approved').length,
     leavesTotal: 3, 
-    pendingTasks: tasks.filter(t => t.assignedTo === user?.id && String(t.done) !== 'true').length,
-    dueToday: tasks.filter(t => t.assignedTo === user?.id && String(t.done) !== 'true' && t.deadline === new Date().toISOString().split('T')[0]).length
+    pendingTasks: tasks.filter(t => t.assignedTo === user?.id && t.done !== 'true').length,
+    dueToday: tasks.filter(t => t.assignedTo === user?.id && t.done !== 'true' && t.deadline === new Date().toISOString().split('T')[0]).length
   }
 
   if (isHR) {
     return (
       <HRDashboardView 
-        user={user}
         stats={stats}
         employees={employees}
         attendance={attendance}
         leaves={leaves}
-        governance={governance}
-        auditLogs={auditLogs}
         onLeaveIds={onLeaveIds}
         onRemindAbsent={handleRemindAbsent}
         onRemindAllAbsent={handleRemindAllAbsent}
@@ -129,7 +122,7 @@ export default function Dashboard() {
     <EmployeeDashboardView 
       user={user}
       stats={employeeStats}
-      tasks={tasks.filter(t => t.assignedTo === user?.id && String(t.done) !== 'true')}
+      tasks={tasks.filter(t => t.assignedTo === user?.id && t.done !== 'true')}
       history={history}
       messages={recentMessages}
       leaves={leaves.filter(l => l.empId === user?.id)}
