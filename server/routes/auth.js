@@ -54,7 +54,8 @@ router.post('/login', async (req, res) => {
       user: {
          id: empId, 
          name: user.name || empRecord?.name || `${role} User`, 
-         role: empRecord?.role || role, 
+         role: role, // Use the system role determined by ID prefix
+         jobTitle: empRecord?.role || 'Staff', // Original job title from Employees sheet
          dept: empRecord?.dept || 'Unknown',
          leavesQuota: empRecord?.leavesQuota || 12,
          av: empRecord?.av || rawId.substring(0,2),

@@ -43,6 +43,17 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? children : <Navigate to="/login" replace />
 }
 
+function RoleGate({ children, allowedRoles }) {
+  const { user } = useAuth()
+  const role = user?.role || 'Employee'
+  
+  if (!allowedRoles.includes(role)) {
+    return <Navigate to="/" replace />
+  }
+  
+  return children
+}
+
 export default function App() {
   const { isAuthenticated } = useAuth()
 
@@ -57,39 +68,154 @@ export default function App() {
           <ProtectedRoute>
             <AppShell>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/attendance" element={<Attendance />} />
-                <Route path="/leaves" element={<Leaves />} />
-                <Route path="/approvals" element={<Approvals />} />
-                <Route path="/tasks" element={<TaskManager />} />
+                <Route path="/" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager', 'Finance']}>
+                    <Dashboard />
+                  </RoleGate>
+                } />
+                <Route path="/attendance" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Attendance />
+                  </RoleGate>
+                } />
+                <Route path="/leaves" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Leaves />
+                  </RoleGate>
+                } />
+                <Route path="/approvals" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Approvals />
+                  </RoleGate>
+                } />
+                <Route path="/tasks" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <TaskManager />
+                  </RoleGate>
+                } />
                 <Route path="/communication" element={<Communication />} />
-                <Route path="/mentors" element={<Mentors />} />
-                <Route path="/hiring" element={<Hiring />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/documents" element={<Documents />} />
-                <Route path="/employees" element={<Employees />} />
-                <Route path="/employees/:id" element={<EmployeeProfile />} />
-                <Route path="/finance-dashboard" element={<FinanceDashboard />} />
-                <Route path="/payroll" element={<Payroll />} />
-                <Route path="/salary" element={<Salary />} />
-                <Route path="/deductions" element={<Deductions />} />
-                <Route path="/tax-management" element={<TaxManagement />} />
-                <Route path="/financial-reports" element={<FinancialReports />} />
-                <Route path="/loans-advances" element={<LoansAdvances />} />
-                <Route path="/finance-audit" element={<FinanceAudit />} />
+                <Route path="/mentors" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Mentors />
+                  </RoleGate>
+                } />
+                <Route path="/hiring" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Hiring />
+                  </RoleGate>
+                } />
+                <Route path="/onboarding" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Onboarding />
+                  </RoleGate>
+                } />
+                <Route path="/documents" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Documents />
+                  </RoleGate>
+                } />
+                <Route path="/employees" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Employees />
+                  </RoleGate>
+                } />
+                <Route path="/employees/:id" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <EmployeeProfile />
+                  </RoleGate>
+                } />
+                
+                {/* Finance Routes */}
+                <Route path="/finance-dashboard" element={
+                  <RoleGate allowedRoles={['Admin', 'Finance']}>
+                    <FinanceDashboard />
+                  </RoleGate>
+                } />
+                <Route path="/payroll" element={
+                  <RoleGate allowedRoles={['Admin', 'Finance']}>
+                    <Payroll />
+                  </RoleGate>
+                } />
+                <Route path="/salary" element={
+                  <RoleGate allowedRoles={['Admin', 'Finance']}>
+                    <Salary />
+                  </RoleGate>
+                } />
+                <Route path="/deductions" element={
+                  <RoleGate allowedRoles={['Admin', 'Finance']}>
+                    <Deductions />
+                  </RoleGate>
+                } />
+                <Route path="/tax-management" element={
+                  <RoleGate allowedRoles={['Admin', 'Finance']}>
+                    <TaxManagement />
+                  </RoleGate>
+                } />
+                <Route path="/financial-reports" element={
+                  <RoleGate allowedRoles={['Admin', 'Finance']}>
+                    <FinancialReports />
+                  </RoleGate>
+                } />
+                <Route path="/loans-advances" element={
+                  <RoleGate allowedRoles={['Admin', 'Finance']}>
+                    <LoansAdvances />
+                  </RoleGate>
+                } />
+                <Route path="/finance-audit" element={
+                  <RoleGate allowedRoles={['Admin', 'Finance']}>
+                    <FinanceAudit />
+                  </RoleGate>
+                } />
+
                 <Route path="/notifications" element={<NotificationsView />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/disciplinary" element={<DisciplinaryExcellence />} />
-                <Route path="/audit" element={<Audit />} />
-                <Route path="/settings" element={<Settings />} />
+                <Route path="/analytics" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Analytics />
+                  </RoleGate>
+                } />
+                <Route path="/disciplinary" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <DisciplinaryExcellence />
+                  </RoleGate>
+                } />
+                <Route path="/audit" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <Audit />
+                  </RoleGate>
+                } />
+                <Route path="/settings" element={
+                  <RoleGate allowedRoles={['Admin']}>
+                    <Settings />
+                  </RoleGate>
+                } />
                 
                 {/* Employee Specific Routes */}
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/my-attendance" element={<MyAttendance />} />
-                <Route path="/my-tasks" element={<MyTasks />} />
-                <Route path="/my-leaves" element={<MyLeaves />} />
-                <Route path="/my-salary" element={<MySalary />} />
-                <Route path="/my-profile" element={<MyProfile />} />
+                <Route path="/dashboard" element={<Navigate to="/" replace />} />
+                <Route path="/my-attendance" element={
+                  <RoleGate allowedRoles={['Employee']}>
+                    <MyAttendance />
+                  </RoleGate>
+                } />
+                <Route path="/my-tasks" element={
+                  <RoleGate allowedRoles={['Employee']}>
+                    <MyTasks />
+                  </RoleGate>
+                } />
+                <Route path="/my-leaves" element={
+                  <RoleGate allowedRoles={['Employee']}>
+                    <MyLeaves />
+                  </RoleGate>
+                } />
+                <Route path="/my-salary" element={
+                  <RoleGate allowedRoles={['Employee']}>
+                    <MySalary />
+                  </RoleGate>
+                } />
+                <Route path="/my-profile" element={
+                  <RoleGate allowedRoles={['Employee']}>
+                    <MyProfile />
+                  </RoleGate>
+                } />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

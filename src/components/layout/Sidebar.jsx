@@ -9,10 +9,10 @@ import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 
 const ADMIN_NAV = [
-  { section: 'Overview', items: [
+  { section: 'Overview', roles: ['Admin', 'HR Manager', 'Finance'], items: [
     { to: '/',            icon: LayoutDashboard, label: 'Dashboard' },
   ]},
-  { section: 'HR Operations', items: [
+  { section: 'HR Operations', roles: ['Admin', 'HR Manager'], items: [
     { to: '/attendance',  icon: Clock,         label: 'Attendance' },
     { to: '/leaves',      icon: CalendarOff,   label: 'Leaves' },
     { to: '/approvals',   icon: CheckSquare,   label: 'Approvals', badge: 'pendingLeaves' },
@@ -21,15 +21,15 @@ const ADMIN_NAV = [
     { to: '/communication', icon: MessageSquare, label: 'Communication', badge: 'unreadNotifs' },
     { to: '/mentors',     icon: Users,         label: 'Mentors' },
   ]},
-  { section: 'Talent', items: [
+  { section: 'Talent', roles: ['Admin', 'HR Manager'], items: [
     { to: '/hiring',      icon: UserPlus,      label: 'Hiring' },
     { to: '/onboarding',  icon: FileCheck,     label: 'Onboarding' },
     { to: '/documents',   icon: FileText,      label: 'Documents' },
   ]},
-  { section: 'People', items: [
+  { section: 'People', roles: ['Admin', 'HR Manager'], items: [
     { to: '/employees',   icon: Users,         label: 'Employees' },
   ]},
-  { section: 'Finance', items: [
+  { section: 'Finance', roles: ['Admin', 'Finance'], items: [
     { to: '/finance-dashboard', icon: LayoutDashboard, label: 'Finance Hub' },
     { to: '/payroll',     icon: Wallet,        label: 'Payroll' },
     { to: '/salary',      icon: Briefcase,     label: 'Salary Slips' },
@@ -39,7 +39,7 @@ const ADMIN_NAV = [
     { to: '/loans-advances', icon: Users,      label: 'Loans & EMI' },
     { to: '/finance-audit', icon: Shield,      label: 'Audit Log' },
   ]},
-  { section: 'System', items: [
+  { section: 'System', roles: ['Admin', 'HR Manager'], items: [
     { to: '/analytics',   icon: TrendingUp,    label: 'Analytics' },
     { to: '/audit',       icon: Shield,        label: 'Audit Log' },
     { to: '/settings',    icon: Settings,      label: 'Settings', roles: ['Admin'] },
@@ -76,9 +76,9 @@ export default function Sidebar({ open, onClose }) {
   const { notifications, leaves, tasks } = useData()
   const location = useLocation()
 
-  const role = user?.role?.toLowerCase() || ''
-  const isHR = role === 'hr manager' || role === 'admin'
-  const activeNav = role === 'employee' ? EMPLOYEE_NAV : ADMIN_NAV
+  const role = user?.role || ''
+  const roleLower = role.toLowerCase()
+  const activeNav = roleLower === 'employee' ? EMPLOYEE_NAV : ADMIN_NAV
 
   const getBadgeValue = (type) => {
     switch (type) {
@@ -108,9 +108,12 @@ export default function Sidebar({ open, onClose }) {
 
       <nav className="sidebar-nav">
         {activeNav.map(section => {
+          // Filter section by user role
+          if (section.roles && !section.roles.some(r => r === role)) return null
+
           const filteredItems = section.items.filter(item => {
             if (!item.roles) return true
-            return item.roles.some(r => r.toLowerCase() === role)
+            return item.roles.some(r => r === role)
           })
 
           if (filteredItems.length === 0) return null
