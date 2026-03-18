@@ -146,6 +146,8 @@ router.post('/send-credentials-all', async (req, res) => {
     console.error('[API_ERROR] POST /api/auth/send-credentials-all:', err.message)
     res.status(500).json({ error: 'Failed to send credentials' })
   }
+})
+
 // Send Credentials to Individual via Telegram
 router.post('/send-credentials-single', async (req, res) => {
   try {

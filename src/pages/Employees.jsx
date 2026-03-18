@@ -129,6 +129,8 @@ export default function Employees() {
       showToast('Failed to send credentials', 'error')
     }
   }
+
+  const handleSendAllCredentials = async () => {
     setSendingBulk(true)
     try {
       const data = await api.sendCredentialsToAll()
