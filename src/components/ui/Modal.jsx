@@ -1,8 +1,10 @@
 import { X } from 'lucide-react'
 import { useScreenSize } from '../../hooks/useScreenSize' // Correct path depending on where it's called
 
-export default function Modal({ title, onClose, children, footer, maxWidth = 500 }) {
+export default function Modal({ isOpen = true, title, onClose, children, footer, maxWidth = 500 }) {
   const { isMobile } = useScreenSize()
+  
+  if (!isOpen) return null;
   
   return (
     <div 
