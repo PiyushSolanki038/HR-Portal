@@ -2,7 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Clock, CalendarOff, CheckSquare,
   MessageSquare, UserPlus, FileCheck, FileText,
-  Users, Wallet, TrendingUp, Shield, Settings,
+  Users, Wallet, TrendingUp, TrendingDown, Shield, Settings,
   LogOut, Briefcase, ShieldAlert, Award
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
