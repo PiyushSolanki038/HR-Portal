@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { readSheet, appendRow } from '../sheets.js'
+import { readSheet, appendRow, updateRowWhere } from '../sheets.js'
 
 const router = Router()
 
@@ -153,11 +153,46 @@ router.post('/mark', async (req, res) => {
       date, time, status, report, now.toISOString()
     ])
 
+    // Sync stats to Employees sheet
+    await syncEmployeeStats(empId)
+
     res.json({ success: true, date, time, status })
   } catch (err) {
     console.error('[ATTENDANCE ERROR]', err)
     res.status(500).json({ error: err.message })
   }
 })
+
+async function syncEmployeeStats(empId) {
+  try {
+    const attendance = await readSheet('Attendance')
+    const employees  = await readSheet('Employees')
+    
+    const emp = employees.find(e => e.id === empId)
+    if (!emp) return
+
+    const records = attendance.filter(r => r.empId === empId)
+    const p = records.filter(r => r.status === 'p').length
+    const l = records.filter(r => r.status === 'l').length
+    
+    // Get all unique working dates from attendance
+    const allDates = Array.from(new Set(attendance.map(r => r.date))).sort()
+    const empWorkingDays = allDates.filter(d => d >= (emp.joining || '1970-01-01')).length
+    
+    // Score = (Attended Days / Expected Days) * 100
+    const score = empWorkingDays > 0 ? Math.min(100, Math.round(((p + l) / empWorkingDays) * 100)) : 100
+    const absent = Math.max(0, empWorkingDays - (p + l))
+
+    await updateRowWhere('Employees', 'id', empId, {
+      present: p,
+      late: l,
+      absent: absent,
+      score: score
+    })
+    console.log(`[SYNC] Updated stats for ${empId}: P=${p}, L=${l}, A=${absent}, Score=${score}`)
+  } catch (err) {
+    console.error(`[SYNC_ERROR] Failed to sync stats for ${empId}:`, err.message)
+  }
+}
 
 export default router
