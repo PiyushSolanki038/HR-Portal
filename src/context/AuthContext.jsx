@@ -18,8 +18,14 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('siswit_user')
   }
 
+  const setMustChangePassword = (val) => {
+    const updatedUser = { ...user, mustChangePassword: val }
+    setUser(updatedUser)
+    localStorage.setItem('siswit_user', JSON.stringify(updatedUser))
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, setMustChangePassword, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   )

@@ -65,6 +65,7 @@ router.post('/login', async (req, res) => {
          leavesQuota: empRecord?.leavesQuota || 12,
          av: empRecord?.av || rawId.substring(0,2),
          color: empRecord?.color || color, 
+         mustChangePassword: empRecord?.mustChangePassword === 'true',
          token: 'direct_auth_token_ready'
       },
       route 
@@ -79,6 +80,60 @@ router.post('/login', async (req, res) => {
 // OTP Verification is now deprecated (Removed as per user request)
 router.post('/verify-otp', (req, res) => {
   res.status(410).json({ error: 'OTP authentication is no longer enabled.' })
+})
+
+// Change password endpoint
+import { updateRowWhere } from '../sheets.js'
+import { sendMessage } from '../telegram.js'
+
+router.post('/change-password', async (req, res) => {
+  try {
+    const { empId, newPassword } = req.body
+    
+    if (!empId || !newPassword) {
+      return res.status(400).json({ error: 'Missing employee ID or new password' })
+    }
+
+    // 1. Update password in Login sheet
+    await updateRowWhere('Login', 'id', empId, { password: newPassword })
+
+    // 2. Update flag in Employees sheet
+    const allEmployees = await readSheet('Employees')
+    const empRecord = allEmployees.find(e => e.id?.toString().trim().toUpperCase() === empId.toString().trim().toUpperCase())
+    
+    await updateRowWhere('Employees', 'id', empId, { 
+      mustChangePassword: 'false',
+      tempPassword: ''
+    })
+
+    // 3. Send Telegram notification if chat ID is available
+    if (empRecord && empRecord.telegramChatId) {
+      const msg = `🔐 <b>Password Updated</b>\n\nYour SISWIT password has been updated successfully. Your new password is saved securely. If you did not make this change, contact HR immediately.`
+      await sendMessage(empRecord.telegramChatId, msg)
+    }
+
+    res.json({ success: true, message: 'Password updated successfully' })
+  } catch (err) {
+    console.error('[API_ERROR] POST /api/auth/change-password:', err.message)
+    res.status(500).json({ error: 'Failed to update password' })
+  }
+})
+
+// Set Temp Password (Admin only)
+router.post('/set-temp-password', async (req, res) => {
+  try {
+    const { empId, tempPassword } = req.body
+    if (!empId || !tempPassword) return res.status(400).json({ error: 'empId and tempPassword required' })
+
+    await updateRowWhere('Employees', 'id', empId, { 
+      mustChangePassword: 'true',
+      tempPassword: tempPassword
+    })
+
+    res.json({ success: true, message: `Temporary password set for ${empId}` })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
 })
 
 export default router
