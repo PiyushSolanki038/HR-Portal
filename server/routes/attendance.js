@@ -216,7 +216,7 @@ router.post('/mark', async (req, res) => {
   }
 })
 
-async function syncEmployeeStats(empId) {
+export async function syncEmployeeStats(empId) {
   try {
     const attendance = await readSheet('Attendance')
     const employees  = await readSheet('Employees')
@@ -229,12 +229,18 @@ async function syncEmployeeStats(empId) {
     const p = records.filter(r => r.status === 'p').length
     const l = records.filter(r => r.status === 'l').length
     
-    const empLeaves = leaves.filter(lv => {
+    // Count total leave days from approved requests
+    let leaveDays = 0
+    leaves.forEach(lv => {
       const isApproved = lv.status?.toLowerCase() === 'approved' || lv.status?.includes('day') || lv.approvedBy;
-      return lv.empId === empId && isApproved;
+      if (lv.empId === empId && isApproved) {
+        // Parse duration like "3 days" or "1 day"
+        const d = parseInt(lv.duration) || 1
+        leaveDays += d
+      }
     })
 
-    const attended = p + l + empLeaves.length
+    const attended = p + l + leaveDays
 
     // Get all unique working dates from attendance
     const allDates = Array.from(new Set(attendance.map(r => r.date))).sort()
@@ -248,9 +254,10 @@ async function syncEmployeeStats(empId) {
       present: p,
       late: l,
       absent: absent,
+      leaves: leaveDays,
       score: score
     })
-    console.log(`[SYNC] Updated stats for ${empId}: P=${p}, L=${l}, A=${absent}, Score=${score}`)
+    console.log(`[SYNC] Updated stats for ${empId}: P=${p}, L=${l}, A=${absent}, Leaves=${leaveDays}, Score=${score}`)
   } catch (err) {
     console.error(`[SYNC_ERROR] Failed to sync stats for ${empId}:`, err.message)
   }

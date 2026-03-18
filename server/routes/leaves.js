@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { readSheet, appendRow, updateRowWhere, findRow } from '../sheets.js'
+import { syncEmployeeStats } from './attendance.js'
 import { sendMessage } from '../telegram.js'
 import { appendAudit } from './audit.js'
 
@@ -66,15 +67,8 @@ router.post('/:id/approve', async (req, res) => {
     // Notify employee via Telegram
     const leave = await findRow('Leaves', 'id', req.params.id)
     if (leave) {
-      // Sync leaves count in Employees sheet
-      const employees = await readSheet('Employees')
-      const empRow = employees.find(e => e.id === leave.empId)
-      if (empRow) {
-        const currentLeaves = parseInt(empRow.leaves) || 0
-        await updateRowWhere('Employees', 'id', leave.empId, {
-          leaves: currentLeaves + 1
-        })
-      }
+      // Sync leaves count in Employees sheet using the unified sync function
+      await syncEmployeeStats(leave.empId)
 
       const emp = await findRow('Employees', 'id', leave.empId)
       if (emp?.telegramChatId) {
@@ -167,15 +161,8 @@ router.post('/log-external', async (req, res) => {
       reason, status: 'approved', approvedBy: loggedBy, approvedAt: now
     })
 
-    // 2. Increment employee leaves count
-    const employees = await readSheet('Employees')
-    const empRow = employees.find(e => e.id === empId)
-    if (empRow) {
-      const currentLeaves = parseInt(empRow.leaves) || 0
-      await updateRowWhere('Employees', 'id', empId, {
-        leaves: currentLeaves + 1
-      })
-    }
+    // 2. Sync employee stats (including new leave duration)
+    await syncEmployeeStats(empId)
 
     await appendAudit('approval', `${empName} external leave logged by ${loggedBy}`, loggedBy)
     res.json({ success: true, id })
