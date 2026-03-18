@@ -79,7 +79,6 @@ router.post('/verify-otp', (req, res) => {
 })
 
 // Change password endpoint
-
 router.post('/change-password', async (req, res) => {
   try {
     const { empId, currentPassword, newPassword } = req.body
