@@ -99,9 +99,9 @@ router.post('/change-password', async (req, res) => {
     const allEmployees = await readSheet('Employees')
     const empRecord = allEmployees.find(e => e.id?.toString().trim().toUpperCase() === empId.toString().trim().toUpperCase())
 
-    // 3. Send Telegram notification if chat ID is available
+    // 3. Send Telegram notification
     if (empRecord && empRecord.telegramChatId) {
-      const msg = `🔐 <b>Password Updated</b>\n\nYour SISWIT password has been updated successfully. Your new password is saved securely. If you did not make this change, contact HR immediately.`
+      const msg = `✅ <b>Password Updated Successfully!</b>\n\nHello ${empRecord.name}!\n\nYour SISWIT portal password has been changed.\n\n👤 Employee ID: ${empId}\n🔑 New Password: ${newPassword}\n🌐 Portal: https://hr-portal-production-4b10.up.railway.app\n\nIf you did not make this change, contact HR immediately!\n\n- SISWIT HR Team`
       await sendMessage(empRecord.telegramChatId, msg)
     }
 
@@ -112,20 +112,39 @@ router.post('/change-password', async (req, res) => {
   }
 })
 
-// Set Temp Password (Admin only)
-router.post('/set-temp-password', async (req, res) => {
+// Send Credentials to All via Telegram
+router.post('/send-credentials-all', async (req, res) => {
   try {
-    const { empId, tempPassword } = req.body
-    if (!empId || !tempPassword) return res.status(400).json({ error: 'empId and tempPassword required' })
+    const loginData = await readSheet('Login')
+    const employees = await readSheet('Employees')
+    
+    let sent = 0
+    let failed = 0
 
-    await updateRowWhere('Login', 'id', empId, { 
-      password: tempPassword,
-      mustChangePassword: 'true'
-    })
+    for (const loginUser of loginData) {
+      if (!loginUser.id || !loginUser.password) continue
 
-    res.json({ success: true, message: `Temporary password set for ${empId}` })
+      const emp = employees.find(e => e.id?.toString().trim().toUpperCase() === loginUser.id.toString().trim().toUpperCase())
+      
+      if (emp && emp.telegramChatId) {
+        const msg = `🔐 <b>SISWIT Portal Login Credentials</b>\n\nHello ${emp.name || loginUser.name}! Your account is ready.\n\n🌐 Portal: https://hr-portal-production-4b10.up.railway.app\n👤 Employee ID: ${loginUser.id}\n🔑 Temporary Password: ${loginUser.password}\n\n⚠️ You will be asked to set a new password when you login.\nPlease change it immediately for security.\n\n- SISWIT HR Team`
+        
+        try {
+          await sendMessage(emp.telegramChatId, msg)
+          sent++
+        } catch (err) {
+          console.error(`Failed to send to ${loginUser.id}:`, err.message)
+          failed++
+        }
+      } else {
+        failed++
+      }
+    }
+
+    res.json({ success: true, sent, failed })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    console.error('[API_ERROR] POST /api/auth/send-credentials-all:', err.message)
+    res.status(500).json({ error: 'Failed to send credentials' })
   }
 })
 

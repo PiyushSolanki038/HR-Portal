@@ -61,10 +61,10 @@ export default function ForcePasswordModal() {
         </div>
 
         <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, marginBottom: 12 }}>
-          Update Your Password
+          🔐 Set Your New Password
         </h2>
         <p style={{ color: 'var(--text-dim)', fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
-          You are using a temporary password. Please set your own secure password to continue to the portal.
+          You are using a temporary password. Set your own password to continue.
         </p>
 
         <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>

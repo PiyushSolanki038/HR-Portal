@@ -29,6 +29,8 @@ export default function Employees() {
   const [resetTarget, setResetTarget] = useState(null)
   const [tempPassword, setTempPassword] = useState('')
   const [resettingPass, setResettingPass] = useState(false)
+  const [showBulkModal, setShowBulkModal] = useState(false)
+  const [sendingBulk, setSendingBulk] = useState(false)
 
   const depts = ['Developer', 'Marketing', 'HR', 'Design', 'Operations', 'Sales', 'Admin', 'Engineering']
 
@@ -119,18 +121,16 @@ export default function Employees() {
     }
   }
 
-  const handleResetPassword = async () => {
-    if (!tempPassword.trim()) return
-    setResettingPass(true)
+  const handleSendAllCredentials = async () => {
+    setSendingBulk(true)
     try {
-      await api.setTempPassword({ empId: resetTarget.id, tempPassword })
-      showToast(`Temporary password set for ${resetTarget.name}`, 'success')
-      setShowResetModal(false)
-      setTempPassword('')
+      const data = await api.sendCredentialsToAll()
+      showToast(`Credentials sent to ${data.sent} employees. (${data.failed} skipped/failed)`, 'success')
+      setShowBulkModal(false)
     } catch {
-      showToast('Failed to reset password', 'error')
+      showToast('Failed to send credentials', 'error')
     } finally {
-      setResettingPass(false)
+      setSendingBulk(false)
     }
   }
 
@@ -159,6 +159,13 @@ export default function Employees() {
                <Plus size={16} color={viewMode === 'grid' ? 'var(--accent)' : 'var(--muted)'} style={{ transform: 'rotate(45deg)' }} />
             </button>
           </div>
+          <button 
+            className="btn btn-secondary" 
+            style={{ flex: '1 1 auto', display: 'flex', alignItems: 'center', gap: 8 }}
+            onClick={() => setShowBulkModal(true)}
+          >
+            <MessageSquare size={16} /> 📨 Send Login Credentials
+          </button>
           <button className="btn btn-secondary" style={{ flex: '1 1 auto' }} onClick={() => { setMsgTarget('broadcast'); setShowMsgModal(true); }}>
             <Radio size={16} /> Broadcast
           </button>
@@ -491,6 +498,37 @@ export default function Employees() {
                 style={{ background: 'var(--amber)', color: '#000' }}
               >
                 {resettingPass ? 'SETTING...' : 'SET PASSWORD'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Bulk Send Credentials Confirmation */}
+      {showBulkModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setShowBulkModal(false)}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ padding: 8, background: 'var(--bg-elevated)', borderRadius: 10, color: 'var(--accent)' }}>
+                  <MessageSquare size={20} />
+                </div>
+                <h2 style={{ fontFamily: 'Syne, sans-serif', margin: 0, fontSize: '20px', fontWeight: 800 }}>Bulk Send Credentials</h2>
+              </div>
+              <button onClick={() => setShowBulkModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            <p style={{ fontSize: 13, color: 'var(--text-dim)', margin: 0, lineHeight: 1.6 }}>
+              Send login credentials to all <b>{employees.length}</b> employees via Telegram? This will notify everyone with their Employee ID and Temporary Password.
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+              <button className="btn btn-ghost" onClick={() => setShowBulkModal(false)}>Cancel</button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSendAllCredentials} 
+                disabled={sendingBulk}
+              >
+                {sendingBulk ? 'SENDING...' : 'CONFIRM & SEND'}
               </button>
             </div>
           </div>
