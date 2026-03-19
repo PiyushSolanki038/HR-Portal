@@ -246,11 +246,11 @@ export default function Mentors() {
 
       {/* Add Mentor Modal */}
       {showAddModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowAddModal(false)}>
-          <div style={styles.modalContent} onClick={e => e.stopPropagation()} className="modal-content">
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ fontFamily: theme.fontHeading, margin: 0, fontSize: '24px', fontWeight: 800 }}>Enlist Mentor</h2>
-             </div>
+        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="modal-drawer" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+            <div className="modal-header">
+               <h2 style={{ fontFamily: theme.fontHeading, margin: 0, fontSize: '24px', fontWeight: 800 }}>Enlist Mentor</h2>
+            </div>
              
              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div>
@@ -290,9 +290,11 @@ export default function Mentors() {
       )}
       {/* Assign Mentee Modal */}
       {showAssignModal && selectedMentor && (
-        <div style={styles.modalOverlay} onClick={() => setShowAssignModal(false)}>
-          <div style={{ ...styles.modalContent, maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontFamily: theme.fontHeading, margin: 0, fontSize: '20px', fontWeight: 800 }}>Assign to {selectedMentor.name}</h2>
+        <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
+          <div className="modal-drawer" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h2 style={{ fontFamily: theme.fontHeading, margin: 0, fontSize: '20px', fontWeight: 800 }}>Assign to {selectedMentor.name}</h2>
+            </div>
             <p style={{ color: theme.muted, fontSize: '13px' }}>Select an unassigned employee to assign as a mentee.</p>
             
             <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px' }}>

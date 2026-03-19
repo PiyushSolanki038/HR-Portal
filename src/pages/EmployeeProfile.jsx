@@ -127,15 +127,17 @@ function Heatmap({ data = {} }) {
     colEls.push(<div key={col} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>{rowEls}</div>)
   }
   return (
-    <div>
-      <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 8, fontWeight: 600, letterSpacing: .5, textTransform: 'uppercase' }}>March 2026 — Attendance Pattern</div>
-      <div style={{ display: 'flex', gap: 6 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 2 }}>
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
-            <div key={d} style={{ fontSize: 9, color: 'var(--muted)', height: 13, lineHeight: '13px' }}>{d}</div>
-          ))}
+    <div style={{ width: '100%' }}>
+      <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 12, fontWeight: 600, letterSpacing: .5, textTransform: 'uppercase' }}>March 2026 — Attendance Pattern</div>
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 8, width: '100%' }}>
+        <div style={{ display: 'inline-flex', gap: 6, minWidth: 'max-content' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 2 }}>
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+              <div key={d} style={{ fontSize: 9, color: 'var(--muted)', height: 13, lineHeight: '13px' }}>{d}</div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 2 }}>{colEls}</div>
         </div>
-        <div style={{ display: 'flex', gap: 2 }}>{colEls}</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, fontSize: 11.5, color: 'var(--text-dim)', flexWrap: 'wrap' }}>
         <span>Legend:</span>
@@ -194,7 +196,7 @@ export default function EmployeeProfile() {
   const { showToast } = useToast()
   const { employees, mentors, leaves, attendanceSummary, loading: dataLoading, refresh } = useData()
   const { user } = useAuth()
-  
+
   const isHR = user?.role?.toLowerCase() === 'hr manager' || user?.role?.toLowerCase() === 'admin'
 
   const [activeId, setActiveId] = useState(id || '')
@@ -202,7 +204,7 @@ export default function EmployeeProfile() {
   const [history, setHistory] = useState([])
   const [heatmap, setHeatmap] = useState({})
   const [loading, setLoading] = useState(false)
-  
+
   const [taskFilter, setTaskFilter] = useState('all')
   const [attTab, setAttTab] = useState('heatmap')
   const [quickAdd, setQuickAdd] = useState('')
@@ -252,7 +254,7 @@ export default function EmployeeProfile() {
         if (!active) return
         setTasks(tks || [])
         setHistory(att || [])
-        
+
         // Generate a simple heatmap from history
         const hm = {}
         att.forEach(a => {
@@ -274,7 +276,7 @@ export default function EmployeeProfile() {
     name: 'Loading...', role: 'Please wait', dept: '...', status: 'active', color: '#ccc', av: '??', score: 0,
     present: 0, late: 0, absent: 0, streak: 0, leaves: 0, joining: '...', tg: '...', wa: '...', email: '...', salary: 0, id: '...'
   }
-  
+
   const empTasks = tasks
   const mentorEmp = mentors.find(m => m.id === emp.mentorId)
   const teamLeaderEmp = employees.find(e => e.id === emp.teamLeaderId)
@@ -375,7 +377,7 @@ export default function EmployeeProfile() {
 
   async function sendMessage() {
     if (!msgText.trim()) { showToast('Message cannot be empty', 'warning'); return }
-    
+
     if (msgChannel === 'wa') {
       const phone = emp.wa || ''
       if (!phone) {
@@ -493,17 +495,17 @@ export default function EmployeeProfile() {
 
         {/* ── HERO ── */}
         <div style={{ ...card, marginBottom: 24, border: 'none', background: 'transparent' }}>
-          <div style={{ 
-            background: 'var(--bg-card)', borderRadius: 'var(--r-xl)', border: 'var(--border)', 
-            overflow: 'hidden', position: 'relative', boxShadow: 'var(--shadow-md)' 
+          <div style={{
+            background: 'var(--bg-card)', borderRadius: 'var(--r-xl)', border: 'var(--border)',
+            overflow: 'hidden', position: 'relative', boxShadow: 'var(--shadow-md)'
           }}>
             {/* Banner */}
             {/* Banner */}
             <div style={{ height: isMobile ? 100 : 160, background: 'var(--bg-elevated)', position: 'relative', overflow: 'hidden' }}>
-              <img 
-                src="/profile_banner_abstract.png" 
-                alt="Banner" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9, filter: 'brightness(0.95)' }} 
+              <img
+                src="/profile_banner_abstract.png"
+                alt="Banner"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.9, filter: 'brightness(0.95)' }}
                 onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.style.background = 'linear-gradient(135deg, var(--accent) 0%, #fcd34d 100%)'; }}
               />
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.1), var(--bg-card))' }} />
@@ -513,8 +515,8 @@ export default function EmployeeProfile() {
             <div style={{ padding: isMobile ? '0 16px 24px' : '0 32px 32px', marginTop: isMobile ? -40 : -50, position: 'relative', zIndex: 1 }}>
               <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'center' : 'flex-end', justifyContent: 'space-between', gap: 24 }}>
                 <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'center' : 'flex-end', gap: isMobile ? 12 : 24, flex: 1, textAlign: isMobile ? 'center' : 'left' }}>
-                  <div style={{ 
-                    width: isMobile ? 80 : 100, height: isMobile ? 80 : 100, borderRadius: 'var(--r-xl)', 
+                  <div style={{
+                    width: isMobile ? 80 : 100, height: isMobile ? 80 : 100, borderRadius: 'var(--r-xl)',
                     background: `linear-gradient(135deg, ${emp.color}, var(--accent))`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 40, fontWeight: 800, color: '#fff', fontFamily: 'var(--font-heading)',
@@ -524,8 +526,8 @@ export default function EmployeeProfile() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, flexWrap: 'wrap' }}>
                       <h1 style={{ fontFamily: 'Syne,sans-serif', fontSize: isMobile ? 20 : 28, fontWeight: 800, letterSpacing: -1, overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%', whiteSpace: 'nowrap' }}>{emp.name}</h1>
-                      <span style={{ 
-                        padding: '4px 10px', borderRadius: 100, fontSize: 10, fontWeight: 700, 
+                      <span style={{
+                        padding: '4px 10px', borderRadius: 100, fontSize: 10, fontWeight: 700,
                         background: statusBadge.bg === '#edfaf3' ? 'var(--green-dim)' : statusBadge.bg === '#ecfeff' ? 'var(--blue-dim)' : 'var(--red-dim)',
                         color: statusBadge.color, border: `1px solid ${statusBadge.color}33`,
                         marginLeft: isMobile ? 'auto' : 0, marginRight: isMobile ? 'auto' : 0
@@ -566,9 +568,9 @@ export default function EmployeeProfile() {
                 </div>
               </div>
 
-              <div style={{ 
-                display: 'grid', gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(120px, 1fr))', 
-                gap: isMobile ? 10 : 16, marginTop: 32
+              <div style={{
+                display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(120px, 1fr))',
+                gap: isMobile ? 12 : 16, marginTop: 32
               }}>
                 {[
                   { val: stats.present, label: 'Present', color: 'var(--green)', icon: 'CheckCircle2' },
@@ -578,8 +580,8 @@ export default function EmployeeProfile() {
                   { val: takenCount, label: 'Leaves', color: 'var(--purple)', icon: 'Calendar' },
                   { val: parseInt(emp.score) || stats.score || 0, label: 'Score', color: scoreColor(parseInt(emp.score) || stats.score || 0), icon: 'Target' },
                 ].map((s) => (
-                  <div key={s.label} style={{ 
-                    background: 'var(--bg-elevated)', padding: isMobile ? '12px 8px' : '20px 16px', borderRadius: '20px', 
+                  <div key={s.label} style={{
+                    background: 'var(--bg-elevated)', padding: isMobile ? '12px 8px' : '20px 16px', borderRadius: '20px',
                     textAlign: 'center', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)',
                     transition: 'transform 0.2s', cursor: 'default'
                   }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
@@ -601,15 +603,21 @@ export default function EmployeeProfile() {
             {/* TASK MANAGER */}
             <div style={card}>
               <div style={cardHdr}>
-                <div>
-                  <div style={cardTitle}>Task Manager</div>
-                </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={cardTitle}>Task Manager</div>
+                  </div>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                   <button onClick={() => setShowTaskModal(true)} style={{ ...primaryBtn, padding: '6px 14px', fontSize: 11 }}>+ New</button>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '12px 20px', borderBottom: 'var(--border)', background: 'var(--bg-elevated)', opacity: .9 }}>
+              <div className="no-scrollbar" style={{ 
+                display: 'flex', gap: 6, overflowX: 'auto', 
+                padding: isMobile ? '12px 10px' : '12px 20px', 
+                borderBottom: 'var(--border)', background: 'var(--bg-elevated)', 
+                opacity: .9, WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none'
+              }}>
                 {[
                   { key: 'all', label: 'All', color: 'var(--blue)', count: counts.all },
                   { key: 'over', label: 'Overdue', color: 'var(--red)', count: counts.over },
@@ -644,13 +652,13 @@ export default function EmployeeProfile() {
                   return (
                     <div key={task.id}
                       style={{
-                        display: 'flex', alignItems: 'flex-start', gap: 14, padding: '16px 12px',
+                        display: 'flex', alignItems: 'flex-start', gap: 12, padding: isMobile ? '16px 8px' : '16px 12px',
                         borderBottom: 'var(--border)', position: 'relative', borderRadius: 'var(--r-md)',
                         margin: '4px 0', transition: 'background .15s'
                       }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      
+
                       <div onClick={() => toggleTaskStatus(task.id)}
                         style={{
                           width: 22, height: 22, borderRadius: 6, flexShrink: 0, marginTop: 2,
@@ -668,7 +676,7 @@ export default function EmployeeProfile() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 10px', borderRadius: 20, ...dlStyle(dl.cls), border: '1px solid transparent' }}>{dl.text}</span>
                           <span style={{ fontSize: 10.5, fontWeight: 600, padding: '2px 8px', borderRadius: 20, ...tagStyle(task.tag) }}>{task.tag}</span>
-                           <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20, ...priStyle(task.priority) }}>{(task.priority || 'med').toUpperCase()}</span>
+                          <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20, ...priStyle(task.priority) }}>{(task.priority || 'med').toUpperCase()}</span>
                         </div>
                       </div>
                     </div>
@@ -714,8 +722,8 @@ export default function EmployeeProfile() {
                 {attTab === 'log' && (
                   <div style={{ maxHeight: 300, overflowY: 'auto', paddingRight: 4 }}>
                     {history.map((a, i) => (
-                      <div key={i} style={{ 
-                        display: 'flex', alignItems: 'center', gap: 12, padding: '12px 10px', 
+                      <div key={i} style={{
+                        display: 'flex', alignItems: 'center', gap: 12, padding: '12px 10px',
                         borderBottom: i < history.length - 1 ? 'var(--line) dashed 1px' : 'none',
                         background: i % 2 === 0 ? 'var(--bg-elevated)' : 'transparent', borderRadius: 'var(--r-sm)',
                         marginBottom: 4
@@ -778,7 +786,7 @@ export default function EmployeeProfile() {
 
           {/* RIGHT COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            
+
             {/* PERFORMANCE SCORE */}
             <div style={card}>
               <div style={cardHdr}>
@@ -828,7 +836,7 @@ export default function EmployeeProfile() {
                     <div style={{
                       width: 54, height: 54, borderRadius: 'var(--r-md)', background: `linear-gradient(135deg, ${mentorEmp.color || 'var(--accent)'}, var(--accent))`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 800, color: '#fff', border: 'var(--border)'
-                    }}>{mentorEmp.name?.substring(0,1)?.toUpperCase() || 'M'}</div>
+                    }}>{mentorEmp.name?.substring(0, 1)?.toUpperCase() || 'M'}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 15, fontWeight: 700 }}>{mentorEmp.name}</div>
                       <div style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>{mentorEmp.expertise}</div>
@@ -850,7 +858,7 @@ export default function EmployeeProfile() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       {empNotes.map((note, i) => (
-                        <div key={i} style={{ 
+                        <div key={i} style={{
                           padding: '12px', borderRadius: '12px', background: 'var(--bg-elevated)', border: '1px solid var(--border)',
                           display: 'flex', gap: 12, position: 'relative', overflow: 'hidden'
                         }}>
@@ -860,7 +868,7 @@ export default function EmployeeProfile() {
                       ))}
                     </div>
                     <button onClick={() => setShowNoteModal(true)}
-                       style={{ ...outlineBtn, width: '100%', borderStyle: 'dashed', marginTop: 16, justifyContent: 'center' }}>+ Add Private Note</button>
+                      style={{ ...outlineBtn, width: '100%', borderStyle: 'dashed', marginTop: 16, justifyContent: 'center' }}>+ Add Private Note</button>
                   </div>
                 </div>
               ) : (
@@ -913,7 +921,7 @@ export default function EmployeeProfile() {
                 {(!emp.warnings || emp.warnings.length === 0) ? (
                   <div style={{ textAlign: 'center', padding: '10px 0', color: 'var(--muted)', fontSize: 13 }}>
                     <div style={{ display: 'inline-flex', padding: '8px 16px', borderRadius: '100px', background: 'var(--green-dim)', color: 'var(--green)', border: '1px solid var(--green)', fontWeight: 600, fontSize: '13px', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                      <CheckCircle2 size={16}/> Excellent Record 
+                      <CheckCircle2 size={16} /> Excellent Record
                     </div>
                     <div>No formal warnings issued.</div>
                   </div>
@@ -993,23 +1001,23 @@ export default function EmployeeProfile() {
         footer={<button onClick={() => setShowMentorModal(false)} style={outlineBtn}>Close</button>}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 400, overflowY: 'auto', paddingRight: 4 }}>
           {mentors.map(m => (
-            <div key={m.id} onClick={async () => { 
-                try {
-                  await api.assignMentor(activeId, m.id);
-                  showToast('Mentor Assigned!', 'success');
-                  setShowMentorModal(false);
-                  refresh();
-                } catch (err) {
-                  showToast('Failed to assign mentor', 'error');
-                }
-              }}
+            <div key={m.id} onClick={async () => {
+              try {
+                await api.assignMentor(activeId, m.id);
+                showToast('Mentor Assigned!', 'success');
+                setShowMentorModal(false);
+                refresh();
+              } catch (err) {
+                showToast('Failed to assign mentor', 'error');
+              }
+            }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 'var(--r-md)',
                 border: emp.mentorId === m.id ? '2px solid var(--accent)' : 'var(--border)',
                 background: emp.mentorId === m.id ? 'var(--bg-elevated)' : 'transparent',
                 cursor: 'pointer', transition: 'all .2s'
               }}>
-              <div style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', background: `linear-gradient(135deg, ${m.color || 'var(--accent)'}, var(--accent))`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff' }}>{m.name?.substring(0,1)?.toUpperCase() || 'M'}</div>
+              <div style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', background: `linear-gradient(135deg, ${m.color || 'var(--accent)'}, var(--accent))`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff' }}>{m.name?.substring(0, 1)?.toUpperCase() || 'M'}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{m.name}</div>
                 <div style={{ fontSize: 11, color: 'var(--muted)' }}>{m.expertise || 'General'}</div>
@@ -1024,8 +1032,8 @@ export default function EmployeeProfile() {
         footer={<><button onClick={() => setShowEditModal(false)} style={outlineBtn}>Cancel</button><button onClick={saveProfile} style={primaryBtn}>Apply Changes</button></>}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
           {[
-            ['name', 'Name'], ['role', 'Role'], ['dept', 'Dept'], 
-            ['tg', 'Telegram Handle'], ['telegramChatId', 'Telegram Chat ID'], 
+            ['name', 'Name'], ['role', 'Role'], ['dept', 'Dept'],
+            ['tg', 'Telegram Handle'], ['telegramChatId', 'Telegram Chat ID'],
             ['wa', 'WhatsApp'], ['email', 'Email']
           ].map(([key, label]) => (
             <div key={key}>
@@ -1078,13 +1086,13 @@ export default function EmployeeProfile() {
                 showToast('Failed to assign team leader', 'error');
               }
             }}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 'var(--r-md)',
-              border: emp.teamLeaderId === e.id ? '2px solid var(--accent)' : 'var(--border)',
-              background: emp.teamLeaderId === e.id ? 'var(--bg-elevated)' : 'transparent',
-              cursor: 'pointer', transition: 'all .2s'
-            }}>
-              <div style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', background: e.color || 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff' }}>{e.av || e.name?.substring(0,2)?.toUpperCase() || '??'}</div>
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 'var(--r-md)',
+                border: emp.teamLeaderId === e.id ? '2px solid var(--accent)' : 'var(--border)',
+                background: emp.teamLeaderId === e.id ? 'var(--bg-elevated)' : 'transparent',
+                cursor: 'pointer', transition: 'all .2s'
+              }}>
+              <div style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', background: e.color || 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, color: '#fff' }}>{e.av || e.name?.substring(0, 2)?.toUpperCase() || '??'}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{e.name}</div>
                 <div style={{ fontSize: 11, color: 'var(--muted)' }}>{e.role} • {e.dept}</div>

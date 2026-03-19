@@ -41,8 +41,8 @@ export default function Employees() {
     if (e.role?.toLowerCase() === 'admin' || e.id?.toUpperCase().startsWith('ADM')) return false
 
     const matchSearch = (e.name || '').toLowerCase().includes(search.toLowerCase()) ||
-                        (e.role || '').toLowerCase().includes(search.toLowerCase()) ||
-                        (e.id || '').toLowerCase().includes(search.toLowerCase())
+      (e.role || '').toLowerCase().includes(search.toLowerCase()) ||
+      (e.id || '').toLowerCase().includes(search.toLowerCase())
     const matchDept = deptFilter === 'all' || e.dept === deptFilter
     return matchSearch && matchDept
   })
@@ -56,7 +56,7 @@ export default function Employees() {
     try {
       const colors = ['#4f6ef7', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#f97316']
       const randomColor = colors[Math.floor(Math.random() * colors.length)]
-      
+
       const prefix = newEmp.dept.substring(0, 3).toUpperCase()
       const id = `${prefix}${Date.now().toString().slice(-4)}`
 
@@ -94,9 +94,9 @@ export default function Employees() {
     if (!msgText.trim()) return
     try {
       if (msgTarget === 'broadcast') {
-        await api.sendBroadcast({ 
-          message: msgText, 
-          recipients: 'all', 
+        await api.sendBroadcast({
+          message: msgText,
+          recipients: 'all',
           channels: [msgChannel],
           actor: user?.name || 'HR Manager'
         })
@@ -147,7 +147,7 @@ export default function Employees() {
       setSendingBulk(false)
     }
   }
-  
+
   const handleResetPassword = async () => {
     if (!tempPassword.trim()) return
     setResettingPass(true)
@@ -176,21 +176,21 @@ export default function Employees() {
         </div>
         <div className="page-header-actions" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', width: '100%', justifyContent: 'flex-start' }}>
           <div style={{ background: 'var(--bg-elevated)', padding: 4, borderRadius: 12, display: 'flex', border: '1px solid var(--line)' }}>
-            <button 
+            <button
               onClick={() => setViewMode('list')}
               style={{ padding: '8px 12px', borderRadius: 8, background: viewMode === 'list' ? 'var(--bg-card)' : 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', boxShadow: viewMode === 'list' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none' }}
             >
-               <Users size={16} color={viewMode === 'list' ? 'var(--accent)' : 'var(--muted)'} />
+              <Users size={16} color={viewMode === 'list' ? 'var(--accent)' : 'var(--muted)'} />
             </button>
-            <button 
+            <button
               onClick={() => setViewMode('grid')}
               style={{ padding: '8px 12px', borderRadius: 8, background: viewMode === 'grid' ? 'var(--bg-card)' : 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', boxShadow: viewMode === 'grid' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none' }}
             >
-               <Plus size={16} color={viewMode === 'grid' ? 'var(--accent)' : 'var(--muted)'} style={{ transform: 'rotate(45deg)' }} />
+              <Plus size={16} color={viewMode === 'grid' ? 'var(--accent)' : 'var(--muted)'} style={{ transform: 'rotate(45deg)' }} />
             </button>
           </div>
-          <button 
-            className="btn btn-secondary" 
+          <button
+            className="btn btn-secondary"
             style={{ flex: 'none', display: 'flex', alignItems: 'center', gap: 8 }}
             onClick={() => setShowBulkModal(true)}
           >
@@ -205,11 +205,11 @@ export default function Employees() {
         </div>
       </div>
 
-      <div className="filter-bar" style={{ 
-        background: 'var(--bg-card)', 
-        padding: isMobile ? '12px' : '16px 24px', 
-        borderRadius: 20, 
-        border: '1px solid var(--line)', 
+      <div className="filter-bar" style={{
+        background: 'var(--bg-card)',
+        padding: isMobile ? '12px' : '16px 24px',
+        borderRadius: 20,
+        border: '1px solid var(--line)',
         marginBottom: 32,
         display: 'flex',
         flexDirection: isMobile ? 'column' : 'row',
@@ -217,16 +217,16 @@ export default function Employees() {
       }}>
         <div className="search-bar" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Search size={16} className="search-icon" style={{ minWidth: 16 }} />
-          <input 
-            placeholder="Search by name, role, ID or handle…" 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
-            style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: 16 }} 
+          <input
+            placeholder="Search by name, role, ID or handle…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ border: 'none', background: 'transparent', width: '100%', outline: 'none', fontSize: 16 }}
           />
         </div>
-        <select 
-          value={deptFilter} 
-          onChange={e => setDeptFilter(e.target.value)} 
+        <select
+          value={deptFilter}
+          onChange={e => setDeptFilter(e.target.value)}
           style={{ width: isMobile ? '100%' : 'auto', border: 'none', fontWeight: 700, color: 'var(--text-dim)', background: isMobile ? 'var(--bg-elevated)' : 'transparent', padding: isMobile ? '10px' : '0', borderRadius: isMobile ? '10px' : '0' }}
         >
           <option value="all">All Departments</option>
@@ -235,8 +235,8 @@ export default function Employees() {
       </div>
 
       {viewMode === 'list' ? (
-        <div className="table-container" style={{ borderRadius: 24, overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
-          <table style={{ minWidth: isMobile ? 600 : '100%' }}>
+        <div className="table-container no-scrollbar" style={{ borderRadius: 24, overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', margin: isMobile ? '0 -4px' : 0 }}>
+          <table style={{ minWidth: isMobile ? 650 : '100%' }}>
             <thead>
               <tr>
                 <th>Employee</th>
@@ -262,7 +262,7 @@ export default function Employees() {
                     <td onClick={() => navigate(`/employees/${emp.id}`)}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div className="avatar avatar-sm" style={{ background: emp.color || 'var(--accent)', borderRadius: 10 }}>
-                          {emp.av || emp.name?.substring(0,2).toUpperCase()}
+                          {emp.av || emp.name?.substring(0, 2).toUpperCase()}
                         </div>
                         <div>
                           <div style={{ fontWeight: 700, fontSize: 14 }}>{emp.name}</div>
@@ -289,27 +289,27 @@ export default function Employees() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
-                        <button 
+                        <button
                           onClick={() => { setMsgTarget(emp); setShowMsgModal(true); }}
                           style={{ border: 'none', background: 'var(--bg-elevated)', color: 'var(--accent)', padding: 7, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
                         >
                           <MessageSquare size={14} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleSendSingleCredentials(emp.id, emp.name)}
                           style={{ border: 'none', background: 'var(--bg-elevated)', color: 'var(--blue)', padding: 7, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
                           title="Send Credentials"
                         >
                           <Mail size={14} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => { setResetTarget(emp); setShowResetModal(true); }}
                           style={{ border: 'none', background: 'var(--bg-elevated)', color: 'var(--amber)', padding: 7, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
                           title="Reset Password"
                         >
                           <KeyRound size={14} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDeleteEmployee(emp.id)}
                           style={{ border: 'none', background: 'var(--bg-elevated)', color: 'var(--red)', padding: 7, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
                         >
@@ -333,59 +333,59 @@ export default function Employees() {
         </div>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
             {filtered.map(emp => {
               const stats = attendanceSummary[emp.id] || { present: 0, late: 0, score: 0 }
               return (
                 <div key={emp.id} className="card hover-scale" style={{ padding: 24, borderRadius: 24, background: 'var(--bg-card)', border: '1px solid var(--line)', position: 'relative' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
                     <div className="avatar avatar-lg" style={{ background: emp.color || 'var(--accent)', borderRadius: 16 }}>
-                        {emp.av || emp.name?.substring(0,2).toUpperCase()}
+                      {emp.av || emp.name?.substring(0, 2).toUpperCase()}
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                        <PerformanceRing score={parseInt(stats.score) || 0} size={44} strokeWidth={4} />
-                        <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--muted)', marginTop: 4, textTransform: 'uppercase' }}>Reliability</div>
+                      <PerformanceRing score={parseInt(stats.score) || 0} size={44} strokeWidth={4} />
+                      <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--muted)', marginTop: 4, textTransform: 'uppercase' }}>Reliability</div>
                     </div>
                   </div>
-                  
+
                   <h3 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 4px 0' }}>{emp.name}</h3>
                   <p style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 700, margin: 0 }}>{emp.role}</p>
                   <p style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{emp.dept} • {emp.id}</p>
 
                   <div style={{ marginTop: 20, padding: '12px 16px', background: 'var(--bg-elevated)', borderRadius: 16, display: 'flex', justifyContent: 'space-around' }}>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--green)' }}>{stats.present || 0}</div>
-                        <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Present</div>
-                      </div>
-                      <div style={{ width: 1, height: 20, background: 'var(--line)', alignSelf: 'center' }} />
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--amber)' }}>{stats.late || 0}</div>
-                        <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Late</div>
-                      </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--green)' }}>{stats.present || 0}</div>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Present</div>
+                    </div>
+                    <div style={{ width: 1, height: 20, background: 'var(--line)', alignSelf: 'center' }} />
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--amber)' }}>{stats.late || 0}</div>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Late</div>
+                    </div>
                   </div>
 
                   <div style={{ marginTop: 24, display: 'flex', gap: 10 }}>
-                    <button 
+                    <button
                       onClick={() => navigate(`/employees/${emp.id}`)}
                       className="btn btn-secondary btn-sm" style={{ flex: 1, borderRadius: 10, fontWeight: 800 }}
                     >
                       PROFILE
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleSendSingleCredentials(emp.id, emp.name)}
                       className="btn btn-ghost btn-sm" style={{ borderRadius: 10, padding: 8, color: 'var(--blue)' }}
                       title="Send Credentials"
                     >
                       <Mail size={16} />
                     </button>
-                    <button 
+                    <button
                       onClick={() => { setResetTarget(emp); setShowResetModal(true); }}
                       className="btn btn-ghost btn-sm" style={{ borderRadius: 10, padding: 8, color: 'var(--amber)' }}
                       title="Reset Password"
                     >
                       <KeyRound size={16} />
                     </button>
-                    <button 
+                    <button
                       onClick={() => { setMsgTarget(emp); setShowMsgModal(true); }}
                       className="btn btn-primary btn-sm" style={{ flex: 1, borderRadius: 10, fontWeight: 800 }}
                     >
@@ -406,21 +406,21 @@ export default function Employees() {
       )}
       {/* Add Employee Modal */}
       {showAddModal && (
-        <div style={{ 
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          background: 'rgba(0,0,0,0.4)', display: 'flex', 
-          alignItems: isMobile ? 'flex-end' : 'center', 
-          justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' 
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.4)', display: 'flex',
+          alignItems: isMobile ? 'flex-end' : 'center',
+          justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)'
         }} onClick={() => setShowAddModal(false)}>
-          <div style={{ 
-            background: 'var(--bg-card)', border: '1px solid var(--border)', 
-            borderRadius: isMobile ? '24px 24px 0 0' : '24px', 
-            padding: isMobile ? '24px' : '32px', 
-            width: isMobile ? '100%' : '95%', 
-            maxWidth: isMobile ? '100%' : '520px', 
+          <div style={{
+            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            borderRadius: isMobile ? '24px 24px 0 0' : '24px',
+            padding: isMobile ? '24px' : '32px',
+            width: isMobile ? '100%' : '95%',
+            maxWidth: isMobile ? '100%' : '520px',
             maxHeight: isMobile ? '90vh' : 'auto',
             overflowY: 'auto',
-            display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' 
+            display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)'
           }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 style={{ fontFamily: 'Syne, sans-serif', margin: 0, fontSize: isMobile ? '20px' : '24px', fontWeight: 800 }}>Enlist Team Member</h2>
@@ -430,20 +430,20 @@ export default function Employees() {
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
               <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Full Name</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
-                  value={newEmp.name} onChange={e => setNewEmp({...newEmp, name: e.target.value})} placeholder="E.g. John Doe" />
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }}
+                  value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} placeholder="E.g. John Doe" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Role</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
-                  value={newEmp.role} onChange={e => setNewEmp({...newEmp, role: e.target.value})} placeholder="E.g. Senior Developer" />
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }}
+                  value={newEmp.role} onChange={e => setNewEmp({ ...newEmp, role: e.target.value })} placeholder="E.g. Senior Developer" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Department</label>
-                <select style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
-                  value={newEmp.dept} onChange={e => setNewEmp({...newEmp, dept: e.target.value})}>
+                <select style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }}
+                  value={newEmp.dept} onChange={e => setNewEmp({ ...newEmp, dept: e.target.value })}>
                   <option value="">Select Dept</option>
                   {depts.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
@@ -451,38 +451,38 @@ export default function Employees() {
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Email</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
-                  value={newEmp.email} onChange={e => setNewEmp({...newEmp, email: e.target.value})} placeholder="john@company.com" />
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }}
+                  value={newEmp.email} onChange={e => setNewEmp({ ...newEmp, email: e.target.value })} placeholder="john@company.com" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>WhatsApp</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
-                  value={newEmp.wa} onChange={e => setNewEmp({...newEmp, wa: e.target.value})} placeholder="+91..." />
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }}
+                  value={newEmp.wa} onChange={e => setNewEmp({ ...newEmp, wa: e.target.value })} placeholder="+91..." />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Telegram Handle</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
-                  value={newEmp.tg} onChange={e => setNewEmp({...newEmp, tg: e.target.value})} placeholder="@username" />
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }}
+                  value={newEmp.tg} onChange={e => setNewEmp({ ...newEmp, tg: e.target.value })} placeholder="@username" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Telegram Chat ID</label>
-                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
-                  value={newEmp.telegramChatId} onChange={e => setNewEmp({...newEmp, telegramChatId: e.target.value})} placeholder="e.g. 123456789" />
+                <input style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }}
+                  value={newEmp.telegramChatId} onChange={e => setNewEmp({ ...newEmp, telegramChatId: e.target.value })} placeholder="e.g. 123456789" />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Joining Date</label>
-                <input type="date" style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
-                  value={newEmp.joining} onChange={e => setNewEmp({...newEmp, joining: e.target.value})} />
+                <input type="date" style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }}
+                  value={newEmp.joining} onChange={e => setNewEmp({ ...newEmp, joining: e.target.value })} />
               </div>
 
               <div style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Salary (CTC Yearly)</label>
-                <input type="number" style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }} 
-                  value={newEmp.salary} onChange={e => setNewEmp({...newEmp, salary: e.target.value})} placeholder="E.g. 1200000" />
+                <input type="number" style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', fontSize: 16 }}
+                  value={newEmp.salary} onChange={e => setNewEmp({ ...newEmp, salary: e.target.value })} placeholder="E.g. 1200000" />
               </div>
             </div>
 
@@ -495,21 +495,9 @@ export default function Employees() {
       )}
       {/* Quick Message Modal */}
       {showMsgModal && (
-        <div style={{ 
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          background: 'rgba(0,0,0,0.4)', display: 'flex', 
-          alignItems: isMobile ? 'flex-end' : 'center', 
-          justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' 
-        }} onClick={() => setShowMsgModal(false)}>
-          <div style={{ 
-            background: 'var(--bg-card)', border: '1px solid var(--border)', 
-            borderRadius: isMobile ? '24px 24px 0 0' : '24px', 
-            padding: isMobile ? '24px' : '32px', 
-            width: isMobile ? '100%' : '95%', 
-            maxWidth: isMobile ? '100%' : '480px', 
-            display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' 
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="modal-overlay" onClick={() => setShowMsgModal(false)}>
+          <div className="modal-drawer" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
               <h2 style={{ fontFamily: 'Syne, sans-serif', margin: 0, fontSize: isMobile ? '20px' : '24px', fontWeight: 800 }}>
                 {msgTarget === 'broadcast' ? 'Broadcast Message' : isMobile ? `Msg: ${msgTarget?.name?.split(' ')[0]}` : `Message to ${msgTarget?.name}`}
               </h2>
@@ -518,10 +506,10 @@ export default function Employees() {
 
             <div style={{ display: 'flex', gap: 8 }}>
               {['telegram', 'wa', 'portal'].map(ch => (
-                <button 
-                  key={ch} 
+                <button
+                  key={ch}
                   onClick={() => setMsgChannel(ch)}
-                  style={{ 
+                  style={{
                     flex: 1, padding: 10, borderRadius: 12, border: msgChannel === ch ? '2px solid var(--accent)' : '1px solid var(--border)',
                     background: msgChannel === ch ? 'var(--accent-glow)' : 'var(--bg-elevated)',
                     color: msgChannel === ch ? 'var(--text)' : 'var(--muted)',
@@ -533,8 +521,8 @@ export default function Employees() {
               ))}
             </div>
 
-            <textarea 
-              rows={5} 
+            <textarea
+              rows={5}
               style={{ width: '100%', padding: '14px', borderRadius: '16px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none', resize: 'none', fontSize: 16 }}
               placeholder="Type your message here..."
               value={msgText}
@@ -552,9 +540,9 @@ export default function Employees() {
       )}
       {/* Reset Password Modal */}
       {showResetModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setShowResetModal(false)}>
-          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="modal-overlay" onClick={() => setShowResetModal(false)}>
+          <div className="modal-drawer" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ padding: 8, background: 'var(--bg-elevated)', borderRadius: 10, color: 'var(--amber)' }}>
                   <KeyRound size={20} />
@@ -570,18 +558,18 @@ export default function Employees() {
 
             <div>
               <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '6px', display: 'block', textTransform: 'uppercase' }}>Temporary Password</label>
-              <input 
+              <input
                 autoFocus
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }} 
-                value={tempPassword} onChange={e => setTempPassword(e.target.value)} placeholder="e.g. WelcomeSISWIT123" 
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text)', outline: 'none' }}
+                value={tempPassword} onChange={e => setTempPassword(e.target.value)} placeholder="e.g. WelcomeSISWIT123"
               />
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
               <button className="btn btn-ghost" onClick={() => setShowResetModal(false)}>Cancel</button>
-              <button 
-                className="btn btn-primary" 
-                onClick={handleResetPassword} 
+              <button
+                className="btn btn-primary"
+                onClick={handleResetPassword}
                 disabled={resettingPass || !tempPassword.trim()}
                 style={{ background: 'var(--amber)', color: '#000' }}
               >
@@ -593,9 +581,9 @@ export default function Employees() {
       )}
       {/* Bulk Send Credentials Confirmation */}
       {showBulkModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }} onClick={() => setShowBulkModal(false)}>
-          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--shadow-xl)' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="modal-overlay" onClick={() => setShowBulkModal(false)}>
+          <div className="modal-drawer" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ padding: 8, background: 'var(--bg-elevated)', borderRadius: 10, color: 'var(--accent)' }}>
                   <MessageSquare size={20} />
@@ -611,9 +599,9 @@ export default function Employees() {
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
               <button className="btn btn-ghost" onClick={() => setShowBulkModal(false)}>Cancel</button>
-              <button 
-                className="btn btn-primary" 
-                onClick={handleSendAllCredentials} 
+              <button
+                className="btn btn-primary"
+                onClick={handleSendAllCredentials}
                 disabled={sendingBulk}
               >
                 {sendingBulk ? 'SENDING...' : 'CONFIRM & SEND'}

@@ -5,14 +5,14 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import * as api from '../services/api'
-import { 
-  CheckSquare, 
-  Search, 
-  Filter, 
-  Plus, 
-  MessageSquare, 
-  Bell, 
-  Trash2, 
+import {
+  CheckSquare,
+  Search,
+  Filter,
+  Plus,
+  MessageSquare,
+  Bell,
+  Trash2,
   ChevronRight,
   User,
   Calendar,
@@ -28,7 +28,7 @@ export default function TaskManager() {
   const { tasks, employees, loading, error, refresh } = useData()
   const { user } = useAuth()
   const { showToast } = useToast()
-  
+
   const [search, setSearch] = useState('')
   const [deptFilter, setDeptFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -40,13 +40,13 @@ export default function TaskManager() {
     return tasks.filter(t => {
       const emp = employees.find(e => e.id === t.assignedTo) || {}
       const matchSearch = (t.title || '').toLowerCase().includes(search.toLowerCase()) ||
-                          (emp.name || '').toLowerCase().includes(search.toLowerCase())
+        (emp.name || '').toLowerCase().includes(search.toLowerCase())
       const matchDept = deptFilter === 'all' || emp.dept === deptFilter
       const isDone = t.done === 'true' || t.done === true
-      const matchStatus = statusFilter === 'all' || 
-                         (statusFilter === 'done' && isDone) ||
-                         (statusFilter === 'pending' && !isDone)
-      
+      const matchStatus = statusFilter === 'all' ||
+        (statusFilter === 'done' && isDone) ||
+        (statusFilter === 'pending' && !isDone)
+
       return matchSearch && matchDept && matchStatus
     })
   }, [tasks, employees, search, deptFilter, statusFilter])
@@ -84,15 +84,15 @@ export default function TaskManager() {
           <p className="subtitle">Global oversight of all organizational objectives</p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
-           <div style={{ textAlign: 'right', marginRight: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700 }}>{tasks.filter(t => t.done === 'true').length}/{tasks.length} Completed</div>
-              <div style={{ fontSize: 11, color: 'var(--muted)' }}>Global Tasks Stats</div>
-           </div>
+          <div style={{ textAlign: 'right', marginRight: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 700 }}>{tasks.filter(t => t.done === 'true').length}/{tasks.length} Completed</div>
+            <div style={{ fontSize: 11, color: 'var(--muted)' }}>Global Tasks Stats</div>
+          </div>
         </div>
       </div>
 
-      <div className="filter-bar" style={{ 
-        background: 'var(--bg-card)', padding: isMobile ? '12px 16px' : '16px 24px', 
+      <div className="filter-bar" style={{
+        background: 'var(--bg-card)', padding: isMobile ? '12px 16px' : '16px 24px',
         borderRadius: 24, border: '1px solid var(--line)', marginBottom: 32,
         flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center'
       }}>
@@ -131,7 +131,7 @@ export default function TaskManager() {
               const isDone = task.done === 'true' || task.done === true
               const deadline = new Date(task.deadline)
               const isOverdue = !isDone && deadline < new Date() && task.deadline
-              
+
               return (
                 <tr key={task.id}>
                   <td>
@@ -153,7 +153,7 @@ export default function TaskManager() {
                   </td>
                   <td>
                     <div style={{ fontSize: 13, fontWeight: 600, color: isOverdue ? 'var(--red)' : 'inherit' }}>
-                      {task.deadline ? deadline.toLocaleDateString('en-IN', { day:'2-digit', month:'short' }) : 'No Date'}
+                      {task.deadline ? deadline.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'No Date'}
                     </div>
                     {isOverdue && <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase' }}>Overdue</div>}
                   </td>
@@ -173,24 +173,24 @@ export default function TaskManager() {
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                       <button 
-                        className="btn btn-icon btn-sm" 
+                      <button
+                        className="btn btn-icon btn-sm"
                         title="Toggle Status"
                         onClick={() => handleToggleTask(task.id)}
                         disabled={updating === task.id}
                         style={{ background: isDone ? 'var(--green-dim)' : 'var(--bg-elevated)', color: isDone ? 'var(--green)' : 'var(--muted)' }}
-                       >
-                         {updating === task.id ? <div className="spinner-sm" /> : <CheckCircle2 size={14} />}
-                       </button>
-                       <button 
-                         className="btn btn-icon btn-sm" 
-                         title="Send Reminder"
-                         onClick={() => handleRemind(task.id)}
-                         disabled={isDone}
-                         style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}
-                       >
-                         <Bell size={14} />
-                       </button>
+                      >
+                        {updating === task.id ? <div className="spinner-sm" /> : <CheckCircle2 size={14} />}
+                      </button>
+                      <button
+                        className="btn btn-icon btn-sm"
+                        title="Send Reminder"
+                        onClick={() => handleRemind(task.id)}
+                        disabled={isDone}
+                        style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}
+                      >
+                        <Bell size={14} />
+                      </button>
                     </div>
                   </td>
                 </tr>

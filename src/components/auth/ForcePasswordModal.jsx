@@ -45,29 +45,13 @@ export default function ForcePasswordModal() {
   }
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: 9999
-    }}>
-      <div className="animate-in" style={{
-        background: 'var(--bg-card)', border: '1px solid var(--line)',
-        borderRadius: 28, padding: 40, width: '100%', maxWidth: 440,
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-        textAlign: 'center'
-      }}>
-        <div style={{
-          width: 64, height: 64, background: 'var(--accent-glow)',
-          borderRadius: 20, display: 'flex', alignItems: 'center',
-          justifyContent: 'center', margin: '0 auto 24px', color: 'var(--accent)'
-        }}>
-          <KeyRound size={32} />
+    <div className="modal-overlay">
+      <div className="modal-drawer" style={{ maxWidth: 440, textAlign: 'center' }}>
+        <div className="modal-header">
+           <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, marginBottom: 0 }}>
+             🔐 Set Your New Password
+           </h2>
         </div>
-
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, marginBottom: 12 }}>
-          🔐 Set Your New Password
-        </h2>
         <p style={{ color: 'var(--text-dim)', fontSize: 15, lineHeight: 1.6, marginBottom: 32 }}>
           You are using a temporary password. Set your own password to continue.
         </p>

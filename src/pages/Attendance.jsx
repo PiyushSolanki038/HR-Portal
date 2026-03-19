@@ -16,7 +16,7 @@ export default function Attendance() {
   const [tab, setTab] = useState('today')
 
   useEffect(() => {
-    api.getWeeklyGrid().then(setWeeklyGrid).catch(() => {})
+    api.getWeeklyGrid().then(setWeeklyGrid).catch(() => { })
   }, [])
 
   if (loading) return <LoadingSpinner />
@@ -46,11 +46,11 @@ export default function Attendance() {
           <div className="filter-bar" style={{ flexDirection: 'column', alignItems: 'stretch', padding: isMobile ? 12 : 16, marginBottom: 24 }}>
             <div className="search-bar" style={{ maxWidth: '100%', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Search size={16} className="search-icon" style={{ minWidth: 16 }} />
-              <input 
-                placeholder="Search by name or department…" 
-                value={search} 
-                onChange={e => setSearch(e.target.value)} 
-                style={{ width: '100%', fontSize: 16, background: 'transparent', border: 'none', outline: 'none' }} 
+              <input
+                placeholder="Search by name or department…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                style={{ width: '100%', fontSize: 16, background: 'transparent', border: 'none', outline: 'none' }}
               />
             </div>
           </div>
@@ -72,7 +72,7 @@ export default function Attendance() {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div className="avatar avatar-sm" style={{ background: employees.find(e => e.id === rec.empId)?.color || 'var(--accent)' }}>
-                          {(rec.empName || '').split(' ').map(w => w[0]).join('').slice(0,2)}
+                          {(rec.empName || '').split(' ').map(w => w[0]).join('').slice(0, 2)}
                         </div>
                         {rec.empName}
                       </div>
@@ -94,21 +94,21 @@ export default function Attendance() {
         <div className="card" style={{ overflow: 'hidden', padding: isMobile ? 16 : 24 }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>Last 5 Working Days</h3>
           {weeklyGrid.length > 0 && (
-            <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
-              <div className="weekly-grid" style={{ minWidth: 500 }}>
-                <div className="grid-row" style={{ marginBottom: 4 }}>
-                  <div className="grid-name" style={{ color: 'var(--muted)', fontSize: 11, fontWeight: 600 }}>EMPLOYEE</div>
+            <div className="table-container no-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', margin: isMobile ? '0 -4px' : 0 }}>
+              <div className="weekly-grid" style={{ minWidth: isMobile ? 550 : 700 }}>
+                <div className="grid-row" style={{ marginBottom: 8 }}>
+                  <div className="grid-name" style={{ color: 'var(--muted)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Employee</div>
                   {weeklyGrid[0]?.dates?.map((d, i) => (
-                    <div key={i} className="grid-cell" style={{ fontSize: 10, color: 'var(--muted)', background: 'transparent', fontWeight: 600 }}>
-                      {new Date(d).toLocaleDateString('en-IN', { weekday: 'short' })}
+                    <div key={i} className="grid-cell" style={{ fontSize: 10, color: 'var(--muted)', background: 'transparent', fontWeight: 700 }}>
+                      {new Date(d).toLocaleDateString('en-IN', { weekday: 'short' }).toUpperCase()}
                     </div>
                   ))}
                 </div>
                 {weeklyGrid.map((row, i) => (
-                  <div key={i} className="grid-row">
-                    <div className="grid-name">{row.empName}</div>
+                  <div key={i} className="grid-row" style={{ height: 44 }}>
+                    <div className="grid-name" style={{ fontSize: 12, fontWeight: 600 }}>{row.empName}</div>
                     {row.days.map((status, j) => (
-                      <div key={j} className={`grid-cell ${status}`}>
+                      <div key={j} className={`grid-cell ${status}`} style={{ borderRadius: 8, margin: 2 }}>
                         {status === 'p' ? '✓' : status === 'l' ? 'L' : status === 'x' ? '✕' : '—'}
                       </div>
                     ))}

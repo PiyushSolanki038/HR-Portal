@@ -1,5 +1,8 @@
 const BASE = '/api'
 
+// Batch: fetch ALL data in a single HTTP call
+export const getAllData = () => req('/data/all')
+
 async function req(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...options.headers },

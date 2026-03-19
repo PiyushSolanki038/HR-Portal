@@ -49,19 +49,39 @@ app.use('/api/governance', governanceRouter)
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }))
 
 // Test route to verify Sheets connection
-import { readSheet } from './sheets.js'
+import { readSheet, batchReadAllSheets, prewarmCache } from './sheets.js'
+
+// Batch endpoint — returns ALL data in a single HTTP request
+app.get('/api/data/all', async (req, res) => {
+  try {
+    const data = await batchReadAllSheets()
+    res.json(data)
+  } catch (err) {
+    console.error('[API_ERROR] GET /api/data/all:', err.message)
+    res.status(500).json({ error: 'Failed to batch-load data' })
+  }
+})
 app.get('/api/test-sheets', async (req, res) => {
   try {
     console.log('[TEST_SHEETS] Attempting to read Employees sheet...')
     const data = await readSheet('Employees')
+    const envSummary = {
+      SHEET_ID: process.env.GOOGLE_SHEET_ID ? 'Configured' : 'MISSING',
+      AUTH: process.env.GOOGLE_SERVICE_ACCOUNT_JSON ? 'Configured' : 'MISSING',
+    }
     if (data.length > 0) {
-      res.json({ success: true, count: data.length, firstRow: data[0] })
+      res.json({ success: true, count: data.length, firstRow: data[0], env: envSummary })
     } else {
-      res.json({ success: true, count: 0, message: 'Sheet is empty or tab "Employees" not found' })
+      res.json({ success: true, count: 0, message: 'Sheet is empty or tab "Employees" not found', env: envSummary })
     }
   } catch (err) {
     console.error('[TEST_SHEETS_ERROR]:', err.message)
-    res.status(500).json({ error: err.message, stack: err.stack })
+    res.status(500).json({ 
+      error: err.message, 
+      stack: err.stack,
+      hint: "Check GOOGLE_SHEET_ID and GOOGLE_SERVICE_ACCOUNT_JSON in .env",
+      code: err.code
+    })
   }
 })
 
@@ -74,9 +94,11 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'))
 })
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`SISWIT API running on port ${PORT}`)
   
+  // Pre-warm the cache so first requests are instant
+  prewarmCache()
   // Optional: Spawn Telegram Bot as a child process if requested
   if (process.env.START_BOT === 'true') {
     console.log('[BOT] Starting Telegram Bot process...')

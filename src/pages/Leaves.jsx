@@ -30,8 +30,8 @@ export default function Leaves() {
         </div>
       </div>
 
-      <div className="filter-bar" style={{ 
-        flexDirection: isMobile ? 'column' : 'row', 
+      <div className="filter-bar" style={{
+        flexDirection: isMobile ? 'column' : 'row',
         alignItems: isMobile ? 'stretch' : 'center',
         padding: isMobile ? 12 : 16,
         marginBottom: 24,
@@ -39,16 +39,16 @@ export default function Leaves() {
       }}>
         <div className="search-bar" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Search size={16} className="search-icon" style={{ minWidth: 16 }} />
-          <input 
-            placeholder="Search by employeeâ€¦" 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
-            style={{ width: '100%', fontSize: 16, background: 'transparent', border: 'none', outline: 'none' }} 
+          <input
+            placeholder="Search by employeeâ€¦"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ width: '100%', fontSize: 16, background: 'transparent', border: 'none', outline: 'none' }}
           />
         </div>
-        <select 
-          value={filterStatus} 
-          onChange={e => setFilterStatus(e.target.value)} 
+        <select
+          value={filterStatus}
+          onChange={e => setFilterStatus(e.target.value)}
           style={{ width: isMobile ? '100%' : 'auto', fontSize: 16, border: isMobile ? '1px solid var(--line)' : 'none', borderRadius: isMobile ? 10 : 0, padding: isMobile ? 10 : 0, fontWeight: 700 }}
         >
           <option value="all">All Status</option>

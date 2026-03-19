@@ -272,22 +272,10 @@ export default function MyAttendance() {
       </div>
 
       {selectedRecord && (
-        <div style={{ 
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          background: 'rgba(0,0,0,0.4)', display: 'flex', 
-          alignItems: isMobile ? 'flex-end' : 'center', 
-          justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' 
-        }} onClick={() => setSelectedRecord(null)}>
-           <div className="card" onClick={e => e.stopPropagation()} style={{ 
-             maxWidth: isMobile ? '100%' : 500, 
-             width: isMobile ? '100%' : '90%',
-             borderRadius: isMobile ? '24px 24px 0 0' : '24px',
-             padding: isMobile ? '20px' : '32px',
-             maxHeight: isMobile ? '90vh' : 'auto',
-             overflowY: 'auto'
-           }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                 <h3 style={{ fontSize: 18, fontWeight: 700 }}>Attendance Details</h3>
+        <div className="modal-overlay" onClick={() => setSelectedRecord(null)}>
+          <div className="modal-drawer" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+            <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+               <h3 style={{ fontSize: 20, fontWeight: 800 }}>Record Details</h3>
                  <button className="btn-icon btn-sm" onClick={() => setSelectedRecord(null)}>×</button>
               </div>
               

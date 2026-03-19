@@ -36,7 +36,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
       {/* Premium Quick Actions */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: isMobile ? '1fr 1fr' : isTablet ? '1fr 1fr' : 'repeat(4, 1fr)', 
+        gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : 'repeat(4, 1fr)', 
         gap: 16, 
         marginBottom: 32 
       }}>

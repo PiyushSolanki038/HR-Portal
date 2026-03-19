@@ -238,27 +238,18 @@ export default function MyTasks() {
       {selectedTask && (
         <div className="modal-overlay" onClick={() => setSelectedTask(null)}>
            <div 
-             className="modal-content animate-in" 
+             className="modal-drawer" 
              onClick={e => e.stopPropagation()} 
-             style={{ 
-               maxWidth: '500px', 
-               width: '100%', 
-               border: '1px solid var(--line)',
-               boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)'
-             }}
+             style={{ maxWidth: '500px' }}
            >
-              <button 
-                className="btn-icon btn-sm" 
-                onClick={() => setSelectedTask(null)}
-                style={{ position: 'absolute', top: 24, right: 24, borderRadius: 12 }}
-              >
-                ×
-              </button>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                <div className={`badge badge-${getPriorityBadgeColor(selectedTask.priority)}`} style={{ padding: '6px 12px', fontSize: 10 }}>
-                   {(selectedTask.priority || 'med').toUpperCase()} PRIORITY
+              <div className="modal-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className={`badge badge-${getPriorityBadgeColor(selectedTask.priority)}`} style={{ padding: '6px 12px', fontSize: 10 }}>
+                     {(selectedTask.priority || 'med').toUpperCase()} PRIORITY
+                  </div>
                 </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: -12, marginBottom: 24 }}>
                 <div style={{ width: 1, height: 16, background: 'var(--line)' }} />
                 <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>TASK ID: #{selectedTask.id?.substring(0,8)}</div>
               </div>

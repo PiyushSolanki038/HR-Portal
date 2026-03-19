@@ -109,8 +109,8 @@ export default function Hiring() {
       )}
 
       {view === 'table' && (
-        <div className="table-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 16 }}>
-          <table style={{ minWidth: 800 }}>
+        <div className="table-container no-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%', borderRadius: 16, margin: isMobile ? '0 -12px' : 0, padding: isMobile ? '0 12px' : 0 }}>
+          <table style={{ minWidth: isMobile ? 800 : '100%' }}>
             <thead>
               <tr>
                 <th>Name</th>
@@ -160,39 +160,39 @@ export default function Hiring() {
         >
           <div className="form-group">
             <label style={{ fontSize: 13, fontWeight: 600 }}>Full Name</label>
-            <input 
-              value={form.name} 
-              onChange={e => setForm({...form, name: e.target.value})} 
-              placeholder="John Doe" 
+            <input
+              value={form.name}
+              onChange={e => setForm({ ...form, name: e.target.value })}
+              placeholder="John Doe"
               style={{ fontSize: 16, width: '100%', padding: '12px', borderRadius: '10px' }}
             />
           </div>
           <div className="form-row" style={{ gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
             <div className="form-group">
               <label style={{ fontSize: 13, fontWeight: 600 }}>Applied For</label>
-              <input 
-                value={form.appliedFor} 
-                onChange={e => setForm({...form, appliedFor: e.target.value})} 
-                placeholder="Frontend Developer" 
+              <input
+                value={form.appliedFor}
+                onChange={e => setForm({ ...form, appliedFor: e.target.value })}
+                placeholder="Frontend Developer"
                 style={{ fontSize: 16, width: '100%', padding: '12px', borderRadius: '10px' }}
               />
             </div>
             <div className="form-group">
               <label style={{ fontSize: 13, fontWeight: 600 }}>Department</label>
-              <input 
-                value={form.dept} 
-                onChange={e => setForm({...form, dept: e.target.value})} 
-                placeholder="Engineering" 
+              <input
+                value={form.dept}
+                onChange={e => setForm({ ...form, dept: e.target.value })}
+                placeholder="Engineering"
                 style={{ fontSize: 16, width: '100%', padding: '12px', borderRadius: '10px' }}
               />
             </div>
           </div>
           <div className="form-group">
             <label style={{ fontSize: 13, fontWeight: 600 }}>Contact</label>
-            <input 
-              value={form.contact} 
-              onChange={e => setForm({...form, contact: e.target.value})} 
-              placeholder="email or phone" 
+            <input
+              value={form.contact}
+              onChange={e => setForm({ ...form, contact: e.target.value })}
+              placeholder="email or phone"
               style={{ fontSize: 16, width: '100%', padding: '12px', borderRadius: '10px' }}
             />
           </div>

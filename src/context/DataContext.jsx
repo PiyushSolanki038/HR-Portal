@@ -32,48 +32,36 @@ export function DataProvider({ children }) {
     try {
       if (isInitialLoad.current) setLoading(true)
 
-      // Use allSettled so one failing endpoint never blocks the others
-      const [empsR, attR, lvsR, mntR, tksR, summR, ntfsR, govR, audR] = await Promise.allSettled([
-        api.getEmployees(),
-        api.getTodayAttendance(),
-        api.getLeaves(),
-        api.getMentors(),
-        api.getTasks(),
-        api.getAttendanceSummary(),
+      // Batch: fetch ALL sheet data in a SINGLE HTTP call
+      const [batchR, ntfsR] = await Promise.allSettled([
+        api.getAllData(),
         uid ? api.getNotifications(uid) : Promise.resolve([]),
-        api.getGovernance(),
-        api.getAuditLog()
       ])
 
-      const pick = (result, fallback, name) => {
-        if (result.status === 'fulfilled') return result.value
-        if (isInitialLoad.current) console.error(`[DATA_LOAD_ERROR] ${name}:`, result.reason)
-        return fallback
-      }
-
-      const emps = pick(empsR, employees, 'Employees')
-      const att  = pick(attR,  attendance, 'Attendance')
-      const lvs  = pick(lvsR,  leaves, 'Leaves')
-      const mnt  = pick(mntR,  mentors, 'Mentors')
-      const tks  = pick(tksR,  tasks, 'Tasks')
-      const summ = pick(summR, attendanceSummary, 'Summary')
-      const ntfs = pick(ntfsR, notifications, 'Notifications')
-      const gov  = pick(govR,  governance, 'Governance')
-      const aud  = pick(audR,  auditLogs, 'AuditLogs')
-
-      if (empsR.status === 'rejected' || attR.status === 'rejected' || lvsR.status === 'rejected') {
+      if (batchR.status === 'fulfilled') {
+        const d = batchR.value
+        setEmployees(d.Employees || employees)
+        setAttendance(d.Attendance || attendance)
+        setLeaves(d.Leaves || leaves)
+        setMentors(d.Mentors || mentors)
+        setTasks(d.Tasks || tasks)
+        setGovernance(d.Governance || governance)
+        setAuditLogs(d.Audit || auditLogs)
+      } else {
+        if (isInitialLoad.current) console.error('[DATA_LOAD_ERROR] Batch:', batchR.reason)
         showToast('Some data failed to load. Check connection.', 'error')
       }
 
-      setEmployees(emps)
-      setAttendance(att)
-      setLeaves(lvs)
-      setMentors(mnt)
-      setTasks(tks)
-      setGovernance(gov)
-      setAuditLogs(aud)
-      setAttendanceSummary(summ)
-      
+      // Attendance summary still needs its own call (computed server-side)
+      try {
+        const summ = await api.getAttendanceSummary()
+        setAttendanceSummary(summ)
+      } catch (summErr) {
+        if (isInitialLoad.current) console.error('[DATA_LOAD_ERROR] Summary:', summErr)
+      }
+
+      const ntfs = ntfsR.status === 'fulfilled' ? ntfsR.value : notifications
+
       // Notification Detection Logic
       if (ntfs && ntfs.length > 0) {
         const unreadNtfs = ntfs.filter(n => n.read === 'false' || n.read === false)
@@ -104,10 +92,10 @@ export function DataProvider({ children }) {
     
     loadAll(user?.id)
     
-    // Notification Polling every 45s
+    // Notification Polling every 60s (matches backend cache TTL)
     const ntfsInterval = setInterval(() => {
       loadAll()
-    }, 15000)
+    }, 60000)
 
     return () => clearInterval(ntfsInterval)
   }, [loadAll])

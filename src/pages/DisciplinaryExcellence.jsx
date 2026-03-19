@@ -393,11 +393,12 @@ export default function DisciplinaryExcellence() {
         </div>
       </div>
 
-      {/* New Record Modal */}
       {showModal && (
-        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }} onClick={() => setShowModal(false)}>
-          <div className="modal-content card animate-in" style={{ width: '100%', maxWidth: 500, padding: 32, borderRadius: 24, background: 'var(--bg-card)' }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 24 }}>Add New Record</h2>
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-drawer" style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+               <h2 style={{ fontSize: 24, fontWeight: 800 }}>Add New Record</h2>
+            </div>
             <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div>
                 <label className="label">Category</label>

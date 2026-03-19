@@ -169,21 +169,9 @@ export default function MyLeaves() {
       </div>
 
       {showApplyModal && (
-        <div style={{ 
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          background: 'rgba(0,0,0,0.4)', display: 'flex', 
-          alignItems: isMobile ? 'flex-end' : 'center', 
-          justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' 
-        }} onClick={() => setShowApplyModal(false)}>
-           <div className="card" onClick={e => e.stopPropagation()} style={{ 
-             maxWidth: isMobile ? '100%' : 500, 
-             width: isMobile ? '100%' : '90%',
-             borderRadius: isMobile ? '24px 24px 0 0' : '24px',
-             padding: isMobile ? '20px' : '32px',
-             maxHeight: isMobile ? '90vh' : 'auto',
-             overflowY: 'auto'
-           }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div className="modal-overlay" onClick={() => setShowApplyModal(false)}>
+           <div className="modal-drawer" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+              <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                  <h2 style={{ fontSize: 20, fontWeight: 700 }}>Apply for Leave</h2>
                  <button className="btn-icon btn-sm" onClick={() => setShowApplyModal(false)}>×</button>
               </div>
