@@ -43,8 +43,9 @@ export default function MyTasks() {
   const getTaskStatusInfo = (task) => {
     if (isDone(task)) return { label: 'Done', color: 'var(--green)', icon: CheckCircle2 }
     
-    const deadline = new Date(task.deadline)
-    if (isNaN(deadline.getTime())) return { label: 'No deadline', color: 'var(--muted)', icon: Calendar }
+    if (!task.deadline) return { label: 'No deadline', color: 'var(--muted)', icon: Calendar }
+    const [y, m, d] = task.deadline.split('-').map(Number)
+    const deadline = new Date(y, m - 1, d)
     
     const today = new Date()
     today.setHours(0, 0, 0, 0)

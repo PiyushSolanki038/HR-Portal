@@ -11,17 +11,22 @@ import { ArrowLeft, Edit, Edit2, Download, Loader2, Users, MessageSquare, CheckC
 // ── HELPERS ───────────────────────────────────────────────
 function taskStatus(task) {
   if (task.done === 'true' || task.done === true) return 'done'
-  const dl = new Date(task.deadline)
+  if (!task.deadline) return 'ok'
+  const [y, m, d] = task.deadline.split('-').map(Number)
+  const dl = new Date(y, m - 1, d)
   const today = new Date(); today.setHours(0, 0, 0, 0)
   const diff = Math.ceil((dl - today) / 86400000)
   if (diff < 0) return 'over'
+  if (diff === 0) return 'soon' // Today
   if (diff <= 2) return 'soon'
   return 'ok'
 }
 
 function deadlineLabel(task) {
   if (task.done === 'true' || task.done === true) return { text: '✅ Done', cls: 'done' }
-  const dl = new Date(task.deadline)
+  if (!task.deadline) return { text: 'No Date', cls: 'ok' }
+  const [y, m, d] = task.deadline.split('-').map(Number)
+  const dl = new Date(y, m - 1, d)
   const today = new Date(); today.setHours(0, 0, 0, 0)
   const diff = Math.ceil((dl - today) / 86400000)
   const fmt = dl.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })

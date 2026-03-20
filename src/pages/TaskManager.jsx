@@ -177,8 +177,17 @@ export default function TaskManager() {
             {filteredTasks.map(task => {
               const emp = employees.find(e => e.id === task.assignedTo)
               const isDone = task.done === 'true' || task.done === true
-              const deadline = new Date(task.deadline)
-              const isOverdue = !isDone && deadline < new Date() && task.deadline
+              
+              const today = new Date(); today.setHours(0, 0, 0, 0)
+              let isOverdue = false
+              let deadlineFmt = 'No Date'
+              
+              if (task.deadline) {
+                const [y, m, d] = task.deadline.split('-').map(Number)
+                const dl = new Date(y, m - 1, d)
+                isOverdue = !isDone && dl < today
+                deadlineFmt = dl.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+              }
 
               return (
                 <tr key={task.id}>
@@ -201,7 +210,7 @@ export default function TaskManager() {
                   </td>
                   <td>
                     <div style={{ fontSize: 13, fontWeight: 600, color: isOverdue ? 'var(--red)' : 'inherit' }}>
-                      {task.deadline ? deadline.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'No Date'}
+                      {deadlineFmt}
                     </div>
                     {isOverdue && <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase' }}>Overdue</div>}
                   </td>
