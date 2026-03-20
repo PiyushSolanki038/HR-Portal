@@ -105,6 +105,17 @@ export default function TaskManager() {
     setShowTaskModal(true)
   }
 
+  const handleRemindAll = async () => {
+    if (!window.confirm('Send Telegram reminders to all employees with pending tasks?')) return
+    try {
+      showToast('Sending reminders...', 'info')
+      const res = await api.remindAllTasks()
+      showToast(`Reminders sent to ${res.employeesReminded} employees`, 'success')
+    } catch (err) {
+      showToast('Failed to send reminders', 'error')
+    }
+  }
+
   const handleSaveTask = async () => {
     if (!newTask.title.trim()) return showToast('Title is required', 'warning')
     setUpdating(taskEditingId)
@@ -131,8 +142,20 @@ export default function TaskManager() {
           <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: isMobile ? 24 : 32 }}>Task Command Center</h1>
           <p className="subtitle">Global oversight of all organizational objectives</p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <div style={{ textAlign: 'right', marginRight: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button 
+            onClick={handleRemindAll}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 12, 
+              background: 'var(--blue-dim)', color: 'var(--blue)', border: '1px solid var(--blue)',
+              fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all .2s'
+            }}
+            onMouseOver={e => e.currentTarget.style.background = 'var(--blue-glow)'}
+            onMouseOut={e => e.currentTarget.style.background = 'var(--blue-dim)'}
+          >
+            <Bell size={16} /> Remind All Pending
+          </button>
+          <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 13, fontWeight: 700 }}>{tasks.filter(t => t.done === 'true').length}/{tasks.length} Completed</div>
             <div style={{ fontSize: 11, color: 'var(--muted)' }}>Global Tasks Stats</div>
           </div>

@@ -76,6 +76,39 @@ router.patch('/:id/toggle', async (req, res) => {
     await updateRowWhere('Tasks', 'id', String(req.params.id), {
       done: String(newDone) // Keep consistently as lowercase string for the sheet
     })
+
+    // NOTIFICATIONS ON COMPLETION
+    if (newDone) {
+      try {
+        const [allTasks, employees] = await Promise.all([readSheet('Tasks'), readSheet('Employees')])
+        const empTaskItems = allTasks.filter(t => String(t.assignedTo) === String(task.assignedTo))
+        const doneCount = empTaskItems.filter(t => String(t.done).toLowerCase() === 'true').length
+        const totalCount = empTaskItems.length
+        const percent = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0
+        const emp = employees.find(e => String(e.id) === String(task.assignedTo))
+
+        if (emp?.telegramChatId) {
+          await sendMessage(emp.telegramChatId,
+            `🎉 <b>Congratulations!</b>\n\n` +
+            `You completed: <b>${task.title}</b>\n\n` +
+            `Your task completion rate is now <b>${percent}%</b> (${doneCount}/${totalCount}).\n` +
+            `Great work! Keep it up! 🚀`
+          )
+        }
+
+        if (process.env.TELEGRAM_ADMIN_ID) {
+          await sendMessage(process.env.TELEGRAM_ADMIN_ID,
+            `✅ <b>Task Completed</b>\n\n` +
+            `<b>Employee:</b> ${emp?.name || 'Unknown'}\n` +
+            `<b>Task:</b> ${task.title}\n` +
+            `<b>Performance:</b> ${percent}% (${doneCount}/${totalCount})`
+          )
+        }
+      } catch (err) {
+        console.error('[NOTIFY_ERROR] Completion notification failed:', err.message)
+      }
+    }
+
     res.json({ success: true, task: { ...task, done: String(newDone) } })
   } catch (err) {
     console.error('Toggle task error:', err)
@@ -131,6 +164,42 @@ router.post('/:id/remind', async (req, res) => {
     }
     res.json({ success: true })
   } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// REMIND ALL pending tasks
+router.post('/remind-all', async (req, res) => {
+  try {
+    const [tasks, employees] = await Promise.all([readSheet('Tasks'), readSheet('Employees')])
+    const pendingTasks = tasks.filter(t => String(t.done).toLowerCase() !== 'true')
+    
+    // Group by employee
+    const tasksPerEmp = pendingTasks.reduce((acc, t) => {
+      acc[t.assignedTo] = acc[t.assignedTo] || []
+      acc[t.assignedTo].push(t)
+      return acc
+    }, {})
+
+    let count = 0
+    for (const empId in tasksPerEmp) {
+      const empTasks = tasksPerEmp[empId]
+      const emp = employees.find(e => String(e.id) === String(empId))
+      
+      if (emp?.telegramChatId) {
+        const taskList = empTasks.map(t => `• ${t.title}`).join('\n')
+        await sendMessage(emp.telegramChatId,
+          `📋 <b>Pending Task Summary</b>\n\n` +
+          `You have <b>${empTasks.length}</b> open action items:\n\n${taskList}\n\n` +
+          `Please check the portal to update your progress.`
+        )
+        count++
+      }
+    }
+
+    res.json({ success: true, employeesReminded: count })
+  } catch (err) {
+    console.error('[API_ERROR] POST /api/tasks/remind-all:', err.message)
     res.status(500).json({ error: err.message })
   }
 })

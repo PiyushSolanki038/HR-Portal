@@ -50,6 +50,7 @@ export const updateTask          = (id, data)  => req(`/tasks/${id}`, { method:'
 export const deleteTask          = (id)        => req(`/tasks/${id}`, { method:'DELETE' })
 export const toggleTask          = (id)        => req(`/tasks/${id}/toggle`, { method:'PATCH' })
 export const remindTask          = (id)        => req(`/tasks/${id}/remind`, { method:'POST' })
+export const remindAllTasks      = ()          => req('/tasks/remind-all', { method:'POST' })
 
 // Hiring
 export const getCandidates       = ()          => req('/hiring')
