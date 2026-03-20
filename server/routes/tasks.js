@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { readSheet, appendRow, updateRowWhere, findRow } from '../sheets.js'
+import { readSheet, appendRow, updateRowWhere, deleteRowWhere, findRow } from '../sheets.js'
 import { sendMessage } from '../telegram.js'
 
 const router = Router()
@@ -79,6 +79,36 @@ router.patch('/:id/toggle', async (req, res) => {
     res.json({ success: true, task: { ...task, done: String(newDone) } })
   } catch (err) {
     console.error('Toggle task error:', err)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// UPDATE task details
+router.patch('/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const updates = req.body
+    
+    // Remove sensitive or non-updatable fields if any
+    delete updates.id
+    delete updates.createdAt
+
+    await updateRowWhere('Tasks', 'id', String(id), updates)
+    res.json({ success: true, id })
+  } catch (err) {
+    console.error('[API_ERROR] PATCH /api/tasks/:id:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// DELETE task
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    await deleteRowWhere('Tasks', 'id', String(id))
+    res.json({ success: true, id })
+  } catch (err) {
+    console.error('[API_ERROR] DELETE /api/tasks/:id:', err.message)
     res.status(500).json({ error: err.message })
   }
 })

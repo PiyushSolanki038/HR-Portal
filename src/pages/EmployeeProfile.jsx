@@ -6,7 +6,7 @@ import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import * as api from '../services/api'
 import Modal from '../components/ui/Modal'
-import { ArrowLeft, Edit, Edit2, Download, Loader2, Users, MessageSquare, CheckCircle2, Calendar, Mail, Flame, Clock, Target, AlertTriangle, Building2 } from 'lucide-react'
+import { ArrowLeft, Edit, Edit2, Download, Loader2, Users, MessageSquare, CheckCircle2, Calendar, Mail, Flame, Clock, Target, AlertTriangle, Building2, Trash2 } from 'lucide-react'
 
 // ── HELPERS ───────────────────────────────────────────────
 function taskStatus(task) {
@@ -231,6 +231,7 @@ export default function EmployeeProfile() {
     ],
   })
   const [newTask, setNewTask] = useState({ title: '', desc: '', deadline: '', priority: 'high', tag: 'Development' })
+  const [taskEditingId, setTaskEditingId] = useState(null)
   const [newNote, setNewNote] = useState({ text: '', type: 'green' })
 
   // Initialize activeId from employees if not set
@@ -345,15 +346,55 @@ export default function EmployeeProfile() {
   async function addTaskFromModal() {
     if (!newTask.title.trim()) { showToast('Title required', 'warning'); return }
     try {
+      setLoading(true)
       const dl = newTask.deadline || (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split('T')[0] })()
-      const res = await api.addTask({ ...newTask, empId: activeId, deadline: dl })
-      setTasks(ts => [res, ...ts])
+      
+      if (taskEditingId) {
+        await api.updateTask(taskEditingId, { ...newTask, deadline: dl })
+        setTasks(ts => ts.map(t => t.id === taskEditingId ? { ...t, ...newTask, deadline: dl } : t))
+        showToast('Task updated!', 'success')
+      } else {
+        const res = await api.addTask({ ...newTask, empId: activeId, deadline: dl })
+        setTasks(ts => [res, ...ts])
+        showToast('Task added!', 'success')
+      }
+      
       setShowTaskModal(false)
+      setTaskEditingId(null)
       setNewTask({ title: '', desc: '', deadline: '', priority: 'high', tag: 'Development' })
-      showToast('Task added!', 'success')
+      refresh()
     } catch (err) {
-      showToast('Failed to add task', 'error')
+      showToast('Action failed', 'error')
+    } finally {
+      setLoading(false)
     }
+  }
+
+  async function deleteTask(tid) {
+    if (!window.confirm('Are you sure you want to delete this task?')) return
+    try {
+      setLoading(true)
+      await api.deleteTask(tid)
+      setTasks(ts => ts.filter(t => t.id !== tid))
+      showToast('Task deleted', 'success')
+      refresh()
+    } catch (err) {
+      showToast('Failed to delete task', 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function openEditTaskModal(task) {
+    setNewTask({
+      title: task.title,
+      desc: task.desc || '',
+      deadline: task.deadline ? new Date(task.deadline).toISOString().split('T')[0] : '',
+      priority: task.priority || 'med',
+      tag: task.tag || 'General'
+    })
+    setTaskEditingId(task.id)
+    setShowTaskModal(true)
   }
 
   function openEditModal() {
@@ -679,6 +720,15 @@ export default function EmployeeProfile() {
                           <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20, ...priStyle(task.priority) }}>{(task.priority || 'med').toUpperCase()}</span>
                         </div>
                       </div>
+
+                      <div style={{ display: 'flex', gap: 4, opacity: isMobile ? 1 : 0, transition: 'opacity .2s' }} className="task-actions">
+                        <button onClick={() => openEditTaskModal(task)} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: 4 }} title="Edit">
+                          <Edit size={14} />
+                        </button>
+                        <button onClick={() => deleteTask(task.id)} style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', padding: 4 }} title="Delete">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                   )
                 })}
@@ -969,8 +1019,10 @@ export default function EmployeeProfile() {
       </div>
 
       {/* ── MODALS (Themed) ── */}
-      <Modal isOpen={showTaskModal} onClose={() => setShowTaskModal(false)} title="New Task" subtitle="Assign a task with deadline"
-        footer={<><button onClick={() => setShowTaskModal(false)} style={outlineBtn}>Cancel</button><button onClick={addTaskFromModal} style={primaryBtn}>Create Task</button></>}>
+      <Modal isOpen={showTaskModal} onClose={() => { setShowTaskModal(false); setTaskEditingId(null); setNewTask({ title: '', desc: '', deadline: '', priority: 'high', tag: 'Development' }); }} 
+        title={taskEditingId ? "Edit Task" : "New Task"} 
+        subtitle={taskEditingId ? "Update task details" : "Assign a task with deadline"}
+        footer={<><button onClick={() => { setShowTaskModal(false); setTaskEditingId(null); }} style={outlineBtn}>Cancel</button><button onClick={addTaskFromModal} style={primaryBtn}>{taskEditingId ? 'Update Task' : 'Create Task'}</button></>}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div><label style={formLabel}>Title</label><input value={newTask.title} onChange={e => setNewTask(t => ({ ...t, title: e.target.value }))} style={formInput} /></div>
           <div><label style={formLabel}>Description</label><textarea rows={3} value={newTask.desc} onChange={e => setNewTask(t => ({ ...t, desc: e.target.value }))} style={{ ...formInput, resize: 'none' }} /></div>

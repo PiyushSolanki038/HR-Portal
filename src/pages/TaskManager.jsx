@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Bell,
   Trash2,
+  Edit,
   ChevronRight,
   User,
   Calendar,
@@ -21,6 +22,7 @@ import {
   Clock,
   Briefcase
 } from 'lucide-react'
+import Modal from '../components/ui/Modal'
 import { Link } from 'react-router-dom'
 
 export default function TaskManager() {
@@ -33,6 +35,9 @@ export default function TaskManager() {
   const [deptFilter, setDeptFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [updating, setUpdating] = useState(null)
+  const [showTaskModal, setShowTaskModal] = useState(false)
+  const [taskEditingId, setTaskEditingId] = useState(null)
+  const [newTask, setNewTask] = useState({ title: '', desc: '', deadline: '', priority: 'med', tag: 'General', assignedTo: '' })
 
   const depts = ['Developer', 'Marketing', 'HR', 'Design', 'Operations', 'Sales', 'Admin', 'Engineering']
 
@@ -70,6 +75,49 @@ export default function TaskManager() {
       showToast('Reminder sent via Telegram', 'success')
     } catch (err) {
       showToast('Failed to send reminder', 'error')
+    }
+  }
+
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Are you sure you want to delete this task?')) return
+    setUpdating(taskId)
+    try {
+      await api.deleteTask(taskId)
+      showToast('Task deleted successfully', 'success')
+      refresh()
+    } catch (err) {
+      showToast('Failed to delete task', 'error')
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  const handleEditTask = (task) => {
+    setNewTask({
+      title: task.title,
+      desc: task.desc || task.description || '',
+      deadline: task.deadline ? new Date(task.deadline).toISOString().split('T')[0] : '',
+      priority: task.priority || 'med',
+      tag: task.tag || 'General',
+      assignedTo: task.assignedTo
+    })
+    setTaskEditingId(task.id)
+    setShowTaskModal(true)
+  }
+
+  const handleSaveTask = async () => {
+    if (!newTask.title.trim()) return showToast('Title is required', 'warning')
+    setUpdating(taskEditingId)
+    try {
+      await api.updateTask(taskEditingId, newTask)
+      showToast('Task updated successfully', 'success')
+      setShowTaskModal(false)
+      refresh()
+    } catch (err) {
+      showToast('Failed to update task', 'error')
+    } finally {
+      setUpdating(null)
+      setTaskEditingId(null)
     }
   }
 
@@ -191,6 +239,23 @@ export default function TaskManager() {
                       >
                         <Bell size={14} />
                       </button>
+                      <button
+                        className="btn btn-icon btn-sm"
+                        title="Edit Task"
+                        onClick={() => handleEditTask(task)}
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-dim)' }}
+                      >
+                        <Edit size={14} />
+                      </button>
+                      <button
+                        className="btn btn-icon btn-sm"
+                        title="Delete Task"
+                        onClick={() => handleDeleteTask(task.id)}
+                        disabled={updating === task.id}
+                        style={{ background: 'var(--red-dim)', color: 'var(--red)' }}
+                      >
+                        {updating === task.id ? <div className="spinner-sm" /> : <Trash2 size={14} />}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -205,6 +270,38 @@ export default function TaskManager() {
           </div>
         )}
       </div>
+
+      <Modal isOpen={showTaskModal} onClose={() => setShowTaskModal(false)} title="Edit Task" subtitle="Update organizational objective"
+        footer={<><button onClick={() => setShowTaskModal(false)} style={{ padding: '8px 16px', borderRadius: 12, border: '1px solid var(--line)', background: 'transparent', fontWeight: 600, cursor: 'pointer' }}>Cancel</button><button onClick={handleSaveTask} style={{ padding: '8px 24px', borderRadius: 12, border: 'none', background: 'var(--accent)', color: '#fff', fontWeight: 700, cursor: 'pointer', boxShadow: 'var(--shadow-glow)' }}>Save Changes</button></>}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 6, display: 'block' }}>Objective Title</label>
+            <input value={newTask.title} onChange={e => setNewTask({ ...newTask, title: e.target.value })} style={{ width: '100%', padding: '12px', borderRadius: 12, border: '1px solid var(--line)', background: 'var(--bg-elevated)', color: 'var(--text)', outline: 'none' }} />
+          </div>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 6, display: 'block' }}>Description</label>
+            <textarea rows={3} value={newTask.desc} onChange={e => setNewTask({ ...newTask, desc: e.target.value })} style={{ width: '100%', padding: '12px', borderRadius: 12, border: '1px solid var(--line)', background: 'var(--bg-elevated)', color: 'var(--text)', outline: 'none', resize: 'none' }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 6, display: 'block' }}>Deadline</label>
+              <input type="date" value={newTask.deadline} onChange={e => setNewTask({ ...newTask, deadline: e.target.value })} style={{ width: '100%', padding: '12px', borderRadius: 12, border: '1px solid var(--line)', background: 'var(--bg-elevated)', color: 'var(--text)', outline: 'none' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 6, display: 'block' }}>Priority</label>
+              <select value={newTask.priority} onChange={e => setNewTask({ ...newTask, priority: e.target.value })} style={{ width: '100%', padding: '12px', borderRadius: 12, border: '1px solid var(--line)', background: 'var(--bg-elevated)', color: 'var(--text)', outline: 'none' }}>
+                <option value="high">High</option>
+                <option value="med">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 6, display: 'block' }}>Category / Tag</label>
+            <input value={newTask.tag} onChange={e => setNewTask({ ...newTask, tag: e.target.value })} style={{ width: '100%', padding: '12px', borderRadius: 12, border: '1px solid var(--line)', background: 'var(--bg-elevated)', color: 'var(--text)', outline: 'none' }} />
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

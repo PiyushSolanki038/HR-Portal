@@ -48,12 +48,13 @@ export default function Dashboard() {
   })
   const onLeaveIds = new Set(onLeaveEmps.map(l => l.empId?.toLowerCase()))
 
+  const workforce = employees.filter(e => e.role?.toLowerCase() !== 'admin')
   const stats = {
-    total: employees.length,
-    present: attendance.filter(a => a.status === 'p' || a.status === 'l').length,
-    late: attendance.filter(a => a.status === 'l').length,
-    absent: attendance.filter(a => a.status === 'a' && !onLeaveIds.has(a.empId?.toLowerCase())).length,
-    onLeave: onLeaveIds.size,
+    total: workforce.length,
+    present: attendance.filter(a => (a.status === 'p' || a.status === 'l') && workforce.some(e => e.id === a.empId)).length,
+    late: attendance.filter(a => a.status === 'l' && workforce.some(e => e.id === a.empId)).length,
+    absent: attendance.filter(a => a.status === 'a' && !onLeaveIds.has(a.empId?.toLowerCase()) && workforce.some(e => e.id === a.empId)).length,
+    onLeave: workforce.filter(e => onLeaveIds.has(e.id?.toLowerCase())).length,
     pendingLeaves: leaves.filter(l => l.status?.toLowerCase() === 'pending').length,
   }
 
@@ -119,7 +120,7 @@ export default function Dashboard() {
     return (
       <HRDashboardView 
         stats={stats}
-        employees={employees}
+        employees={workforce}
         attendance={attendance}
         leaves={leaves}
         onLeaveIds={onLeaveIds}

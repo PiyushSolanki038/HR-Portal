@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { useScreenSize } from '../../hooks/useScreenSize'
 import StatCard from '../ui/StatCard'
 import ActivityFeed from '../ui/ActivityFeed'
+import AIInsightEngine from './AIInsightEngine'
+import TeamAvailabilityGrid from './TeamAvailabilityGrid'
 import { 
   Users, Clock, CalendarOff, AlertTriangle, CheckCircle, 
   TrendingUp, Bell, Zap, Star, Award, UserPlus, FileText, Send
@@ -57,6 +59,17 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
         ))}
       </div>
 
+      {/* Intelligence Row */}
+      <div style={{ marginBottom: 32 }}>
+        <AIInsightEngine 
+          stats={stats} 
+          employees={employees} 
+          attendance={attendance} 
+          leaves={leaves} 
+          onLeaveIds={onLeaveIds} 
+        />
+      </div>
+
       <div className="stats-grid" style={{ 
         display: 'grid',
         gridTemplateColumns: isMobile ? '1fr 1fr' : isTablet ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
@@ -69,6 +82,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
           icon={Users}
           color="var(--accent)"
           bgColor="var(--accent-glow)"
+          trend={[10, 11, 12, 12, 12, 12, 12]}
         />
         <StatCard
           title="Active Now"
@@ -77,6 +91,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
           icon={CheckCircle}
           color="var(--green)"
           bgColor="var(--green-dim)"
+          trend={[8, 9, 7, 10, 11, 9, present]}
         />
         <StatCard
           title="Late Alerts"
@@ -84,6 +99,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
           icon={Clock}
           color="var(--amber)"
           bgColor="var(--amber-dim)"
+          trend={[0, 1, 0, 2, 1, 0, late]}
         />
         <StatCard
           title="Attention Reqd"
@@ -91,6 +107,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
           icon={AlertTriangle}
           color="var(--red)"
           bgColor="var(--red-dim)"
+          trend={[1, 0, 2, 0, 1, 1, absent]}
         />
         <StatCard
           title="On Leave"
@@ -98,6 +115,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
           icon={CalendarOff}
           color="var(--blue)"
           bgColor="var(--blue-dim)"
+          trend={[2, 2, 1, 1, 0, 0, onLeave]}
         />
         <StatCard
           title="Leave Queue"
@@ -105,6 +123,7 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
           icon={TrendingUp}
           color="var(--purple)"
           bgColor="var(--purple-dim)"
+          trend={[5, 4, 6, 2, 3, 1, pendingLeaves]}
         />
       </div>
 
@@ -189,29 +208,11 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
             </div>
           </div>
 
-          <div className="card-premium" style={{ padding: isMobile ? 16 : 32 }}>
-            <h3 style={{ margin: '0 0 24px 0', fontSize: 16, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Users size={18} color="var(--blue)" /> Currently Out
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {activeLeaves.map(emp => (
-                <div key={emp.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div className="avatar avatar" style={{ background: emp.color || 'var(--accent)', borderRadius: 12, fontWeight: 800 }}>
-                    {emp.av || emp.name?.substring(0,2).toUpperCase()}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700 }}>{emp.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>{emp.dept} • On Leave</div>
-                  </div>
-                </div>
-              ))}
-              {activeLeaves.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)', fontSize: 13 }}>
-                  No one is out today.
-                </div>
-              )}
-            </div>
-          </div>
+          <TeamAvailabilityGrid 
+            employees={employees} 
+            attendance={attendance} 
+            onLeaveIds={onLeaveIds} 
+          />
         </div>
       </div>
     </div>

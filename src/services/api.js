@@ -46,6 +46,8 @@ export const rejectLeave         = (id, data)  => req(`/leaves/${id}/reject`,  {
 export const getEmployeeTasks    = (empId)     => req(`/tasks/employee/${empId}`)
 export const getTasks            = ()          => req('/tasks')
 export const addTask             = (data)      => req('/tasks', { method:'POST', body:JSON.stringify(data) })
+export const updateTask          = (id, data)  => req(`/tasks/${id}`, { method:'PATCH', body:JSON.stringify(data) })
+export const deleteTask          = (id)        => req(`/tasks/${id}`, { method:'DELETE' })
 export const toggleTask          = (id)        => req(`/tasks/${id}/toggle`, { method:'PATCH' })
 export const remindTask          = (id)        => req(`/tasks/${id}/remind`, { method:'POST' })
 
