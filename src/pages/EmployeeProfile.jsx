@@ -9,8 +9,10 @@ import Modal from '../components/ui/Modal'
 import { ArrowLeft, Edit, Edit2, Download, Loader2, Users, MessageSquare, CheckCircle2, Calendar, Mail, Flame, Clock, Target, AlertTriangle, Building2, Trash2 } from 'lucide-react'
 
 // ── HELPERS ───────────────────────────────────────────────
+const isTaskDone = (t) => t && (t.done === true || String(t.done).toLowerCase() === 'true')
+
 function taskStatus(task) {
-  if (task.done === 'true' || task.done === true) return 'done'
+  if (isTaskDone(task)) return 'done'
   if (!task.deadline) return 'ok'
   const [y, m, d] = task.deadline.split('-').map(Number)
   const dl = new Date(y, m - 1, d)
@@ -23,7 +25,7 @@ function taskStatus(task) {
 }
 
 function deadlineLabel(task) {
-  if (task.done === 'true' || task.done === true) return { text: '✅ Done', cls: 'done' }
+  if (isTaskDone(task)) return { text: '✅ Done', cls: 'done' }
   if (!task.deadline) return { text: 'No Date', cls: 'ok' }
   const [y, m, d] = task.deadline.split('-').map(Number)
   const dl = new Date(y, m - 1, d)
@@ -297,7 +299,7 @@ export default function EmployeeProfile() {
   const totalDays = stats.workingDays || 0
   const attendRate = parseInt(emp.score) || stats.score || 0
   const punctRate = stats.totalAttended > 0 ? Math.round(((stats.present || 0) / stats.totalAttended) * 100) : 100
-  const doneCount = empTasks.filter(t => t.done === 'true' || t.done === true).length
+  const doneCount = empTasks.filter(isTaskDone).length
   const taskRate = empTasks.length > 0 ? Math.round(doneCount / empTasks.length * 100) : 0
   const leaveLeft = Math.max(0, 3 - takenCount)
   // Calculate streak from history
@@ -320,14 +322,14 @@ export default function EmployeeProfile() {
 
   const filteredTasks = useMemo(() => {
     if (taskFilter === 'all') return empTasks
-    if (taskFilter === 'done') return empTasks.filter(t => t.done === 'true' || t.done === true)
+    if (taskFilter === 'done') return empTasks.filter(isTaskDone)
     return empTasks.filter(t => taskStatus(t) === taskFilter)
   }, [empTasks, taskFilter])
 
   async function toggleTaskStatus(tid) {
     try {
       await api.toggleTask(tid)
-      setTasks(ts => ts.map(t => t.id === tid ? { ...t, done: (t.done === 'true' || t.done === true) ? 'false' : 'true' } : t))
+      setTasks(ts => ts.map(t => t.id === tid ? { ...t, done: !isTaskDone(t) } : t))
       showToast('Task updated', 'success')
     } catch (err) {
       showToast('Failed to update task', 'error')
@@ -708,16 +710,16 @@ export default function EmployeeProfile() {
                       <div onClick={() => toggleTaskStatus(task.id)}
                         style={{
                           width: 22, height: 22, borderRadius: 6, flexShrink: 0, marginTop: 2,
-                          border: (task.done === 'true' || task.done === true) ? 'none' : '2px solid var(--line)',
-                          background: (task.done === 'true' || task.done === true) ? 'var(--green)' : 'var(--bg-elevated)',
+                          border: isTaskDone(task) ? 'none' : '2px solid var(--line)',
+                          background: isTaskDone(task) ? 'var(--green)' : 'var(--bg-elevated)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           cursor: 'pointer', transition: 'all .2s', fontSize: 12, color: '#fff'
                         }}>
-                        {(task.done === 'true' || task.done === true) && '✓'}
+                        {isTaskDone(task) && '✓'}
                       </div>
 
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: (task.done === 'true' || task.done === true) ? 'var(--muted)' : 'var(--text)', textDecoration: (task.done === 'true' || task.done === true) ? 'line-through' : 'none', marginBottom: 4 }}>{task.title}</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: isTaskDone(task) ? 'var(--muted)' : 'var(--text)', textDecoration: isTaskDone(task) ? 'line-through' : 'none', marginBottom: 4 }}>{task.title}</div>
                         {task.desc && <div style={{ fontSize: 12.5, color: 'var(--text-dim)', marginBottom: 8, lineHeight: 1.5 }}>{task.desc}</div>}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 10px', borderRadius: 20, ...dlStyle(dl.cls), border: '1px solid transparent' }}>{dl.text}</span>

@@ -25,6 +25,8 @@ import {
 import Modal from '../components/ui/Modal'
 import { Link } from 'react-router-dom'
 
+const isTaskDone = (t) => t && (t.done === true || String(t.done).toLowerCase() === 'true')
+
 export default function TaskManager() {
   const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { tasks, employees, loading, error, refresh } = useData()
@@ -47,10 +49,9 @@ export default function TaskManager() {
       const matchSearch = (t.title || '').toLowerCase().includes(search.toLowerCase()) ||
         (emp.name || '').toLowerCase().includes(search.toLowerCase())
       const matchDept = deptFilter === 'all' || emp.dept === deptFilter
-      const isDone = t.done === 'true' || t.done === true
       const matchStatus = statusFilter === 'all' ||
-        (statusFilter === 'done' && isDone) ||
-        (statusFilter === 'pending' && !isDone)
+        (statusFilter === 'done' && isTaskDone(t)) ||
+        (statusFilter === 'pending' && !isTaskDone(t))
 
       return matchSearch && matchDept && matchStatus
     })
@@ -156,7 +157,7 @@ export default function TaskManager() {
             <Bell size={16} /> Remind All Pending
           </button>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 13, fontWeight: 700 }}>{tasks.filter(t => t.done === 'true').length}/{tasks.length} Completed</div>
+            <div style={{ fontSize: 13, fontWeight: 700 }}>{tasks.filter(isTaskDone).length}/{tasks.length} Completed</div>
             <div style={{ fontSize: 11, color: 'var(--muted)' }}>Global Tasks Stats</div>
           </div>
         </div>
@@ -199,7 +200,7 @@ export default function TaskManager() {
           <tbody>
             {filteredTasks.map(task => {
               const emp = employees.find(e => e.id === task.assignedTo)
-              const isDone = task.done === 'true' || task.done === true
+              const isDone = isTaskDone(task)
               
               const today = new Date(); today.setHours(0, 0, 0, 0)
               let isOverdue = false

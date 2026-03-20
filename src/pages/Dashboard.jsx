@@ -7,6 +7,8 @@ import * as api from '../services/api'
 import HRDashboardView from '../components/dashboard/HRDashboardView'
 import EmployeeDashboardView from '../components/dashboard/EmployeeDashboardView'
 
+const isTaskDone = (t) => t && (t.done === true || String(t.done).toLowerCase() === 'true')
+
 export default function Dashboard() {
   const { employees, attendance, leaves, tasks, loading, error, refresh } = useData()
   const { user } = useAuth()
@@ -112,8 +114,8 @@ export default function Dashboard() {
     late: history.filter(h => h.status === 'l').length,
     leavesUsed: leaves.filter(l => l.empId === user?.id && l.status === 'approved').length,
     leavesTotal: 3, 
-    pendingTasks: tasks.filter(t => t.assignedTo === user?.id && t.done !== 'true').length,
-    dueToday: tasks.filter(t => t.assignedTo === user?.id && t.done !== 'true' && t.deadline === new Date().toISOString().split('T')[0]).length
+    pendingTasks: tasks.filter(t => t.assignedTo === user?.id && !isTaskDone(t)).length,
+    dueToday: tasks.filter(t => t.assignedTo === user?.id && !isTaskDone(t) && t.deadline === new Date().toISOString().split('T')[0]).length
   }
 
   if (isHR) {
@@ -136,7 +138,7 @@ export default function Dashboard() {
     <EmployeeDashboardView 
       user={user}
       stats={employeeStats}
-      tasks={tasks.filter(t => t.assignedTo === user?.id && t.done !== 'true')}
+      tasks={tasks.filter(t => t.assignedTo === user?.id && !isTaskDone(t))}
       history={history}
       messages={recentMessages}
       leaves={leaves.filter(l => l.empId === user?.id)}
