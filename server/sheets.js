@@ -30,7 +30,16 @@ const HEADER_CACHE = {}
 const PENDING_READS = {} // Coalescing concurrent reads for the same tab
 
 // All known tabs — used for batch operations
-export const ALL_TABS = ['Employees', 'Attendance', 'Leaves', 'Mentors', 'Tasks', 'Messages', 'Governance', 'Audit']
+export const ALL_TABS = ['Employees', 'Attendance', 'Leaves', 'Mentors', 'Tasks', 'Messages', 'Governance', 'Audit', 'PenaltyCatalog', 'Waivers', 'Reviews']
+
+// Default headers for new tabs
+const TAB_HEADERS = {
+  'PenaltyCatalog': ['id', 'label', 'amount'],
+  'Waivers':        ['id', 'empId', 'amount', 'reason', 'month', 'date'],
+  'Governance':     ['id', 'type', 'empId', 'empName', 'title', 'penalty', 'description', 'date'],
+  'Audit':          ['timestamp', 'action', 'details', 'actor'],
+  'Reviews':        ['id', 'empId', 'reviewerId', 'reviewerName', 'rating', 'comment', 'date']
+}
 
 async function retry(fn, retries = 3, delay = 1000) {
   for (let i = 0; i < retries; i++) {
@@ -46,10 +55,108 @@ async function retry(fn, retries = 3, delay = 1000) {
   }
 }
 
+let PENDING_SYNC = null;
+const SYNCED_TABS = new Set();
+
+// Ensure tabs exist in the spreadsheet
+export async function ensureTabsExist(tabNames) {
+  // 1. Filter out tabs already verified in this session
+  const todo = tabNames.filter(t => !SYNCED_TABS.has(t))
+  if (todo.length === 0) return
+
+  // 2. If sync is in progress, wait and try once more
+  if (PENDING_SYNC) {
+    await PENDING_SYNC
+    return ensureTabsExist(tabNames)
+  }
+
+  const auth = getAuth()
+  const sheets = google.sheets({ version: 'v4', auth })
+  
+  // 3. Create the sync promise
+  PENDING_SYNC = (async () => {
+    try {
+      console.log(`[SHEETS_SYNC] Verifying tabs: ${todo.join(', ')}`)
+      const spreadsheet = await retry(() => sheets.spreadsheets.get({ spreadsheetId: SHEET_ID }))
+      const existingTabs = spreadsheet.data.sheets.map(s => s.properties.title)
+      const missingTabs = todo.filter(t => !existingTabs.includes(t))
+      
+      // Mark all as synced immediately to prevent retry storms
+      todo.forEach(t => SYNCED_TABS.add(t))
+
+      if (missingTabs.length > 0) {
+        console.log(`[SHEETS_SYNC] Creating missing tabs: ${missingTabs.join(', ')}`)
+        
+        try {
+          await retry(() => sheets.spreadsheets.batchUpdate({
+            spreadsheetId: SHEET_ID,
+            resource: {
+              requests: missingTabs.map(title => ({
+                addSheet: { properties: { title } }
+              }))
+            }
+          }))
+          
+          for (const tab of missingTabs) {
+            const headers = TAB_HEADERS[tab]
+            if (headers) {
+              console.log(`[SHEETS_SYNC] Initializing headers for: "${tab}"`)
+              await retry(() => sheets.spreadsheets.values.update({
+                spreadsheetId: SHEET_ID,
+                range: `${tab}!A1`,
+                valueInputOption: 'USER_ENTERED',
+                resource: { values: [headers] }
+              }))
+              HEADER_CACHE[tab] = headers
+            }
+          }
+        } catch (updateErr) {
+          if (updateErr.message?.includes('already exists')) {
+            console.warn('[SHEETS_SYNC] Some tabs were already created.')
+          } else {
+            console.error('[SHEETS_SYNC_UPDATE_ERROR]:', updateErr.message)
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[SHEETS_SYNC_ERROR]:', err.message)
+    } finally {
+      PENDING_SYNC = null
+    }
+  })()
+
+  return PENDING_SYNC
+}
+
+const DATE_COLUMNS = ['date', 'month', 'joiningDate', 'lastActive', 'appliedOn', 'attendanceDate']
+
+function normalizeValue(key, val) {
+  if (!val) return ''
+  const sVal = String(val).trim()
+  
+  // Check if it's a Google Sheets Serial Date (Number between 30000 and 60000)
+  if (DATE_COLUMNS.includes(key) && /^\d{5}(\.\d+)?$/.test(sVal)) {
+    const serial = parseFloat(sVal)
+    if (serial > 30000 && serial < 60000) {
+      const date = new Date((serial - 25569) * 86400 * 1000)
+      if (key === 'month') {
+        const monthStr = date.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
+        // Standardize: "March 2026" (remove any commas if added by toLocaleDateString)
+        return monthStr.replace(',', '')
+      }
+      return date.toISOString().split('T')[0]
+    }
+  }
+  return sVal
+}
+
 // Internal fetch — always makes a real API call
 async function _fetchSheet(tabName) {
   const auth   = getAuth()
   const sheets = google.sheets({ version: 'v4', auth })
+  
+  await ensureTabsExist([tabName])
+  
   let res;
   try {
     console.log(`[SHEETS_READ] Fetching tab: "${tabName}" from ID: "${SHEET_ID}"`)
@@ -75,7 +182,7 @@ async function _fetchSheet(tabName) {
   const data = rows.slice(1)
     .filter(row => row.some(cell => cell && cell.trim() !== ''))
     .map(row =>
-      Object.fromEntries(headers.map((h, i) => [h, row[i] || '']))
+      Object.fromEntries(headers.map((h, i) => [h, normalizeValue(h, row[i] || '')]))
     )
 
   CACHE[tabName] = { data, timestamp: Date.now() }
@@ -110,6 +217,8 @@ export async function readSheet(tabName) {
 export async function appendRow(tabName, dataObj) {
   const auth   = getAuth()
   const sheets = google.sheets({ version: 'v4', auth })
+  
+  await ensureTabsExist([tabName])
   
   // 1. Get current headers (cached)
   let headers = HEADER_CACHE[tabName]
@@ -166,6 +275,9 @@ export async function updateRowWhere(tabName, field, value, updates) {
   delete CACHE[tabName] // Clear cache
   const auth   = getAuth()
   const sheets = google.sheets({ version: 'v4', auth })
+  
+  await ensureTabsExist([tabName])
+  
   const res    = await retry(() => sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
     range: tabName,
@@ -229,6 +341,8 @@ export async function deleteRowWhere(tabName, field, value) {
   const auth   = getAuth()
   const sheets = google.sheets({ version: 'v4', auth })
   
+  await ensureTabsExist([tabName])
+  
   // 1. Get spreadsheet to find tabId
   const spreadsheet = await retry(() => sheets.spreadsheets.get({ spreadsheetId: SHEET_ID }))
   const sheet = spreadsheet.data.sheets.find(s => s.properties.title === tabName)
@@ -285,6 +399,9 @@ export async function batchReadAllSheets() {
   const sheets = google.sheets({ version: 'v4', auth })
   
   try {
+    // Crucial: Ensure tabs exist BEFORE batchGet, otherwise the whole call fails if one is missing
+    await ensureTabsExist(ALL_TABS)
+    
     console.log(`[BATCH_READ] Fetching ALL tabs in one call...`)
     const res = await retry(() => sheets.spreadsheets.values.batchGet({
       spreadsheetId: SHEET_ID,

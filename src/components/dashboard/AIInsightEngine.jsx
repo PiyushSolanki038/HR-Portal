@@ -25,11 +25,20 @@ export default function AIInsightEngine({ stats, employees, attendance, leaves, 
     }
 
     // Departmental Insight
-    const workforce = employees.filter(e => e.role?.toLowerCase() !== 'admin');
+    const workforce = employees.filter(e => {
+      const r = (e.role || '').toLowerCase()
+      const n = (e.name || '').toLowerCase()
+      return !r.includes('admin') && !r.includes('head') && !r.includes('owner') && !r.includes('hr manager') && !n.includes('shreyansh') && !n.includes('ankur')
+    });
     const depts = [...new Set(workforce.map(e => e.dept).filter(Boolean))];
     depts.forEach(dept => {
       const deptEmps = workforce.filter(e => e.dept === dept);
-      const outIds = attendance.filter(a => (a.status === 'a' || a.status === 'leave') && a.dept === dept && a.role?.toLowerCase() !== 'admin').map(a => a.empId?.toLowerCase());
+      const outIds = attendance.filter(a => {
+        const r = (a.role || '').toLowerCase()
+        const n = (a.empName || '').toLowerCase() // assuming a.empName exists or filter by empId later
+        const isExcluded = r.includes('admin') || r.includes('head') || r.includes('owner') || r.includes('hr manager') || n.includes('shreyansh') || n.includes('ankur')
+        return (a.status === 'a' || a.status === 'leave') && a.dept === dept && !isExcluded
+      }).map(a => a.empId?.toLowerCase());
       const outCount = outIds.length;
       
       if (deptEmps.length > 0 && (outCount / deptEmps.length) > 0.4) {
@@ -58,32 +67,46 @@ export default function AIInsightEngine({ stats, employees, attendance, leaves, 
   const insights = generateInsights();
 
   return (
-    <div className="card-premium animate-in" style={{ padding: '24px', background: 'var(--bg-elevated)', border: '1px solid var(--line)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: 'var(--accent-glow)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Zap size={18} fill="var(--accent)" />
-        </div>
-        <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>Intelligence Engine</h3>
+    <div className="card-premium super-glass animate-in" style={{ padding: '24px', minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h3 style={{ margin: 0, fontSize: 13, fontWeight: 900, display: 'flex', alignItems: 'center', gap: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
+          <Zap size={16} color="var(--accent)" fill="var(--accent)" /> AI Insights
+        </h3>
+        <div style={{ fontSize: 9, fontWeight: 900, color: 'var(--accent)', opacity: 0.6 }}>PREDICTIVE ENGINE V3.1</div>
       </div>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
         {insights.map((insight, i) => (
           <div key={i} style={{ 
             display: 'flex', 
-            gap: 14, 
-            padding: '12px 16px', 
-            borderRadius: 14, 
-            background: 'var(--bg)', 
-            border: `1px solid var(--line)`,
-            alignItems: 'center'
+            gap: 16, 
+            padding: '16px 20px', 
+            borderRadius: 16, 
+            background: 'rgba(255,255,255,0.4)', 
+            border: `1px solid rgba(255,255,255,0.5)`,
+            alignItems: 'center',
+            flex: 1
           }}>
             <insight.icon size={18} color={insight.color} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', opacity: 0.9 }}>{insight.text}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', opacity: 0.9, lineHeight: 1.4 }}>{insight.text}</span>
           </div>
         ))}
         {insights.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '20px', color: 'var(--muted)', fontSize: 13 }}>
-            System scanning... No immediate alerts.
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '32px', 
+            color: 'var(--muted)', 
+            fontSize: 12, 
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flex: 1,
+            background: 'rgba(255,255,255,0.2)',
+            borderRadius: 16,
+            border: '1px dashed rgba(255,255,255,0.3)'
+          }}>
+            NEURAL SCANNING: NO CRITICAL VARIANCES DETECTED
           </div>
         )}
       </div>

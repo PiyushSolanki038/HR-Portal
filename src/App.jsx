@@ -30,6 +30,8 @@ import Settings from './pages/Settings'
 import Mentors from './pages/Mentors'
 import DisciplinaryExcellence from './pages/DisciplinaryExcellence'
 import TaskManager from './pages/TaskManager'
+import ActionCenter from './pages/ActionCenter'
+import EmployeeReviews from './pages/EmployeeReviews'
 
 // Employee Portal Pages
 import MyAttendance from './pages/MyAttendance'
@@ -71,6 +73,16 @@ export default function App() {
                 <Route path="/" element={
                   <RoleGate allowedRoles={['Admin', 'HR Manager', 'Finance', 'Employee']}>
                     <Dashboard />
+                  </RoleGate>
+                } />
+                <Route path="/action-center" element={
+                  <RoleGate allowedRoles={['Admin']}>
+                    <ActionCenter />
+                  </RoleGate>
+                } />
+                <Route path="/employee-reviews" element={
+                  <RoleGate allowedRoles={['Admin', 'HR Manager']}>
+                    <EmployeeReviews />
                   </RoleGate>
                 } />
                 <Route path="/attendance" element={

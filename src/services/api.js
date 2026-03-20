@@ -51,6 +51,8 @@ export const deleteTask          = (id)        => req(`/tasks/${id}`, { method:'
 export const toggleTask          = (id)        => req(`/tasks/${id}/toggle`, { method:'PATCH' })
 export const remindTask          = (id)        => req(`/tasks/${id}/remind`, { method:'POST' })
 export const remindAllTasks      = ()          => req('/tasks/remind-all', { method:'POST' })
+export const sendHRBroadcast     = (data)      => req('/tasks/broadcast',  { method:'POST', body:JSON.stringify(data) })
+export const getSystemHealth     = ()          => req('/tasks/health')
 
 // Hiring
 export const getCandidates       = ()          => req('/hiring')
@@ -86,3 +88,18 @@ export const deleteMentor        = (id)         => req(`/mentors/${id}`, { metho
 export const getGovernance       = ()          => req('/governance')
 export const addGovernance       = (data)      => req('/governance', { method:'POST', body:JSON.stringify(data) })
 export const deleteGovernance    = (id)        => req(`/governance/${id}`, { method:'DELETE' })
+
+// Penalty Catalog
+export const getPenaltyCatalog    = ()          => req('/governance/catalog')
+export const addPenaltyType       = (data)      => req('/governance/catalog', { method:'POST', body:JSON.stringify(data) })
+export const updatePenaltyType    = (id, data)  => req(`/governance/catalog/${id}`, { method:'PATCH', body:JSON.stringify(data) })
+export const deletePenaltyType    = (id)        => req(`/governance/catalog/${id}`, { method:'DELETE' })
+
+// Waivers
+export const addWaiver            = (data)      => req('/governance/waivers', { method:'POST', body:JSON.stringify(data) })
+export const getWaivers           = ()          => req('/governance/waivers')
+export const deleteWaiver         = (id)        => req(`/governance/waivers/${id}`, { method:'DELETE' })
+
+// Reviews
+export const getReviews           = ()          => req('/reviews')
+export const addReview            = (data)      => req('/reviews', { method:'POST', body:JSON.stringify(data) })

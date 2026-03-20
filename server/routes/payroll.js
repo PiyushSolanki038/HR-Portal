@@ -17,27 +17,71 @@ router.get('/employee/:empId', async (req, res) => {
   }
 })
 
-function calcSalary(emp) {
+function calcSalary(emp, manualDeductions = 0) {
   const leaves = parseInt(emp.leaves) || 0
   const late   = parseInt(emp.late)   || 0
-  let deductions = 0
-  if (leaves > 3)  deductions += (leaves - 3) * 500
-  if (late   > 5)  deductions += 200
+  
+  let leaveDeduction = leaves > 3 ? (leaves - 3) * 500 : 0
+  let lateDeduction = late > 5 ? 200 : 0
+  let deductions = leaveDeduction + lateDeduction + manualDeductions
+  
   return {
     gross:      parseInt(emp.salary) || 0,
     deductions,
-    net:        (parseInt(emp.salary) || 0) - deductions
+    net:        (parseInt(emp.salary) || 0) - deductions,
+    breakdown: {
+      leavesUsed: leaves,
+      lates: late,
+      leaveDeduction,
+      lateDeduction,
+      other: manualDeductions,
+      total: deductions
+    }
   }
 }
 
 router.get('/', async (req, res) => {
   try {
-    const employees = await readSheet('Employees')
-    const payroll = employees.map(emp => ({
-      emp,
-      ...calcSalary(emp),
-      sent: false
-    }))
+    const [employees, governance, waivers] = await Promise.all([
+      readSheet('Employees'),
+      readSheet('Governance'),
+      readSheet('Waivers')
+    ])
+
+    const monthLabel = new Date().toLocaleDateString('en-IN', { month:'long', year:'numeric' })
+    const now = new Date()
+    const currentMonthIdx = now.getMonth()
+    const currentYear = now.getFullYear()
+
+      const payroll = employees.map(emp => {
+        const targetId = String(emp.id).trim()
+        
+        const empPenalties = governance
+          .filter(g => {
+            if (String(g.empId).trim() !== targetId || g.type !== 'disciplinary') return false
+            const d = new Date(g.date)
+            return d.getMonth() === currentMonthIdx && d.getFullYear() === currentYear
+          })
+          .reduce((sum, g) => sum + (parseFloat(g.penalty) || 0), 0)
+
+        const empWaivers = waivers
+          .filter(w => String(w.empId).trim() === targetId && String(w.month).trim() === monthLabel)
+          .reduce((sum, w) => sum + (parseFloat(w.amount) || 0), 0)
+
+      const salaryInfo = calcSalary(emp, empPenalties)
+      
+      // Apply waivers to total deductions and also update breakdown
+      salaryInfo.deductions = Math.max(0, salaryInfo.deductions - empWaivers)
+      salaryInfo.net = salaryInfo.gross - salaryInfo.deductions
+      salaryInfo.breakdown.waivers = empWaivers
+      salaryInfo.breakdown.total = salaryInfo.deductions
+
+      return {
+        emp,
+        ...salaryInfo,
+        sent: false
+      }
+    })
     res.json(payroll)
   } catch (err) {
     console.error('[API_ERROR] GET /api/payroll:', err.message)

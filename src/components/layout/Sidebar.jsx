@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Clock, CalendarOff, CheckSquare,
   MessageSquare, UserPlus, FileCheck, FileText,
   Users, Wallet, TrendingUp, Shield, Settings,
-  LogOut, Briefcase, ShieldAlert, Award
+  LogOut, Briefcase, ShieldAlert, Award, Zap
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
@@ -11,26 +11,28 @@ import { useData } from '../../context/DataContext'
 const ADMIN_NAV = [
   { section: 'Overview', roles: ['Admin', 'HR Manager', 'Finance'], items: [
     { to: '/',            icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/analytics',   icon: TrendingUp,    label: 'Analytics' },
+    { to: '/employee-reviews', icon: Award,       label: 'Employee Reviews' },
+    { to: '/action-center', icon: Zap,          label: 'Action Center', roles: ['Admin'] },
+    { to: '/settings',    icon: Settings,      label: 'Settings', roles: ['Admin'] },
   ]},
-  { section: 'HR Operations', roles: ['Admin', 'HR Manager'], items: [
-    { to: '/attendance',  icon: Clock,         label: 'Attendance' },
-    { to: '/leaves',      icon: CalendarOff,   label: 'Leaves' },
-    { to: '/approvals',   icon: CheckSquare,   label: 'Approvals', badge: 'pendingLeaves' },
-    { to: '/tasks',       icon: CheckSquare,   label: 'Task Manager' },
-    { to: '/disciplinary', icon: ShieldAlert,   label: 'Disciplinary' },
-    { to: '/communication', icon: MessageSquare, label: 'Communication', badge: 'unreadNotifs' },
-    { to: '/mentors',     icon: Users,         label: 'Mentors' },
-    { to: '/deductions',  icon: TrendingUp,    label: 'Deductions' },
-  ]},
-  { section: 'Talent', roles: ['Admin', 'HR Manager'], items: [
+  { section: 'Workforce', roles: ['Admin', 'HR Manager'], items: [
+    { to: '/employees',   icon: Users,         label: 'Employees' },
     { to: '/hiring',      icon: UserPlus,      label: 'Hiring' },
     { to: '/onboarding',  icon: FileCheck,     label: 'Onboarding' },
     { to: '/documents',   icon: FileText,      label: 'Documents' },
   ]},
-  { section: 'People', roles: ['Admin', 'HR Manager'], items: [
-    { to: '/employees',   icon: Users,         label: 'Employees' },
+  { section: 'HR Operations', roles: ['Admin', 'HR Manager'], items: [
+    { to: '/approvals',   icon: CheckSquare,   label: 'Approvals', badge: 'pendingLeaves' },
+    { to: '/attendance',  icon: Clock,         label: 'Attendance' },
+    { to: '/leaves',      icon: CalendarOff,   label: 'Leaves' },
+    { to: '/tasks',       icon: CheckSquare,   label: 'Task Manager' },
+    { to: '/disciplinary', icon: ShieldAlert,   label: 'Disciplinary' },
+    { to: '/mentors',     icon: Users,         label: 'Mentors' },
+    { to: '/deductions',  icon: TrendingUp,    label: 'Deductions' },
+    { to: '/communication', icon: MessageSquare, label: 'Communication', badge: 'unreadNotifs' },
   ]},
-  { section: 'Finance', roles: ['Admin', 'Finance'], items: [
+  { section: 'Finance Hub', roles: ['Admin', 'Finance'], items: [
     { to: '/finance-dashboard', icon: LayoutDashboard, label: 'Finance Hub' },
     { to: '/payroll',     icon: Wallet,        label: 'Payroll' },
     { to: '/salary',      icon: Briefcase,     label: 'Salary Slips' },
@@ -39,10 +41,8 @@ const ADMIN_NAV = [
     { to: '/loans-advances', icon: Users,      label: 'Loans & EMI' },
     { to: '/finance-audit', icon: Shield,      label: 'Audit Log' },
   ]},
-  { section: 'System', roles: ['Admin', 'HR Manager'], items: [
-    { to: '/analytics',   icon: TrendingUp,    label: 'Analytics' },
+  { section: 'System Governance', roles: ['Admin', 'HR Manager'], items: [
     { to: '/audit',       icon: Shield,        label: 'Audit Log' },
-    { to: '/settings',    icon: Settings,      label: 'Settings', roles: ['Admin'] },
   ]},
   { section: 'Personal Workspace', roles: ['HR Manager', 'Finance'], items: [
     { to: '/my-attendance', icon: Clock, label: 'My Attendance' },

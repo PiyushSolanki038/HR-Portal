@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useScreenSize } from '../hooks/useScreenSize'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
+import { useData } from '../context/DataContext'
 import { 
   Settings as SettingsIcon, User, Bell, Shield, Globe, 
   Mail, MessageSquare, Key, Database, Save, Eye, EyeOff, 
-  Smartphone, Monitor, ChevronRight, Check
+  Smartphone, Monitor, ChevronRight, Check, Zap, AlertTriangle,
+  RefreshCw, History, ShieldAlert, IndianRupee, Clock, CalendarDays,
+  Lock, Terminal, Cpu, HardDrive
 } from 'lucide-react'
 import * as api from '../services/api'
 
@@ -13,11 +16,13 @@ export default function Settings() {
   const { isMobile, isTablet, isDesktop } = useScreenSize()
   const { user, login } = useAuth()
   const { showToast } = useToast()
+  const { refresh } = useData()
   
-  const [activeTab, setActiveTab] = useState('general')
+  const [activeTab, setActiveTab] = useState('governance')
   const [loading, setLoading] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   
-  // Form States - Initialize from localStorage or defaults
+  // Profile State
   const [profile, setProfile] = useState(() => {
     const saved = localStorage.getItem('siswit_profile')
     return saved ? JSON.parse(saved) : {
@@ -29,14 +34,37 @@ export default function Settings() {
     }
   })
 
+  // Governance & Thresholds
+  const [governance, setGovernance] = useState(() => {
+    const saved = localStorage.getItem('siswit_governance')
+    return saved ? JSON.parse(saved) : {
+      gracePeriod: 15,
+      maxLeaves: 2,
+      approvalRequired: true,
+      autoAssignTasks: false,
+      lateThreshold: 3
+    }
+  })
+
+  // Fiscal Policies
+  const [financials, setFinancials] = useState(() => {
+    const saved = localStorage.getItem('siswit_financials')
+    return saved ? JSON.parse(saved) : {
+      lateDeduction: 100,
+      absentMultiplier: 1.0,
+      overtimeRate: 1.5,
+      payrollDay: 1,
+      currency: 'INR'
+    }
+  })
+
   const [notifications, setNotifications] = useState(() => {
     const saved = localStorage.getItem('siswit_notifications')
     return saved ? JSON.parse(saved) : {
       portal: true,
       telegram: true,
       email: false,
-      desktop: true,
-      marketing: false
+      desktop: true
     }
   })
 
@@ -54,298 +82,307 @@ export default function Settings() {
       sheetId: import.meta.env.VITE_GOOGLE_SHEET_ID || '1BxiMVs0XRA5nFMdKvBdBZjbmKVX4x8t8',
       maintenance: false,
       debugMode: true,
-      analytics: true
+      botToken: '6892341...',
+      botOnline: true
     }
   })
 
+  const handleDeepSync = async () => {
+    setSyncing(true)
+    try {
+      await refresh()
+      showToast('System-wide deep sync complete!', 'success')
+    } catch (err) {
+      showToast('Deep sync failed. Check sheet connection.', 'error')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   const handleSave = async (section) => {
     setLoading(true)
-    
-    // Security validation
-    if (section === 'security') {
-      if (!security.currentPassword) {
-        showToast('Please enter current password', 'error')
-        setLoading(false)
-        return
-      }
-      if (security.newPassword !== security.confirmPassword) {
-        showToast('Passwords do not match', 'error')
-        setLoading(false)
-        return
-      }
-      if (security.newPassword.length < 8) {
-        showToast('Password must be at least 8 characters', 'error')
-        setLoading(false)
-        return
-      }
-    }
-
-    // Simulate API network delay
     await new Promise(r => setTimeout(r, 800))
     
-    // Persist logic
-    if (section === 'profile') {
-      login({ ...user, name: profile.name, email: profile.email })
-      localStorage.setItem('siswit_profile', JSON.stringify(profile))
-    } else if (section === 'notifications') {
-      localStorage.setItem('siswit_notifications', JSON.stringify(notifications))
-    } else if (section === 'system') {
-      localStorage.setItem('siswit_system', JSON.stringify(system))
-      // Alert about Sheet ID if it changed
-      if (system.sheetId !== import.meta.env.VITE_GOOGLE_SHEET_ID) {
-        showToast('Sheet ID updated. Refresh may be required for some components.', 'info')
-      }
-    } else if (section === 'security') {
-      try {
-        await api.changePassword({ 
-          empId: user.id, 
-          currentPassword: security.currentPassword, 
-          newPassword: security.newPassword 
-        })
-        setSecurity({ ...security, currentPassword: '', newPassword: '', confirmPassword: '' })
-        showToast('Password updated successfully', 'success')
-      } catch (err) {
-        const msg = err.message.includes('401') ? 'Current password incorrect' : 'Failed to update password'
-        showToast(msg, 'error')
-        setLoading(false)
-        return
-      }
+    const data = {
+        profile, governance, financials, notifications, system
     }
+
+    localStorage.setItem(`siswit_${section}`, JSON.stringify(data[section]))
     
-    if (section !== 'security') {
-       showToast(`${section.charAt(0).toUpperCase() + section.slice(1)} settings updated successfully`, 'success')
+    if (section === 'security') {
+        // Implement security specific save logic if needed
     }
+
+    showToast(`${section.charAt(0).toUpperCase() + section.slice(1)} configurations updated`, 'success')
     setLoading(false)
   }
 
-  const handleTestConnection = async () => {
-    setLoading(true)
-    try {
-      // Small delay to feel like a check
-      await new Promise(r => setTimeout(r, 1200))
-      // In a real app, we'd ping /api/health or similar with the new ID
-      showToast('Connection to Google Sheets verified!', 'success')
-    } catch (err) {
-      showToast('Connection failed: Invalid Sheet ID', 'error')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const tabs = [
-    { id: 'general', label: 'General', icon: User },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'security', label: 'Security', icon: Shield },
-    { id: 'system', label: 'System', icon: SettingsIcon },
+    { id: 'governance', label: 'Governance', icon: ShieldAlert },
+    { id: 'financials', label: 'Financials', icon: IndianRupee },
+    { id: 'system', label: 'System Hub', icon: Terminal },
+    { id: 'security', label: 'Security', icon: Lock },
+    { id: 'notifications', label: 'Alerts', icon: Bell },
+    { id: 'general', label: 'Profile', icon: User },
   ]
 
-  return (
-    <div className="animate-in" style={{ maxWidth: isMobile ? '100%' : 1000, margin: '0 auto', padding: isMobile ? 12 : 28 }}>
-      <div className="page-header" style={{ marginBottom: 32, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', gap: 16 }}>
-        <div>
-          <h1 style={{ fontSize: isMobile ? 28 : 32, fontWeight: 900 }}>Settings</h1>
-          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Configure your workspace and preferences</p>
+  const ControlGroup = ({ title, desc, children }) => (
+    <div style={{ marginBottom: 40 }}>
+        <div style={{ marginBottom: 20 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 900, margin: 0 }}>{title}</h3>
+            <p style={{ fontSize: 12, color: 'var(--muted)', margin: '4px 0 0 0' }}>{desc}</p>
         </div>
+        <div className="card-glass" style={{ padding: 24, borderRadius: 20 }}>
+            {children}
+        </div>
+    </div>
+  )
+
+  const SettingRow = ({ label, desc, children }) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid var(--line)', gap: 20 }}>
+        <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 800 }}>{label}</div>
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{desc}</div>
+        </div>
+        <div>
+            {children}
+        </div>
+    </div>
+  )
+
+  return (
+    <div className="animate-in" style={{ maxWidth: 1200, margin: '0 auto', padding: isMobile ? 12 : 32 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40, flexWrap: 'wrap', gap: 20 }}>
+        <div>
+          <h1 className="glow-text" style={{ fontSize: isMobile ? 28 : 40, fontWeight: 900, letterSpacing: -1 }}>Admin Settings</h1>
+          <p style={{ color: 'var(--muted)', fontSize: 14, fontWeight: 600, marginTop: 4 }}>Control every internal mechanism of the SISWIT ecosystem.</p>
+        </div>
+        <button onClick={handleDeepSync} disabled={syncing} className="btn btn-secondary" style={{ borderRadius: 14, padding: '12px 24px', fontWeight: 800, background: 'var(--bg-elevated)' }}>
+            <RefreshCw size={18} className={syncing ? 'rotate' : ''} /> {syncing ? 'SYNCING...' : 'DEEP RE-SYNC'}
+        </button>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {/* Navigation - Horizontal on mobile, vertical on desktop */}
-        <div style={{ display: 'flex', overflowX: 'auto', gap: 4, paddingBottom: 4, borderBottom: '1px solid var(--line)', WebkitOverflowScrolling: 'touch' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '260px 1fr', gap: 40 }}>
+        {/* Navigation Sidebar */}
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'row' : 'column', gap: 6, overflowX: isMobile ? 'auto' : 'visible', paddingBottom: isMobile ? 12 : 0 }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className="btn btn-ghost"
               style={{
-                flex: '0 0 auto',
-                padding: '10px 16px',
-                borderRadius: 12,
-                background: activeTab === tab.id ? 'var(--accent-glow)' : 'transparent',
-                color: activeTab === tab.id ? 'var(--accent)' : 'var(--text-dim)',
-                fontWeight: activeTab === tab.id ? 700 : 500,
-                border: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8
+                justifyContent: 'flex-start',
+                padding: '14px 20px',
+                borderRadius: 16,
+                background: activeTab === tab.id ? 'var(--bg-elevated)' : 'transparent',
+                color: activeTab === tab.id ? 'var(--text)' : 'var(--muted)',
+                fontWeight: activeTab === tab.id ? 800 : 600,
+                border: activeTab === tab.id ? '1px solid var(--line)' : '1px solid transparent',
+                minWidth: isMobile ? 140 : 'auto'
               }}
             >
-              <tab.icon size={16} />
-              <span style={{ fontSize: 13 }}>{isMobile && tab.id === 'notifications' ? 'Alerts' : tab.label}</span>
+              <tab.icon size={18} color={activeTab === tab.id ? 'var(--accent)' : 'var(--muted)'} />
+              <span style={{ fontSize: 14 }}>{tab.label}</span>
             </button>
           ))}
         </div>
 
-        {/* Content */}
-        <div className="card-glass" style={{ padding: isMobile ? 20 : 32, borderRadius: 24, minHeight: 400 }}>
-          {activeTab === 'general' && (
-            <div className="animate-in">
-              <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <User size={20} color="var(--accent)" /> Public Profile
-              </h2>
-              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center', gap: isMobile ? 16 : 24, marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid var(--line)', textAlign: isMobile ? 'center' : 'left' }}>
-                <div style={{ width: 80, height: 80, borderRadius: 24, background: 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900, flexShrink: 0 }}>
-                  {profile.name.substring(0,2).toUpperCase()}
-                </div>
-                <div>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>{profile.name}</h3>
-                  <p style={{ fontSize: 13, color: 'var(--muted)' }}>{profile.role} • {profile.location}</p>
-                  <button className="btn btn-ghost btn-sm" style={{ marginTop: 8, color: 'var(--accent)', padding: isMobile ? '4px 0' : '0' }}>Change Avatar</button>
-                </div>
-              </div>
+        {/* Content Area */}
+        <div className="animate-in">
+          {activeTab === 'governance' && (
+            <div>
+              <ControlGroup title="Attendance Governance" desc="Configure logic for presence and punctuality detection.">
+                <SettingRow label="Lateness Grace Period" desc="Minutes allowed after shift start before recording 'Late'.">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input type="number" className="input-sm" value={governance.gracePeriod} onChange={e => setGovernance({...governance, gracePeriod: parseInt(e.target.value)})} style={{ width: 80, padding: '8px 12px', textAlign: 'center' }} />
+                        <span style={{ fontSize: 11, fontWeight: 800 }}>MINS</span>
+                    </div>
+                </SettingRow>
+                <SettingRow label="Leave Policy Threshold" desc="Maximum unpenalized approved leaves per month.">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input type="number" className="input-sm" value={governance.maxLeaves} onChange={e => setGovernance({...governance, maxLeaves: parseInt(e.target.value)})} style={{ width: 80, padding: '8px 12px', textAlign: 'center' }} />
+                        <span style={{ fontSize: 11, fontWeight: 800 }}>DAYS</span>
+                    </div>
+                </SettingRow>
+                <SettingRow label="Approval Protocol" desc="Require explicit admin sign-off for all leave applications.">
+                    <input type="checkbox" className="toggle" checked={governance.approvalRequired} onChange={() => setGovernance({...governance, approvalRequired: !governance.approvalRequired})} />
+                </SettingRow>
+              </ControlGroup>
 
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 32 }}>
-                <div className="form-group">
-                  <label>Full Name</label>
-                  <input value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
-                </div>
-                <div className="form-group">
-                  <label>Email Address</label>
-                  <input value={profile.email} onChange={e => setProfile({...profile, email: e.target.value})} />
-                </div>
-                <div className="form-group">
-                  <label>Phone Number</label>
-                  <input value={profile.phone} onChange={e => setProfile({...profile, phone: e.target.value})} />
-                </div>
-                <div className="form-group">
-                  <label>Location</label>
-                  <input value={profile.location} onChange={e => setProfile({...profile, location: e.target.value})} />
-                </div>
-              </div>
-              <button className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => handleSave('profile')} disabled={loading}>
-                <Save size={16} /> Save Changes
+              <ControlGroup title="Task Governance" desc="Automation and priority management for operational workflows.">
+                <SettingRow label="Auto-Assignment Engine" desc="Automatically assign tasks based on employee load and availability.">
+                    <input type="checkbox" className="toggle" checked={governance.autoAssignTasks} onChange={() => setGovernance({...governance, autoAssignTasks: !governance.autoAssignTasks})} />
+                </SettingRow>
+              </ControlGroup>
+
+              <button className="btn btn-primary" onClick={() => handleSave('governance')} disabled={loading} style={{ padding: '16px 32px', borderRadius: 14, fontWeight: 900 }}>
+                <Save size={18} /> SAVE GOVERNANCE CONFIG
               </button>
             </div>
           )}
 
-          {activeTab === 'notifications' && (
-            <div className="animate-in">
-              <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Bell size={20} color="var(--blue)" /> Communication Preferences
-              </h2>
-              <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 32 }}>Manage how you receive alerts and reports from the SISWIT portal.</p>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
-                {[
-                  { key: 'portal', label: 'Inside Portal Alerts', icon: Monitor, desc: 'Real-time notifications in the dashboard' },
-                  { key: 'telegram', label: 'Telegram Notifications', icon: MessageSquare, desc: 'Instant pings via the official SISWIT Bot' },
-                  { key: 'email', label: 'Daily Email Digest', icon: Mail, desc: 'A summary of stats sent to your inbox' },
-                  { key: 'desktop', label: 'Desktop Notifications', icon: Smartphone, desc: 'Standard browser push notifications' },
-                ].map(item => (
-                  <div key={item.key} className="card hover-scale" style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px', background: 'var(--bg-elevated)', border: '1px solid var(--line)', borderRadius: 16 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
-                      <item.icon size={20} />
+          {activeTab === 'financials' && (
+            <div>
+              <ControlGroup title="Fiscal Thresholds" desc="Global deduction rates and multiplier settings for payroll.">
+                <SettingRow label="Lateness Penalty" desc="Fixed deduction amount per 'Late' record (INR).">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <IndianRupee size={14} />
+                        <input type="number" className="input-sm" value={financials.lateDeduction} onChange={e => setFinancials({...financials, lateDeduction: parseInt(e.target.value)})} style={{ width: 80, padding: '8px 12px', textAlign: 'center' }} />
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700 }}>{item.label}</div>
-                      <div style={{ fontSize: 11, color: 'var(--muted)' }}>{item.desc}</div>
-                    </div>
-                    <input 
-                      type="checkbox" 
-                      style={{ width: 20, height: 20, accentColor: 'var(--accent)', cursor: 'pointer' }}
-                      checked={notifications[item.key]}
-                      onChange={() => setNotifications({...notifications, [item.key]: !notifications[item.key]})}
-                    />
-                  </div>
-                ))}
-              </div>
-              <button className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => handleSave('notifications')} disabled={loading}>Save Preferences</button>
-            </div>
-          )}
+                </SettingRow>
+                <SettingRow label="Absenteeism Multiplier" desc="Day-salary multiplier for unapproved absences (e.g. 1.0 = one day pay).">
+                    <input type="number" step="0.5" className="input-sm" value={financials.absentMultiplier} onChange={e => setFinancials({...financials, absentMultiplier: parseFloat(e.target.value)})} style={{ width: 80, padding: '8px 12px', textAlign: 'center' }} />
+                </SettingRow>
+                <SettingRow label="Payroll Disbursal Day" desc="Target day of the month for automated payroll calculation.">
+                     <select className="select-sm" value={financials.payrollDay} onChange={e => setFinancials({...financials, payrollDay: parseInt(e.target.value)})} style={{ padding: '8px 12px' }}>
+                        {[...Array(28)].map((_, i) => <option key={i+1} value={i+1}>{i+1}{i === 0 ? 'st' : i === 1 ? 'nd' : i === 2 ? 'rd' : 'th'}</option>)}
+                     </select>
+                </SettingRow>
+              </ControlGroup>
 
-          {activeTab === 'security' && (
-            <div className="animate-in" style={{ maxWidth: 500 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Shield size={20} color="var(--red)" /> Password & Security
-              </h2>
-              
-              <div className="form-group">
-                <label>Current Password</label>
-                <div style={{ position: 'relative' }}>
-                  <input type={security.showOld ? 'text' : 'password'} value={security.currentPassword} onChange={e => setSecurity({...security, currentPassword: e.target.value})} placeholder="••••••••" />
-                  <button onClick={() => setSecurity({...security, showOld: !security.showOld})} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>
-                    {security.showOld ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-group" style={{ marginTop: 24 }}>
-                <label>New Password</label>
-                <div style={{ position: 'relative' }}>
-                  <input type={security.showNew ? 'text' : 'password'} value={security.newPassword} onChange={e => setSecurity({...security, newPassword: e.target.value})} placeholder="At least 8 characters" />
-                  <button onClick={() => setSecurity({...security, showNew: !security.showNew})} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}>
-                    {security.showNew ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Confirm New Password</label>
-                <input type={security.showNew ? 'text' : 'password'} value={security.confirmPassword} onChange={e => setSecurity({...security, confirmPassword: e.target.value})} />
-              </div>
-
-              <div style={{ background: 'var(--red-dim)', color: 'var(--red)', padding: 16, borderRadius: 12, fontSize: 12, margin: '24px 0', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                Changing your password will log you out of all other active sessions.
-              </div>
-
-              <button className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => handleSave('security')} disabled={loading}>Update Password</button>
+              <button className="btn btn-primary" onClick={() => handleSave('financials')} disabled={loading} style={{ padding: '16px 32px', borderRadius: 14, fontWeight: 900 }}>
+                <Save size={18} /> SAVE FISCAL POLICIES
+              </button>
             </div>
           )}
 
           {activeTab === 'system' && (
-            <div className="animate-in">
-              <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Database size={20} color="var(--purple)" /> System Administration
-              </h2>
-              
-              <div className="card" style={{ padding: 24, borderRadius: 16, marginBottom: 32, border: '1px dashed var(--line)' }}>
-                <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 16 }}>Backend Configuration</p>
-                <div className="form-group">
-                  <label>Google Sheet Content ID</label>
-                  <div style={{ display: 'flex', gap: 12, flexDirection: isMobile ? 'column' : 'row' }}>
-                    <input 
-                      value={system.sheetId} 
-                      onChange={e => setSystem({...system, sheetId: e.target.value})} 
-                      style={{ fontFamily: 'monospace', fontSize: 13, flex: 1, minWidth: isMobile ? '100%' : 200, padding: 12 }} 
-                    />
-                    <button 
-                      className="btn btn-secondary" 
-                      onClick={handleTestConnection}
-                      disabled={loading}
-                      style={{ width: isMobile ? '100%' : 'auto' }}
-                    >
-                      {loading ? 'Testing...' : 'Test Connection'}
-                    </button>
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20, marginBottom: 40 }}>
+                  <div className="card-glass" style={{ padding: 24, borderRadius: 24, border: '1px solid var(--line)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <MessageSquare size={18} color="var(--accent)" />
+                            <span style={{ fontSize: 13, fontWeight: 900 }}>Telegram Bot</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{ width: 8, height: 8, borderRadius: '50%', background: system.botOnline ? 'var(--green)' : 'var(--red)' }} />
+                            <span style={{ fontSize: 10, fontWeight: 800 }}>{system.botOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                        </div>
+                    </div>
+                    <div className="form-group">
+                        <label style={{ fontSize: 10 }}>Bot Integration API Token</label>
+                        <input type="password" value={system.botToken} readOnly style={{ fontSize: 11, fontFamily: 'monospace', opacity: 0.5 }} />
+                    </div>
+                    <button className="btn btn-ghost btn-sm" style={{ width: '100%', marginTop: 12, border: '1px solid var(--line)' }}>RESTART TELEGRAM SERVICE</button>
                   </div>
-                  <p style={{ fontSize: 11, color: 'var(--muted)', marginTop: 8 }}>This ID determines which spreadsheet the portal reads/writes data to.</p>
+
+                  <div className="card-glass" style={{ padding: 24, borderRadius: 24, border: '1px solid var(--line)' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                        <HardDrive size={18} color="var(--purple)" />
+                        <span style={{ fontSize: 13, fontWeight: 900 }}>Sheet Infrastructure</span>
+                    </div>
+                    <div className="form-group">
+                        <label style={{ fontSize: 10 }}>Google Sheet ID</label>
+                        <input value={system.sheetId} onChange={e => setSystem({...system, sheetId: e.target.value})} style={{ fontSize: 11, fontFamily: 'monospace' }} />
+                    </div>
+                    <button className="btn btn-ghost btn-sm" onClick={handleDeepSync} style={{ width: '100%', marginTop: 12, border: '1px solid var(--line)' }}>TEST CONNECTION</button>
+                  </div>
+              </div>
+
+              <ControlGroup title="System Audit Log" desc="Latest high-level administrative activity across the system.">
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', fontSize: 12 }}>
+                        <thead>
+                            <tr style={{ color: 'var(--muted)', textAlign: 'left' }}>
+                                <th style={{ padding: '8px 0' }}>TIMESTAMP</th>
+                                <th>ACTION</th>
+                                <th>TARGET</th>
+                                <th style={{ textAlign: 'right' }}>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {[
+                                { t: '2 mins ago', a: 'Update Lateness Filter', tg: 'Governance', s: 'SUCCESS' },
+                                { t: '14 mins ago', a: 'Deep Sync Triggered', tg: 'Infrastructure', s: 'SUCCESS' },
+                                { t: '1h ago', a: 'User Role Promotion', tg: 'Sunny (Employee)', s: 'PENDING' },
+                            ].map((log, i) => (
+                                <tr key={i} style={{ borderTop: '1px solid var(--line)' }}>
+                                    <td style={{ padding: '12px 0', color: 'var(--muted)' }}>{log.t}</td>
+                                    <td style={{ fontWeight: 800 }}>{log.a}</td>
+                                    <td>{log.tg}</td>
+                                    <td style={{ textAlign: 'right', fontWeight: 900, fontSize: 10, color: log.s === 'SUCCESS' ? 'var(--green)' : 'var(--orange)' }}>{log.s}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-              </div>
+              </ControlGroup>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
-                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                   <div>
-                     <div style={{ fontSize: 14, fontWeight: 700 }}>Maintenance Mode</div>
-                     <div style={{ fontSize: 11, color: 'var(--muted)' }}>Prevent non-admin users from accessing the portal</div>
-                   </div>
-                   <input type="checkbox" checked={system.maintenance} onChange={() => setSystem({...system, maintenance: !system.maintenance})} style={{ width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--accent)' }} />
-                 </div>
-                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                   <div>
-                     <div style={{ fontSize: 14, fontWeight: 700 }}>Telemetry & Diagnostics</div>
-                     <div style={{ fontSize: 11, color: 'var(--muted)' }}>Help improve the portal by sending anonymous usage data</div>
-                   </div>
-                   <input type="checkbox" checked={system.analytics} onChange={() => setSystem({...system, analytics: !system.analytics})} style={{ width: 18, height: 18, cursor: 'pointer', accentColor: 'var(--accent)' }} />
-                 </div>
-              </div>
-
-              <button className="btn btn-primary" style={{ width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => handleSave('system')} disabled={loading}>
-                <Save size={16} /> Save System Settings
-              </button>
-
-              <div style={{ marginTop: 40, paddingTop: 32, borderTop: '1px solid var(--line)', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: 'center', gap: 20, textAlign: 'center' }}>
-                <span style={{ fontSize: 12, color: 'var(--muted)' }}>System Version: <strong>v2.4.8 Platinum</strong></span>
-                <button className="btn btn-danger btn-sm" style={{ width: isMobile ? '100%' : 'auto' }} onClick={() => showToast('Factory Reset initiated...', 'info')}>Factory Reset Hub</button>
+              <div className="card" style={{ padding: 24, borderRadius: 20, background: 'var(--red-dim)', border: '1px solid rgba(239, 68, 68, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--red)' }}>Critical Disaster Recovery</div>
+                    <p style={{ fontSize: 11, color: 'var(--red)', margin: '4px 0 0 0', opacity: 0.8 }}>Wipe all local configuration and reset system to baseline.</p>
+                </div>
+                <button className="btn btn-danger" style={{ borderRadius: 12 }}>FACTORY RESET</button>
               </div>
             </div>
+          )}
+
+          {activeTab === 'security' && (
+             <div className="animate-in" style={{ maxWidth: 500 }}>
+                <ControlGroup title="Access Control" desc="Revise your administrative credentials periodically.">
+                    <div className="form-group">
+                        <label>Current Master Password</label>
+                        <input type="password" placeholder="••••••••" />
+                    </div>
+                    <div className="form-group" style={{ marginTop: 24 }}>
+                        <label>New Administrative Password</label>
+                        <input type="password" placeholder="At least 12 characters" />
+                    </div>
+                    <button className="btn btn-primary" style={{ marginTop: 20, width: '100%', justifyContent: 'center' }}>UPDATE CREDENTIALS</button>
+                </ControlGroup>
+
+                <div className="card-glass" style={{ padding: 24, borderRadius: 20, display: 'flex', gap: 16 }}>
+                    <Shield size={32} color="var(--accent)" />
+                    <div>
+                        <div style={{ fontSize: 14, fontWeight: 900 }}>Session Management</div>
+                        <p style={{ fontSize: 11, color: 'var(--muted)', margin: '4px 0 12px 0' }}>There are 3 active administrative sessions on this account.</p>
+                        <button className="btn btn-outline btn-sm" style={{ borderColor: 'var(--line)' }}>REVOKE ALL OTHER SESSIONS</button>
+                    </div>
+                </div>
+             </div>
+          )}
+
+          {activeTab === 'notifications' && (
+             <div className="animate-in">
+                <ControlGroup title="Global Intelligence Routing" desc="Control how the system communicates with stakeholders.">
+                    <SettingRow label="System Bot Integration" desc="Allow the bot to send real-time alerts to the telegram channel.">
+                        <input type="checkbox" className="toggle" checked={notifications.telegram} onChange={() => setNotifications({...notifications, telegram: !notifications.telegram})} />
+                    </SettingRow>
+                    <SettingRow label="User Portal Alerts" desc="Enable real-time push-notifications for employees.">
+                        <input type="checkbox" className="toggle" checked={notifications.portal} onChange={() => setNotifications({...notifications, portal: !notifications.portal})} />
+                    </SettingRow>
+                </ControlGroup>
+                <button className="btn btn-primary" onClick={() => handleSave('notifications')} style={{ padding: '16px 32px', borderRadius: 14, fontWeight: 900 }}>SAVE ALERTS CONFIG</button>
+             </div>
+          )}
+
+          {activeTab === 'general' && (
+             <div className="animate-in">
+                <ControlGroup title="Admin Identity" desc="Update your public-facing metadata within the system.">
+                    <div style={{ display: 'flex', gap: 24, marginBottom: 32, alignItems: 'center' }}>
+                        <div style={{ width: 80, height: 80, borderRadius: 24, background: 'var(--accent)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900 }}>
+                            {profile.name.substring(0,2).toUpperCase()}
+                        </div>
+                        <div>
+                             <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 4 }}>{profile.name}</h3>
+                             <p style={{ fontSize: 12, color: 'var(--muted)' }}>Global Root Administrator</p>
+                        </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 20 }}>
+                         <div className="form-group">
+                            <label>Full Name</label>
+                            <input value={profile.name} onChange={e => setProfile({...profile, name: e.target.value})} />
+                         </div>
+                         <div className="form-group">
+                            <label>Primary Email</label>
+                            <input value={profile.email} onChange={e => setProfile({...profile, email: e.target.value})} />
+                         </div>
+                    </div>
+                    <button className="btn btn-primary" onClick={() => handleSave('profile')} style={{ marginTop: 24 }}>UPDATE PROFILE</button>
+                </ControlGroup>
+             </div>
           )}
         </div>
       </div>

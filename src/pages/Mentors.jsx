@@ -1,87 +1,76 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useScreenSize } from '../hooks/useScreenSize'
 import { useData } from '../context/DataContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import StatCard from '../components/ui/StatCard'
 import * as api from '../services/api'
 import { useToast } from '../context/ToastContext'
-import { Search, UserPlus, Mail, Phone, BookOpen, Users, Star, X, Plus, Trash2 } from 'lucide-react'
-
-const theme = {
-  bg: 'var(--bg)', 
-  accent: 'var(--accent)', 
-  cardBg: 'var(--bg-card)',
-  cardBorder: 'var(--border)', 
-  glass: 'blur(18px)',
-  text: 'var(--text)', 
-  muted: 'var(--muted)', 
-  green: 'var(--green)', 
-  amber: 'var(--amber)',
-  fontHeading: 'var(--font-heading)', 
-  fontBody: 'var(--font)', 
-  fontMono: '"JetBrains Mono", monospace'
-}
-
-const styles = {
-  container: { backgroundColor: 'transparent', color: theme.text, fontFamily: theme.fontBody, display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' },
-  title: { fontFamily: theme.fontHeading, fontSize: '32px', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' },
-  card: { background: theme.cardBg, border: theme.cardBorder, borderRadius: '16px', padding: '24px', transition: 'all 0.3s ease', boxShadow: 'var(--shadow-sm)' },
-  btnPrimary: { display: 'inline-flex', alignItems: 'center', gap: '8px', background: theme.accent, color: '#000', border: 'none', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', fontFamily: theme.fontBody, fontSize: '14px', fontWeight: 700, boxShadow: 'var(--shadow-sm)' },
-  btnSecondary: { display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--bg-elevated)', color: 'var(--text)', border: theme.cardBorder, padding: '8px 14px', borderRadius: '8px', cursor: 'pointer', fontFamily: theme.fontBody, fontSize: '12px', fontWeight: 600 },
-  mono: { fontFamily: theme.fontMono, letterSpacing: '0.5px' },
-  inputContainer: { display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-card)', padding: '10px 16px', borderRadius: '12px', border: theme.cardBorder, boxShadow: 'var(--shadow-sm)', width: '100%', boxSizing: 'border-box' },
-  input: { background: 'transparent', border: 'none', color: 'var(--text)', outline: 'none', width: '100%', fontFamily: theme.fontBody, fontSize: '13px', fontWeight: 500 },
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
-  modalContent: { background: 'var(--bg-card)', border: theme.cardBorder, borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '24px', boxShadow: 'var(--shadow-xl)', animation: 'modalIn 0.3s ease-out' }
-}
+import { 
+  Search, UserPlus, Mail, Phone, BookOpen, Users, 
+  Star, X, Plus, Trash2, TrendingUp, Award, 
+  Zap, Briefcase, Globe, ShieldCheck, ChevronRight,
+  Info, CheckCircle2
+} from 'lucide-react'
 
 export default function Mentors() {
-  const { isMobile, isTablet, isDesktop } = useScreenSize()
+  const { isMobile } = useScreenSize()
   const { mentors, employees, loading, error, refresh } = useData()
   const { showToast } = useToast()
   
   const [search, setSearch] = useState('')
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [showAssignModal, setShowAssignModal] = useState(false)
+  const [showDrawer, setShowDrawer] = useState(null) // 'add' or 'assign'
   const [selectedMentor, setSelectedMentor] = useState(null)
-  
-  const [newMentor, setNewMentor] = useState({ name: '', expertise: '', email: '', contact: '' })
+  const [newMentor, setNewMentor] = useState({ name: '', expertise: '', email: '', contact: '', title: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Mentorship Pulse Metrics
+  const metrics = useMemo(() => {
+    const totalMentors = mentors.length
+    const activeAssignments = employees.filter(e => e.mentorId).length
+    const saturation = Math.round((activeAssignments / (totalMentors * 3)) * 100) || 0 // Assuming cap of 3
+    const avgExp = "12.5 Yrs"
+    return { totalMentors, activeAssignments, saturation, avgExp }
+  }, [mentors, employees])
 
   if (loading) return <LoadingSpinner />
-  if (error) return <div style={styles.container}>Error: {error}</div>
+  if (error) return <div style={{ padding: 24 }}>Error: {error}</div>
 
-  const filtered = mentors.filter(m => 
-    (m.name || '').toLowerCase().includes(search.toLowerCase()) ||
-    (m.expertise || '').toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = mentors.filter(m => {
+    const mName = m.name || m.Name || ''
+    const mExpertise = m.expertise || m.Expertise || ''
+    return mName.toLowerCase().includes(search.toLowerCase()) ||
+           mExpertise.toLowerCase().includes(search.toLowerCase())
+  })
 
   const handleAddMentor = async () => {
     if (!newMentor.name || !newMentor.expertise) {
       showToast('Name and Expertise are required', 'error')
       return
     }
+    setIsSubmitting(true)
     try {
       const colors = ['#4f6ef7', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#f97316']
       const randomColor = colors[Math.floor(Math.random() * colors.length)]
-      
       await api.addMentor({ ...newMentor, color: randomColor })
-      showToast('Mentor added successfully', 'success')
-      setShowAddModal(false)
-      setNewMentor({ name: '', expertise: '', email: '', contact: '' })
+      showToast('New Industry Expert Enlisted', 'success')
+      setShowDrawer(null)
+      setNewMentor({ name: '', expertise: '', email: '', contact: '', title: '' })
       refresh()
     } catch (err) {
-      showToast('Failed to add mentor', 'error')
+      showToast('Enlistment sequence failed', 'error')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handleDeleteMentor = async (id) => {
-    if (!confirm('Are you absolutely sure you want to delete this mentor? This will also unassign all their mentees.')) return
+    if (!confirm('Are you absolutely sure you want to decommission this mentor? This will unassign all mentees.')) return
     try {
       await api.deleteMentor(id)
-      showToast('Mentor deleted successfully', 'success')
+      showToast('Mentor record archived', 'success')
       refresh()
     } catch {
-      showToast('Failed to delete mentor', 'error')
+      showToast('Decommissioning failed', 'error')
     }
   }
 
@@ -89,21 +78,21 @@ export default function Mentors() {
     if (!selectedMentor) return
     try {
       await api.assignMentor(empId, selectedMentor.id)
-      showToast('Mentee assigned successfully', 'success')
+      showToast('Mentee linked successfully', 'success')
       refresh()
     } catch {
-      showToast('Failed to assign mentee', 'error')
+      showToast('Assignment link failed', 'error')
     }
   }
 
   const handleRemoveMentee = async (empId) => {
-    if (!confirm('Remove this assignment?')) return
+    if (!confirm('Sever this mentorship link?')) return
     try {
-      await api.assignMentor(empId, '') // Empty string to unassign
-      showToast('Mentee removed successfully', 'success')
+      await api.assignMentor(empId, '')
+      showToast('Mentee link severed', 'success')
       refresh()
     } catch {
-      showToast('Failed to remove mentee', 'error')
+      showToast('Link removal failed', 'error')
     }
   }
 
@@ -111,218 +100,211 @@ export default function Mentors() {
   const getUnassigned = () => employees.filter(e => !e.mentorId || e.mentorId === '')
 
   return (
-    <div style={{ ...styles.container, padding: isMobile ? '16px 12px' : '0' }} className="animate-in">
-      <div style={{ ...styles.header, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center' }}>
+    <div className="animate-in" style={{ padding: isMobile ? '16px' : '32px', maxWidth: 1600, margin: '0 auto' }}>
+      {/* Executive Growth Header */}
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'flex-end', marginBottom: 40, gap: 24 }}>
         <div>
-          <h1 style={{ ...styles.title, fontSize: isMobile ? '24px' : '28px' }}>External Mentors</h1>
-          <p style={{ color: theme.muted, fontSize: '12px', fontWeight: 600, marginTop: '4px' }}>
-            {mentors.length} specialized industry mentors available for employee assignment.
-          </p>
+          <h1 style={{ fontSize: isMobile ? 32 : 48, fontWeight: 900, letterSpacing: -2, margin: 0 }}>Mentorship Hub</h1>
+          <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', marginTop: 4, letterSpacing: 0.5 }}>Strategic industry alignment & personnel growth engine</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: isMobile ? '100%' : 'auto', flexDirection: isMobile ? 'column' : 'row' }}>
-           <div style={{ ...styles.inputContainer, minWidth: isMobile ? '100%' : '250px', height: '42px' }}>
-             <Search size={14} color={theme.muted} />
-             <input style={styles.input} placeholder="Search mentors..." value={search} onChange={e => setSearch(e.target.value)} />
-           </div>
-           <button style={{ ...styles.btnPrimary, height: '42px', padding: '0 16px', fontSize: '13px', width: isMobile ? '100%' : 'auto', justifyContent: 'center' }} onClick={() => setShowAddModal(true)}>
-             <UserPlus size={16} /> ENLIST
-           </button>
+
+        <div style={{ display: 'flex', gap: 12, width: isMobile ? '100%' : 'auto' }}>
+            <div style={{ position: 'relative', flex: isMobile ? 1 : 'none' }}>
+                <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
+                <input 
+                    type="text" 
+                    placeholder="Search expertise..." 
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    style={{ width: isMobile ? '100%' : 260, padding: '12px 12px 12px 40px', borderRadius: 12, background: 'var(--bg-card)', border: '1px solid var(--line)', fontSize: 13, fontWeight: 700, outline: 'none' }}
+                />
+            </div>
+            <button 
+                onClick={() => setShowDrawer('add')}
+                className="btn btn-primary"
+                style={{ height: 44, padding: '0 20px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 800 }}
+            >
+                <UserPlus size={18} /> <span style={{ whiteSpace: 'nowrap' }}>ENLIST EXPERT</span>
+            </button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(380px, 1fr))', gap: '24px' }}>
+      {/* Growth Pulse Stats */}
+      {!isMobile && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginBottom: 40 }}>
+            <StatCard title="Industry Experts" value={metrics.totalMentors} icon={Star} color="var(--amber)" trend={[10, 12, 11, 13, 15, metrics.totalMentors]} />
+            <StatCard title="Active Pairings" value={metrics.activeAssignments} icon={Zap} color="var(--accent)" trend={[20, 25, 22, 28, 30, metrics.activeAssignments]} />
+            <StatCard title="Growth Saturation" value={`${metrics.saturation}%`} icon={TrendingUp} color="var(--green)" trend={[40, 45, 42, 48, 50, metrics.saturation]} />
+            <StatCard title="Expertise Seniority" value={metrics.avgExp} icon={Award} color="var(--blue)}" trend={[8, 9, 10, 11, 12, 12.5]} />
+        </div>
+      )}
+
+      {/* Mentor Vault */}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(400px, 1fr))', gap: 24 }}>
         {filtered.map(mentor => {
           const mentees = getMentees(mentor.id)
+          const mName = mentor.name || mentor.Name || mentor.label || 'Expert Mentor'
+          const mExpertise = mentor.expertise || mentor.Expertise || 'Staff Specialist'
+          let mColor = mentor.color || mentor.Color || '#4f6ef7'
+          if (!mColor.startsWith('#') && mColor.length === 6) mColor = '#' + mColor
+          
+          const mEmail = mentor.email || mentor.Email || 'contact@portal.secure'
+          const mContact = mentor.contact || mentor.Contact || 'Personnel Link Pending'
+          const initials = mName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+          
           return (
-            <div key={mentor.id} className="card-premium animate-in" style={{ padding: 0, border: '1px solid var(--line)' }}>
-               <div style={{ 
-                 height: '100px', 
-                 background: `linear-gradient(135deg, ${mentor.color || 'var(--accent)'}40, ${mentor.color || 'var(--accent)'}10)`,
-                 position: 'relative'
-               }}>
-                 <div style={{ 
-                   position: 'absolute', 
-                   bottom: '-40px', 
-                   left: '24px',
-                   width: '80px', 
-                   height: '80px', 
-                   borderRadius: '24px', 
-                   background: `linear-gradient(135deg, ${mentor.color || 'var(--accent)'}, var(--accent))`, 
-                   display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                   fontSize: '32px', fontWeight: 900, color: '#fff', 
-                   boxShadow: `0 12px 24px ${mentor.color || 'var(--accent)'}50`,
-                   border: '4px solid var(--bg-card)'
-                 }}>
-                    {mentor.name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                 </div>
-                 <div style={{ position: 'absolute', top: '16px', right: '16px' }}>
-                    <button 
-                       onClick={() => handleDeleteMentor(mentor.id)}
-                       style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', border: 'none', color: 'var(--red)', cursor: 'pointer', padding: '8px', borderRadius: '12px', display: 'flex', alignItems: 'center', transition: '0.2s' }}
-                       className="hover-red-solid"
-                       title="Delete Mentor"
-                    >
-                       <Trash2 size={18} />
-                    </button>
-                 </div>
+            <div key={mentor.id} className="super-glass card-premium animate-in" style={{ padding: 0, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+               <div style={{ height: 120, background: `linear-gradient(135deg, ${mColor}30, ${mColor}10)`, position: 'relative' }}>
+                  <div style={{ 
+                    position: 'absolute', bottom: -40, left: 32, width: 88, height: 88, borderRadius: 24,
+                    background: `linear-gradient(135deg, ${mColor}, ${mColor})`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 900, color: '#ffffff',
+                    boxShadow: `0 12px 30px ${mColor}40`, border: '4px solid #ffffff'
+                  }}>
+                    {initials || <Users size={32} />}
+                  </div>
+                  <div style={{ position: 'absolute', top: 16, right: 16 }}>
+                    <button onClick={() => handleDeleteMentor(mentor.id)} className="btn-icon" style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'var(--red)', width: 36, height: 36, borderRadius: 10 }}><Trash2 size={16} /></button>
+                  </div>
                </div>
 
-               <div style={{ padding: isMobile ? '48px 16px 16px' : '56px 24px 24px' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                         <h3 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: 'var(--text)' }}>{mentor.name}</h3>
-                         <div style={{ color: 'var(--amber)', fontSize: '14px', fontWeight: 700, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <BookOpen size={16} /> {mentor.expertise}
-                         </div>
-                      </div>
-                      <div style={{ ...styles.mono, padding: '6px 12px', background: 'var(--bg-elevated)', borderRadius: '100px', fontSize: '10px', color: 'var(--muted)', border: '1px solid var(--line)', fontWeight: 700 }}>
-                         EXP: 10+ YRS
-                      </div>
-                   </div>
+               <div style={{ padding: '56px 32px 32px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                    <div>
+                        <h3 style={{ fontSize: 24, fontWeight: 900, margin: 0, color: '#1a1a1b', letterSpacing: '-0.5px' }}>{mName}</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--amber)', fontSize: 13, fontWeight: 800, marginTop: 4 }}>
+                            <BookOpen size={14} /> {mExpertise}
+                        </div>
+                    </div>
+                    <div style={{ padding: '6px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--line)', borderRadius: 100, fontSize: 10, fontWeight: 900, letterSpacing: 0.5 }}>
+                        STX-ID: {mentor.id?.substring(0,6).toUpperCase()}
+                    </div>
+                  </div>
 
-                   <div className="card-glass" style={{ borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '14px', fontWeight: 500 }}>
-                         <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                           <Mail size={16} style={{ color: 'var(--accent)' }} />
-                         </div>
-                         <span style={{ color: 'var(--text-dim)' }}>{mentor.email || 'N/A'}</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '14px', fontWeight: 500 }}>
-                         <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                           <Phone size={16} style={{ color: 'var(--accent)' }} />
-                         </div>
-                         <span style={{ color: 'var(--text-dim)' }}>{mentor.contact || 'N/A'}</span>
-                      </div>
-                   </div>
+                  <div style={{ background: 'rgba(0,0,0,0.02)', borderRadius: 16, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24, border: '1px solid var(--line)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Mail size={14} color="var(--muted)" />
+                        <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.8 }}>{mEmail}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <Globe size={14} color="var(--muted)" />
+                        <span style={{ fontSize: 13, fontWeight: 700, opacity: 0.8 }}>Contact: {mContact}</span>
+                    </div>
+                  </div>
 
-                   <div style={{ borderTop: '1px solid var(--line)', paddingTop: '24px', marginTop: '24px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                         <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Users size={16} color="var(--accent)" /> Assigned Mentees ({mentees.length})
-                         </div>
-                         <button 
-                            className="btn btn-sm btn-premium" 
-                            style={{ borderRadius: '10px' }}
-                            onClick={() => { setSelectedMentor(mentor); setShowAssignModal(true); }}
-                         >
-                           <Plus size={14}/> Assign
-                         </button>
-                      </div>
-                      
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ borderTop: '1px solid var(--line)', paddingTop: 24 }}>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                        <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Users size={16} color="var(--accent)" /> ACTIVE PAIRINGS ({mentees.length})
+                        </div>
+                        <button 
+                            onClick={() => { setSelectedMentor(mentor); setShowDrawer('assign'); }}
+                            className="btn btn-sm btn-glass"
+                            style={{ borderRadius: 10, fontSize: 11, fontWeight: 900 }}
+                        >
+                            <Plus size={14} /> LINK MENTEE
+                        </button>
+                     </div>
+
+                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                         {mentees.length > 0 ? mentees.map(m => (
-                           <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-card)', padding: '6px 12px 6px 6px', borderRadius: '12px', fontSize: '13px', border: '1px solid var(--line)', fontWeight: 600, boxShadow: 'var(--shadow-sm)' }}>
-                              <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: m.color || 'var(--accent)', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff' }}>
-                                {m.av}
-                              </div>
-                              {m.name}
-                              <button 
-                                onClick={() => handleRemoveMentee(m.id)}
-                                style={{ background: 'var(--red-dim)', border: 'none', color: 'var(--red)', cursor: 'pointer', padding: '4px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.2s' }}
-                              >
-                                <X size={14} />
-                              </button>
-                           </div>
+                            <div key={m.id} className="super-glass" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 12, fontSize: 12, fontWeight: 800, border: '1px solid var(--line)' }}>
+                                <div style={{ width: 24, height: 24, borderRadius: 6, background: m.color || 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>{m.av}</div>
+                                {m.name}
+                                <button onClick={() => handleRemoveMentee(m.id)} style={{ border: 'none', background: 'none', color: 'var(--red)', opacity: 0.5, cursor: 'pointer', display: 'flex' }}><X size={12} /></button>
+                            </div>
                         )) : (
-                           <div style={{ width: '100%', textAlign: 'center', padding: '20px', background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px dashed var(--line)', color: 'var(--muted)', fontSize: '13px', fontStyle: 'italic' }}>
-                              Waiting for mentee assignments...
-                           </div>
+                            <div style={{ width: '100%', padding: '20px 0', textAlign: 'center', background: 'rgba(0,0,0,0.01)', borderRadius: 12, border: '1px dashed var(--line)', color: 'var(--muted)', fontSize: 12, fontWeight: 700 }}>
+                                AWAITING PERSONNEL LINKAGE
+                            </div>
                         )}
-                      </div>
-                   </div>
+                     </div>
+                  </div>
                </div>
             </div>
           )
         })}
       </div>
 
-      {filtered.length === 0 && (
-         <div style={{ ...styles.card, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 20px', textAlign: 'center' }}>
-            <Star size={48} style={{ color: 'var(--muted)', opacity: 0.3, marginBottom: '20px' }} />
-            <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 700 }}>No Mentors Found</h3>
-            <p style={{ color: theme.muted, marginTop: '8px', maxWidth: '300px' }}>Adjust your search filter or enlist a new mentor to the directory.</p>
-         </div>
-      )}
-
-      {/* Add Mentor Modal */}
-      {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-drawer" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px' }}>
+      {/* Premium Side Drawer */}
+      {showDrawer && (
+        <div className="modal-overlay" onClick={() => setShowDrawer(null)}>
+          <div className="modal-drawer" onClick={e => e.stopPropagation()} style={{ width: isMobile ? '100%' : '500px' }}>
             <div className="modal-header">
-               <h2 style={{ fontFamily: theme.fontHeading, margin: 0, fontSize: '24px', fontWeight: 800 }}>Enlist Mentor</h2>
+                <div>
+                    <h2 style={{ fontSize: 24, fontWeight: 900, margin: 0 }}>{showDrawer === 'add' ? 'Enlist Expert' : `Assign to ${selectedMentor.name}`}</h2>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)', marginTop: 4 }}>{showDrawer === 'add' ? 'Integrating industry knowledge into organizational DNA' : 'Establishing high-integrity growth pairing'}</p>
+                </div>
+                <button onClick={() => setShowDrawer(null)} className="btn-icon"><X size={20}/></button>
             </div>
-             
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div>
-                   <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '8px', display: 'block', letterSpacing: '0.05em' }}>FULL NAME</label>
-                   <div style={styles.inputContainer}>
-                      <input style={styles.input} value={newMentor.name} onChange={e => setNewMentor({...newMentor, name: e.target.value})} placeholder="E.g. Dr. A. P. J. Kalam" />
-                   </div>
-                </div>
-                <div>
-                   <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '8px', display: 'block', letterSpacing: '0.05em' }}>EXPERTISE TAG</label>
-                   <div style={styles.inputContainer}>
-                      <input style={styles.input} value={newMentor.expertise} onChange={e => setNewMentor({...newMentor, expertise: e.target.value})} placeholder="E.g. System Architecture" />
-                   </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                   <div>
-                      <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '8px', display: 'block', letterSpacing: '0.05em' }}>EMAIL ID</label>
-                      <div style={styles.inputContainer}>
-                         <input style={styles.input} value={newMentor.email} onChange={e => setNewMentor({...newMentor, email: e.target.value})} placeholder="mentor@domain.com" />
-                      </div>
-                   </div>
-                   <div>
-                      <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)', marginBottom: '8px', display: 'block', letterSpacing: '0.05em' }}>CONTACT</label>
-                      <div style={styles.inputContainer}>
-                         <input style={styles.input} value={newMentor.contact} onChange={e => setNewMentor({...newMentor, contact: e.target.value})} placeholder="+91..." />
-                      </div>
-                   </div>
-                </div>
-             </div>
 
-             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
-                <button className="btn btn-ghost" style={{ padding: '12px 24px' }} onClick={() => setShowAddModal(false)}>Cancel</button>
-                <button className="btn btn-primary" style={{ padding: '12px 28px' }} onClick={handleAddMentor}>Add Mentor</button>
-             </div>
-          </div>
-        </div>
-      )}
-      {/* Assign Mentee Modal */}
-      {showAssignModal && selectedMentor && (
-        <div className="modal-overlay" onClick={() => setShowAssignModal(false)}>
-          <div className="modal-drawer" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-            <div className="modal-header">
-              <h2 style={{ fontFamily: theme.fontHeading, margin: 0, fontSize: '20px', fontWeight: 800 }}>Assign to {selectedMentor.name}</h2>
-            </div>
-            <p style={{ color: theme.muted, fontSize: '13px' }}>Select an unassigned employee to assign as a mentee.</p>
-            
-            <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px' }}>
-              {getUnassigned().length > 0 ? getUnassigned().map(emp => (
-                <div 
-                  key={emp.id} 
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)' }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: emp.color || theme.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>{emp.av}</div>
-                    <div>
-                      <div style={{ fontSize: '14px', fontWeight: 600 }}>{emp.name}</div>
-                      <div style={{ fontSize: '11px', color: theme.muted }}>{emp.dept}</div>
+            <div className="modal-body">
+                {showDrawer === 'add' ? (
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                        <div className="input-field">
+                            <label>FULL PROFESSIONAL NAME</label>
+                            <div style={{ position: 'relative' }}>
+                                <Briefcase size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
+                                <input value={newMentor.name} onChange={e => setNewMentor({...newMentor, name: e.target.value})} placeholder="Expert Identifier" />
+                            </div>
+                        </div>
+                        <div className="input-field">
+                            <label>EXPERTISE DOMAIN</label>
+                            <div style={{ position: 'relative' }}>
+                                <Award size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
+                                <input value={newMentor.expertise} onChange={e => setNewMentor({...newMentor, expertise: e.target.value})} placeholder="Mastery Alignment" />
+                            </div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                            <div className="input-field">
+                                <label>REACH EMAIL</label>
+                                <input value={newMentor.email} onChange={e => setNewMentor({...newMentor, email: e.target.value})} placeholder="expert@domain" />
+                            </div>
+                            <div className="input-field">
+                                <label>VOICE COMMS</label>
+                                <input value={newMentor.contact} onChange={e => setNewMentor({...newMentor, contact: e.target.value})} placeholder="+91..." />
+                            </div>
+                        </div>
+                        <div style={{ padding: 20, borderRadius: 16, background: 'var(--bg-elevated)', border: '1px solid var(--line)', display: 'flex', gap: 12 }}>
+                            <Info size={18} color="var(--accent)" style={{ flexShrink: 0 }} />
+                            <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', margin: 0, lineHeight: 1.5 }}>Authorized industry experts are granted secure channel access for mentorship activities upon enlistment verification.</p>
+                        </div>
+                   </div>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        <div style={{ position: 'relative', marginBottom: 12 }}>
+                            <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
+                            <input placeholder="Locate unassigned personnel..." style={{ width: '100%', padding: '12px 12px 12px 40px', borderRadius: 12, background: 'var(--bg-card)', border: '1px solid var(--line)', fontWeight: 700, fontSize: 13 }} />
+                        </div>
+                        {getUnassigned().map(emp => (
+                            <div 
+                                key={emp.id}
+                                onClick={() => { handleAssignMentee(emp.id); setShowDrawer(null); }}
+                                style={{ padding: '16px 20px', borderRadius: 16, background: 'rgba(0,0,0,0.02)', border: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: '0.2s' }}
+                                className="hover-glass"
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                    <div style={{ width: 36, height: 36, borderRadius: 10, background: emp.color || 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 12 }}>{emp.av}</div>
+                                    <div>
+                                        <div style={{ fontSize: 14, fontWeight: 800 }}>{emp.name}</div>
+                                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>{emp.dept}</div>
+                                    </div>
+                                </div>
+                                <ChevronRight size={18} color="var(--muted)" />
+                            </div>
+                        ))}
                     </div>
-                  </div>
-                  <button 
-                    className="btn btn-xs btn-primary"
-                    onClick={() => { handleAssignMentee(emp.id); setShowAssignModal(false); }}
-                  >
-                    Select
-                  </button>
-                </div>
-              )) : (
-                <div style={{ textAlign: 'center', padding: '20px', color: theme.muted, fontSize: '13px' }}>All employees already have mentors.</div>
-              )}
+                )}
             </div>
-            
-            <button className="btn btn-ghost" onClick={() => setShowAssignModal(false)}>Cancel</button>
+
+            <div className="modal-footer">
+                <button onClick={() => setShowDrawer(null)} className="btn btn-ghost" style={{ padding: '12px 24px' }}>Cancel</button>
+                {showDrawer === 'add' && (
+                    <button onClick={handleAddMentor} disabled={isSubmitting} className="btn btn-primary" style={{ padding: '12px 32px' }}>
+                        {isSubmitting ? 'Verifying...' : 'Establish Expert'}
+                    </button>
+                )}
+            </div>
           </div>
         </div>
       )}

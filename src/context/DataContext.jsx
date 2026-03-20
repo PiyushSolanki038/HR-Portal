@@ -12,6 +12,8 @@ export function DataProvider({ children }) {
   const [tasks,      setTasks]      = useState([])
   const [mentors,    setMentors]    = useState([])
   const [governance, setGovernance] = useState([])
+  const [waivers,    setWaivers]    = useState([])
+  const [catalog,    setCatalog]     = useState([])
   const [auditLogs, setAuditLogs] = useState([])
   const [attendanceSummary, setAttendanceSummary] = useState({})
   const [notifications, setNotifications] = useState([])
@@ -46,6 +48,8 @@ export function DataProvider({ children }) {
         setMentors(d.Mentors || mentors)
         setTasks(d.Tasks || tasks)
         setGovernance(d.Governance || governance)
+        setWaivers(d.Waivers || waivers)
+        setCatalog(d.PenaltyCatalog || catalog)
         setAuditLogs(d.Audit || auditLogs)
       } else {
         if (isInitialLoad.current) console.error('[DATA_LOAD_ERROR] Batch:', batchR.reason)
@@ -108,6 +112,8 @@ export function DataProvider({ children }) {
       tasks, setTasks,
       mentors, setMentors,
       governance, setGovernance,
+      waivers, setWaivers,
+      catalog, setCatalog,
       auditLogs, setAuditLogs,
       attendanceSummary, setAttendanceSummary,
       notifications, setNotifications,

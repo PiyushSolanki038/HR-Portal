@@ -5,171 +5,19 @@ import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { useToast } from '../context/ToastContext'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import StatCard from '../components/ui/StatCard'
 import * as api from '../services/api'
 import { 
   Send, Search, Users, Phone, Video, MoreVertical, 
   Pin, Paperclip, Smile, Radio, MessageSquare, 
-  Circle, ChevronRight, Hash, Shield, GraduationCap
+  Circle, ChevronRight, Hash, Shield, GraduationCap,
+  Activity, Wifi, Globe, History, ShieldCheck,
+  Zap, Compass, Target, Bell, AtSign, Cpu
 } from 'lucide-react'
-
-const theme = {
-  bg: 'var(--bg)',
-  accent: 'var(--accent)',
-  accentGlow: 'var(--accent-glow)',
-  panelBg: 'var(--bg-card)',
-  cardBg: 'var(--bg-elevated)',
-  border: 'var(--border)',
-  glass: 'blur(20px)',
-  text: 'var(--text)',
-  muted: 'var(--muted)',
-  green: 'var(--green)',
-  amber: 'var(--amber)',
-  red: 'var(--red)',
-  blue: 'var(--blue)',
-  fontHeading: 'var(--font-heading)',
-  fontBody: 'var(--font)'
-}
-
-const styles = {
-  wrapper: {
-    height: 'calc(100vh - 180px)', 
-    display: 'flex',
-    background: theme.panelBg,
-    borderRadius: '24px',
-    border: theme.border,
-    overflow: 'hidden',
-    boxShadow: 'var(--shadow-lg)',
-    animation: 'fadeIn 0.5s ease-out',
-    maxWidth: '100%'
-  },
-  sidebar: {
-    width: '320px',
-    borderRight: theme.border,
-    display: 'flex',
-    flexDirection: 'column',
-    background: 'rgba(0,0,0,0.02)',
-  },
-  chatArea: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    background: 'rgba(255,255,255,0.01)',
-    position: 'relative'
-  },
-  searchWrapper: {
-    padding: '24px 20px 16px',
-    borderBottom: theme.border
-  },
-  searchBox: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    background: 'var(--bg-elevated)',
-    padding: '12px 16px',
-    borderRadius: '16px',
-    border: '1px solid var(--line)',
-    transition: 'all 0.3s ease'
-  },
-  searchInput: {
-    background: 'transparent',
-    border: 'none',
-    color: 'var(--text)',
-    outline: 'none',
-    width: '100%',
-    fontSize: '14px',
-    fontWeight: 500
-  },
-  contactList: {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '12px'
-  },
-  contactItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '12px 14px',
-    borderRadius: '16px',
-    cursor: 'pointer',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-    marginBottom: '4px',
-    position: 'relative'
-  },
-  avatar: {
-    width: '44px',
-    height: '44px',
-    borderRadius: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '16px',
-    fontWeight: 700,
-    color: '#fff',
-    flexShrink: 0,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-  },
-  statusIndicator: {
-    position: 'absolute',
-    bottom: '-2px',
-    right: '-2px',
-    width: '12px',
-    height: '12px',
-    borderRadius: '50%',
-    border: '2px solid white',
-    background: theme.green
-  },
-  messageArea: {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '24px 32px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-  },
-  bubble: {
-    maxWidth: '85%',
-    padding: '12px 16px',
-    borderRadius: '20px',
-    fontSize: '13px',
-    lineHeight: 1.6,
-    position: 'relative',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-  },
-  inputSurface: {
-    padding: '20px 32px 32px',
-    background: 'transparent'
-  },
-  inputBar: {
-    display: 'flex',
-    alignItems: 'flex-end',
-    gap: '12px',
-    background: 'var(--bg-card)',
-    padding: '12px 16px',
-    borderRadius: '24px',
-    border: '1px solid var(--line)',
-    boxShadow: 'var(--shadow-md)',
-    transition: 'transform 0.3s ease'
-  },
-  sendBtn: {
-    width: '44px',
-    height: '44px',
-    borderRadius: '14px',
-    background: theme.accent,
-    color: '#000',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    flexShrink: 0,
-    boxShadow: `0 4px 15px ${theme.accentGlow}`
-  }
-}
 
 export default function Communication() {
   const { user } = useAuth()
-  const { employees, mentors, loading, error } = useData()
+  const { employees, mentors, loading, error, refresh } = useData()
   const { showToast } = useToast()
   const location = useLocation()
   const navigate = useNavigate()
@@ -182,6 +30,7 @@ export default function Communication() {
   const [sending, setSending] = useState(false)
   const [chatMode, setChatMode] = useState('direct')
   const [histories, setHistories] = useState({})
+  const [syncStatus, setSyncStatus] = useState('stable') // stable, syncing, weak
 
   const messagesEndRef = useRef(null)
 
@@ -192,17 +41,23 @@ export default function Communication() {
     const emps = employees.filter(e => e.name).map(e => ({ ...e, type: 'employee' }))
     const mnts = isHR ? mentors.filter(m => m.name).map(m => ({
       ...m,
-      type: 'mentor',
       role: 'External Mentor',
       av: m.name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'M',
       dept: m.expertise || 'External Mentor',
       isMentor: true,
-      color: m.color || 'linear-gradient(135deg, #f59e0b, #d97706)'
+      color: m.color || 'var(--amber)'
     })) : []
     return [...emps, ...mnts]
   }, [employees, mentors, isHR, loading])
 
-  // Handle URL deep linking
+  // Intelligence Pulse Metrics
+  const metrics = useMemo(() => {
+    const totalMsgs = Object.values(histories).flat().length
+    const activeLeads = allContacts.length
+    const reach = Math.round((activeLeads / employees.length) * 100) || 100
+    return { totalMsgs, activeLeads, reach }
+  }, [histories, allContacts, employees])
+
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const targetId = params.get('id')
@@ -216,9 +71,9 @@ export default function Communication() {
     }
   }, [location.search, allContacts, isMobile])
 
-  // Fetch history for active chat
   const fetchHistory = async () => {
     if (!activeChat || chatMode !== 'direct') return
+    setSyncStatus('syncing')
     try {
       const history = await api.getPortalHistory(user.id, activeChat.id)
       setHistories(prev => ({
@@ -230,24 +85,19 @@ export default function Communication() {
           time: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }))
       }))
+      setSyncStatus('stable')
     } catch (err) {
-      console.error('History fetch failed:', err)
+      setSyncStatus('weak')
     }
   }
 
-  // Initial fetch on chat change
   useEffect(() => {
-    if (activeChat && chatMode === 'direct') {
-      fetchHistory()
-    }
+    if (activeChat && chatMode === 'direct') { fetchHistory() }
   }, [activeChat, chatMode])
 
-  // Polling for new messages
   useEffect(() => {
     let interval
-    if (activeChat && chatMode === 'direct') {
-      interval = setInterval(fetchHistory, 5000)
-    }
+    if (activeChat && chatMode === 'direct') { interval = setInterval(fetchHistory, 5000) }
     return () => clearInterval(interval)
   }, [activeChat, chatMode])
 
@@ -255,324 +105,313 @@ export default function Communication() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [histories, activeChat])
 
-  if (loading) return <LoadingSpinner />
-  if (error) return <div style={{ padding: '24px' }}>Error: {error}</div>
-
-  const dynamicAccent = user?.role?.toLowerCase() === 'employee' ? '#10b981' : '#4f6ef7'
-  const accentGlow = user?.role?.toLowerCase() === 'employee' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(79, 110, 247, 0.15)'
-
-  const filteredContacts = allContacts.filter(e =>
-    e.id !== user.id &&
-    (
-      (e.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (e.dept || '').toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  )
-
   const handleSend = async () => {
     if (!message.trim() || sending) return
     setSending(true)
 
     try {
       if (chatMode === 'direct' && activeChat) {
-        await api.sendPortalMessage({ 
-          fromId: user.id,
-          toId: activeChat.id, 
-          message, 
-          channel: 'portal'
-        })
-        
-        // Optimistic update
-        const newMsg = { 
-          id: Date.now(), 
-          text: message, 
-          sender: 'me', 
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-        }
-        setHistories(prev => ({
-          ...prev,
-          [activeChat.id]: [...(prev[activeChat.id] || []), newMsg]
-        }))
+        await api.sendPortalMessage({ fromId: user.id, toId: activeChat.id, message, channel: 'portal' })
+        const newMsg = { id: Date.now(), text: message, sender: 'me', time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+        setHistories(prev => ({ ...prev, [activeChat.id]: [...(prev[activeChat.id] || []), newMsg] }))
       } else if (chatMode === 'broadcast') {
         const recipients = activeChat === 'all' ? 'all' : activeChat
-        await api.sendBroadcast({ 
-          message, 
-          recipients, 
-          channels: ['telegram'], // Broadcasts can stay on telegram or move later
-          actor: user?.name || 'Administrator' 
-        })
-        showToast(`Broadcast sent to ${recipients}`, 'success')
+        await api.sendBroadcast({ message, recipients, channels: ['telegram', 'portal'], actor: user?.name || 'Admin' })
+        showToast(`Intelligence broadcast dispatched to ${recipients}`, 'success')
       }
       setMessage('')
     } catch (err) {
-      showToast('Delivery failed. Could not reach portal gateway.', 'error')
+      showToast('Dispatch sequence failed. Connection unstable.', 'error')
     } finally {
       setSending(false)
     }
   }
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }
+  if (loading) return <LoadingSpinner />
+
+  const filteredContacts = allContacts.filter(e =>
+    e.id !== user.id &&
+    ( (e.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (e.dept || '').toLowerCase().includes(searchQuery.toLowerCase()) )
+  )
 
   const depts = [...new Set(employees.map(e => e.dept).filter(Boolean))]
 
   return (
-    <div style={{ 
-      ...styles.wrapper, 
-      height: isMobile ? 'calc(100vh - 120px)' : 'calc(100vh - 180px)',
-      borderRadius: isMobile ? 0 : '24px',
-      border: isMobile ? 'none' : theme.border,
-      margin: isMobile ? '-16px' : 0
-    }}>
-      
-      {/* ─── SIDEBAR ─── */}
-      <div style={{ 
-        ...styles.sidebar, 
-        display: isMobile && showChatMobile ? 'none' : 'flex',
-        width: isMobile ? '100%' : '320px',
-        borderRight: isMobile ? 'none' : theme.border
-      }}>
-        <div style={{ padding: '24px 20px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ fontFamily: theme.fontHeading, fontSize: '24px', fontWeight: 800 }}>Hub</h2>
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '12px' }}>
-              <button 
-                onClick={() => setChatMode('direct')}
-                style={{ ...styles.iconBtn, background: chatMode === 'direct' ? dynamicAccent : 'transparent', color: chatMode === 'direct' ? '#fff' : theme.muted, borderRadius: '8px', padding: '6px 10px' }}
-              >
-                <MessageSquare size={16} />
-              </button>
-              {user?.role?.toLowerCase() !== 'employee' && (
-                <button 
-                  onClick={() => { setChatMode('broadcast'); setActiveChat('all'); }}
-                  style={{ ...styles.iconBtn, background: chatMode === 'broadcast' ? dynamicAccent : 'transparent', color: chatMode === 'broadcast' ? '#fff' : theme.muted, borderRadius: '8px', padding: '6px 10px' }}
-                >
-                  <Radio size={16} />
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div style={styles.searchBox}>
-            <Search size={18} color={theme.muted} />
-            <input 
-              style={styles.searchInput} 
-              placeholder="Find anyone..." 
-              value={searchQuery} 
-              onChange={e => setSearchQuery(e.target.value)} 
-            />
-          </div>
+    <div className="animate-in" style={{ padding: isMobile ? '16px' : '32px', maxWidth: 1600, margin: '0 auto' }}>
+      {/* Executive Intelligence Header */}
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'flex-end', marginBottom: 40, gap: 24 }}>
+        <div>
+          <h1 style={{ fontSize: isMobile ? 32 : 48, fontWeight: 900, letterSpacing: -2, margin: 0 }}>Dispatch Hub</h1>
+          <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', marginTop: 4, letterSpacing: 0.5 }}>Real-time situational intelligence & secure orchestration</p>
         </div>
 
-        <div style={styles.contactList}>
-          {chatMode === 'direct' ? (
-            <>
-              <div style={{ padding: '16px 8px 8px', fontSize: '11px', fontWeight: 700, color: theme.muted, textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Pin size={12} /> Pinned
-              </div>
-              {filteredContacts.slice(0, 3).map(emp => (
-                <div 
-                  key={emp.id} 
-                  style={{ 
-                    ...styles.contactItem, 
-                    background: activeChat?.id === emp.id ? 'rgba(255,255,255,0.06)' : 'transparent',
-                    boxShadow: activeChat?.id === emp.id ? 'inset 0 0 0 1px rgba(255,255,255,0.05)' : 'none'
-                  }}
-                  onClick={() => { setActiveChat(emp); if (isMobile) setShowChatMobile(true); }}
-                >
-                  <div style={{ ...styles.avatar, background: emp.color || `linear-gradient(135deg, ${dynamicAccent}, #1e3a8a)`, position: 'relative' }}>
-                    {emp.av}
-                    <div style={styles.statusIndicator} />
-                  </div>
-                  <div style={{ flex: 1, overflow: 'hidden' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '14px', fontWeight: 600 }}>{emp.name}</span>
-                      <span style={{ fontSize: '11px', color: theme.muted }}>10:45</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: theme.muted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {emp.dept} • {emp.id}
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <div style={{ padding: '24px 8px 8px', fontSize: '11px', fontWeight: 700, color: theme.muted, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Team Members
-              </div>
-              {filteredContacts.slice(3).map(emp => (
-                <div 
-                  key={emp.id} 
-                  style={{ 
-                    ...styles.contactItem, 
-                    background: activeChat?.id === emp.id ? 'rgba(255,255,255,0.06)' : 'transparent'
-                  }}
-                  onClick={() => { setActiveChat(emp); if (isMobile) setShowChatMobile(true); }}
-                >
-                  <div style={{ ...styles.avatar, background: emp.color || 'var(--accent)', boxShadow: `0 4px 12px ${emp.color || 'var(--accent)'}40` }}>
-                    {emp.av}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 600 }}>{emp.name}</div>
-                    <div style={{ fontSize: '12px', color: theme.muted }}>{emp.role}</div>
-                  </div>
-                </div>
-              ))}
-            </>
-          ) : (
-            <div style={{ padding: '12px' }}>
-               <div 
-                style={{ ...styles.contactItem, borderRadius: '20px', border: activeChat === 'all' ? `1px solid ${dynamicAccent}` : theme.border, background: activeChat === 'all' ? accentGlow : 'rgba(255,255,255,0.02)', padding: '20px' }}
-                onClick={() => setActiveChat('all')}
-               >
-                 <div style={{ ...styles.avatar, background: dynamicAccent }}><Users size={20} /></div>
-                 <div>
-                    <div style={{ fontWeight: 700, fontSize: '15px' }}>Whole Company</div>
-                    <div style={{ fontSize: '12px', color: theme.muted }}>{employees.length} team members</div>
-                 </div>
-               </div>
-               <div style={{ padding: '24px 8px 12px', fontSize: '11px', fontWeight: 700, color: theme.muted, textTransform: 'uppercase' }}>Departments</div>
-               {depts.map(d => (
-                 <div 
-                    key={d} 
-                    style={{ ...styles.contactItem, borderRadius: '20px', border: activeChat === d ? `1px solid ${dynamicAccent}` : theme.border, background: activeChat === d ? accentGlow : 'rgba(255,255,255,0.02)', padding: '16px', marginBottom: '8px' }}
-                    onClick={() => setActiveChat(d)}
-                 >
-                    <div style={{ ...styles.avatar, background: 'rgba(255,255,255,0.1)' }}><Hash size={18} /></div>
-                    <div style={{ fontWeight: 600 }}>{d}</div>
-                 </div>
-               ))}
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <div style={{ padding: '8px 16px', borderRadius: 12, background: 'var(--bg-elevated)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Wifi size={14} color={syncStatus === 'stable' ? 'var(--green)' : syncStatus === 'syncing' ? 'var(--amber)' : 'var(--red)'} />
+                <span style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 0.5 }}>Signal: {syncStatus}</span>
             </div>
-          )}
+            {!isMobile && (
+                <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 12, fontWeight: 900 }}>E2E ENCRYPTED</div>
+                    <div style={{ fontSize: 10, color: 'var(--green)', fontWeight: 800 }}>SECURE HANDSHAKE ACTIVE</div>
+                </div>
+            )}
         </div>
       </div>
 
-      {/* ─── CHAT AREA ─── */}
-      <div style={{ 
-        ...styles.chatArea,
-        display: isMobile && !showChatMobile ? 'none' : 'flex'
+      {/* Dispatch Pulse Stats */}
+      {!isMobile && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginBottom: 40 }}>
+            <StatCard title="Total Transmissions" value={metrics.totalMsgs} icon={Activity} color="var(--accent)" trend={[20, 25, 22, 28, 30, metrics.totalMsgs]} />
+            <StatCard title="Active Leads" value={metrics.activeLeads} icon={Target} color="var(--blue)}" trend={[10, 12, 11, 13, 15, metrics.activeLeads]} />
+            <StatCard title="Operational Reach" value={`${metrics.reach}%`} icon={Globe} color="var(--green)" trend={[90, 92, 94, 91, 93, metrics.reach]} />
+            <StatCard title="Sync Latency" value="12ms" icon={Cpu} color="var(--amber)" trend={[15, 14, 12, 13, 11, 12]} />
+        </div>
+      )}
+
+      {/* Communication Matrix */}
+      <div className="super-glass" style={{ 
+        height: isMobile ? 'calc(100vh - 200px)' : '700px', 
+        display: 'flex', 
+        borderRadius: 32, 
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.1)',
+        boxShadow: '0 24px 70px -12px rgba(0,0,0,0.1)'
       }}>
-        {activeChat ? (
-          <>
-            {/* Header */}
-            <div style={{ padding: isMobile ? '16px' : '24px 32px', borderBottom: theme.border, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.1)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '16px' }}>
-                {isMobile && (
-                  <button 
-                    onClick={() => setShowChatMobile(false)}
-                    style={{ background: 'none', border: 'none', color: theme.muted, cursor: 'pointer', padding: '4px' }}
-                  >
-                    <ChevronRight size={24} style={{ transform: 'rotate(180deg)' }} />
-                  </button>
-                )}
-                {chatMode === 'direct' ? (
-                  <>
-                    <div style={{ ...styles.avatar, background: activeChat.color || dynamicAccent, width: isMobile ? '36px' : '48px', height: isMobile ? '36px' : '48px' }}>
-                      {activeChat.av}
+        
+        {/* Sidebar Personnel */}
+        <div style={{ 
+            width: isMobile && showChatMobile ? 0 : isMobile ? '100%' : '380px', 
+            background: 'var(--bg-card)', 
+            borderRight: '1px solid var(--line)',
+            display: 'flex', flexDirection: 'column',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            overflow: 'hidden'
+        }}>
+           <div style={{ padding: '24px', borderBottom: '1px solid var(--line)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                    <h2 style={{ fontSize: 20, fontWeight: 900, letterSpacing: -1 }}>Matrix</h2>
+                    <div style={{ display: 'flex', background: 'rgba(0,0,0,0.04)', padding: 4, borderRadius: 14 }}>
+                        <button onClick={() => setChatMode('direct')} style={{ border: 'none', padding: '8px 12px', borderRadius: 10, background: chatMode === 'direct' ? '#fff' : 'transparent', color: chatMode === 'direct' ? 'var(--text)' : 'var(--muted)', cursor: 'pointer', transition: 'all 0.2s' }}><MessageSquare size={16} /></button>
+                        {isHR && <button onClick={() => { setChatMode('broadcast'); setActiveChat('all'); }} style={{ border: 'none', padding: '8px 12px', borderRadius: 10, background: chatMode === 'broadcast' ? '#fff' : 'transparent', color: chatMode === 'broadcast' ? 'var(--text)' : 'var(--muted)', cursor: 'pointer', transition: 'all 0.2s' }}><Radio size={16} /></button>}
                     </div>
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: isMobile ? '14px' : '18px', fontWeight: 700 }}>{activeChat.name}</h3>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: isMobile ? '11px' : '13px', color: theme.green, fontWeight: 500 }}>
-                        <Circle size={isMobile ? 6 : 8} fill={theme.green} /> Secured
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ ...styles.avatar, background: `linear-gradient(45deg, ${dynamicAccent}, ${theme.blue})`, width: '48px', height: '48px' }}>
-                      <Radio size={24} />
-                    </div>
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>Broadcast Intelligence</h3>
-                      <div style={{ fontSize: '13px', color: theme.muted }}>Targeting: {activeChat === 'all' ? 'Entire Organization' : `${activeChat} Team`}</div>
-                    </div>
-                  </>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: isMobile ? '4px' : '12px' }}>
-                {!isMobile && (
-                  <>
-                    <button style={{ ...styles.iconBtn, width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', border: 'none' }}><Phone size={18} /></button>
-                    <button style={{ ...styles.iconBtn, width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', border: 'none' }}><Video size={18} /></button>
-                  </>
-                )}
-                <button style={{ ...styles.iconBtn, width: isMobile ? '32px' : '40px', height: isMobile ? '32px' : '40px', background: 'rgba(255,255,255,0.05)', border: 'none' }}><MoreVertical size={18} /></button>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div style={{ ...styles.messageArea, padding: isMobile ? '16px' : '24px 32px' }}>
-              {chatMode === 'direct' ? (
-                <>
-                   <div style={{ textAlign: 'center', margin: '10px 0 20px' }}>
-                     <span style={{ background: 'rgba(255,255,255,0.04)', padding: '6px 14px', borderRadius: '12px', fontSize: '11px', color: theme.muted, fontWeight: 600, border: theme.border }}>ENCRYPTED SESSION STARTED</span>
-                   </div>
-                   { (histories[activeChat.id] || []).map(msg => {
-                     const isMe = msg.sender === 'me'
-                     return (
-                       <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
-                          <div style={{ ...styles.bubble, background: isMe ? dynamicAccent : 'var(--bg-elevated)', color: isMe ? '#000' : 'var(--text)', borderBottomRightRadius: isMe ? '4px' : '20px', borderBottomLeftRadius: !isMe ? '4px' : '20px', border: isMe ? 'none' : '1px solid var(--line)' }}>
-                            {msg.text}
-                          </div>
-                          <div style={{ fontSize: '10px', color: theme.muted, marginTop: '4px', fontWeight: 600 }}>{msg.time} {isMe && '• DELIVERED'}</div>
-                       </div>
-                     )
-                   })}
-                </>
-              ) : (
-                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: theme.muted }}>
-                   <div style={{ width: '100px', height: '100px', borderRadius: '30px', background: accentGlow, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
-                      <Radio size={48} color={dynamicAccent} />
-                   </div>
-                   <h2 style={{ fontFamily: theme.fontHeading, color: 'var(--text)', fontSize: '28px', marginBottom: '12px' }}>Broadcast Center</h2>
-                   <p style={{ maxWidth: '400px', lineHeight: 1.6 }}>Your announcement will be sent to the <b>{activeChat}</b> department and pinned to their portal dashboards.</p>
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
+                <div style={{ position: 'relative' }}>
+                    <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} />
+                    <input 
+                        type="text" 
+                        placeholder="Intercept personnel or dept..." 
+                        value={searchQuery}
+                        onChange={e => setSearchQuery(e.target.value)}
+                        style={{ width: '100%', padding: '12px 12px 12px 40px', borderRadius: 12, background: 'rgba(0,0,0,0.03)', border: 'none', fontSize: 13, fontWeight: 700, outline: 'none' }}
+                    />
+                </div>
+           </div>
 
-            {/* Input */}
-            <div style={{ ...styles.inputSurface, padding: isMobile ? '12px 16px 20px' : '20px 32px 32px' }}>
-              <div style={styles.inputBar}>
-                <button style={{ background: 'transparent', border: 'none', color: theme.muted, cursor: 'pointer' }}><Smile size={22} /></button>
-                <button style={{ background: 'transparent', border: 'none', color: theme.muted, cursor: 'pointer' }}><Paperclip size={22} /></button>
-                <textarea 
-                  rows={1}
-                  style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text)', outline: 'none', fontSize: '15px', padding: '10px 0', resize: 'none' }}
-                  placeholder={chatMode === 'direct' ? `Message ${activeChat.name}...` : "Type broadcast announcement..."}
-                  value={message}
-                  onChange={e => setMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                />
-                <button 
-                  style={{ ...styles.sendBtn, opacity: message.trim() ? 1 : 0.5, background: dynamicAccent }} 
-                  onClick={handleSend}
-                >
-                  {sending ? <LoadingSpinner size={20} /> : <Send size={20} />}
-                </button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px' }}>
-            <div style={{ width: '120px', height: '120px', borderRadius: '40px', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px', border: theme.border }}>
-               <Shield size={64} style={{ opacity: 0.1 }} />
-            </div>
-            <h2 style={{ fontFamily: theme.fontHeading, fontSize: '32px', marginBottom: '12px' }}>SISWIT Secure Hub</h2>
-            <p style={{ color: theme.muted, maxWidth: '360px', lineHeight: 1.6 }}>Select a contact or start a broadcast to begin. Your communications are audited and secured by corporate policy.</p>
-            <div style={{ marginTop: '32px', display: 'flex', gap: '12px' }}>
-               <div style={{ padding: '12px 20px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: theme.border, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Shield size={16} color={theme.green} /> <span style={{ fontSize: '13px', fontWeight: 600 }}>E2E Encrypted</span>
-               </div>
-               <div style={{ padding: '12px 20px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: theme.border, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Circle size={10} fill={theme.green} /> <span style={{ fontSize: '13px', fontWeight: 600 }}>Sync Stable</span>
-               </div>
-            </div>
-          </div>
-        )}
+           <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
+                {chatMode === 'direct' ? (
+                    <>
+                        <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--muted)', padding: '12px 12px 8px', letterSpacing: 1 }}>FAVORITES</div>
+                        {filteredContacts.map(c => (
+                            <div 
+                                key={c.id} 
+                                onClick={() => { setActiveChat(c); if (isMobile) setShowChatMobile(true); }}
+                                style={{ 
+                                    padding: '12px 16px', borderRadius: 20, cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: 14,
+                                    background: activeChat?.id === c.id ? 'var(--accent-glow)' : 'transparent',
+                                    transition: 'all 0.2s ease', marginBottom: 4
+                                }}
+                            >
+                                <div style={{ 
+                                    width: 44, height: 44, borderRadius: 16, background: c.color || 'var(--accent)', color: '#fff', 
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 14,
+                                    position: 'relative'
+                                }}>
+                                    {c.av}
+                                    <div style={{ position: 'absolute', bottom: -2, right: -2, width: 12, height: 12, borderRadius: '50%', background: 'var(--green)', border: '2.5px solid #fff' }} />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: 14, fontWeight: 800 }}>{c.name}</div>
+                                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>{c.dept}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </>
+                ) : (
+                    <div style={{ padding: 12 }}>
+                         <div 
+                            onClick={() => setActiveChat('all')}
+                            style={{ padding: 20, borderRadius: 24, background: activeChat === 'all' ? 'var(--accent-glow)' : 'rgba(0,0,0,0.02)', border: activeChat === 'all' ? '1px solid var(--accent)' : '1px solid transparent', cursor: 'pointer', marginBottom: 16 }}
+                         >
+                            <div style={{ width: 48, height: 48, borderRadius: 16, background: 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}><Users size={24} /></div>
+                            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900 }}>Global Broadcast</h3>
+                            <p style={{ margin: '4px 0 0', fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>Entire organization reach</p>
+                         </div>
+                         <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--muted)', padding: '12px 12px 12px', letterSpacing: 1 }}>DEPARTMENTS</div>
+                         {depts.map(d => (
+                             <div 
+                                key={d}
+                                onClick={() => setActiveChat(d)}
+                                style={{ padding: 16, borderRadius: 20, background: activeChat === d ? 'var(--accent-glow)' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 14, marginBottom: 4 }}
+                             >
+                                <div style={{ width: 40, height: 40, borderRadius: 14, background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Hash size={18} /></div>
+                                <span style={{ fontSize: 14, fontWeight: 800 }}>{d} Hub</span>
+                             </div>
+                         ))}
+                    </div>
+                )}
+           </div>
+        </div>
+
+        {/* Chat / Dispatch Area */}
+        <div style={{ 
+            flex: 1, display: 'flex', flexDirection: 'column', 
+            background: 'rgba(255,255,255,0.02)',
+            display: isMobile && !showChatMobile ? 'none' : 'flex'
+        }}>
+            {activeChat ? (
+                <>
+                    {/* Active Header */}
+                    <div style={{ padding: '20px 32px', borderBottom: '1px solid var(--line)', background: 'rgba(255,255,255,0.4)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                            {isMobile && <button onClick={() => setShowChatMobile(false)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><ChevronRight size={20} style={{ transform: 'rotate(180deg)' }} /></button>}
+                            {chatMode === 'direct' ? (
+                                <>
+                                    <div style={{ width: 44, height: 44, borderRadius: 14, background: activeChat.color || 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>{activeChat.av}</div>
+                                    <div>
+                                        <div style={{ fontSize: 16, fontWeight: 900 }}>{activeChat.name}</div>
+                                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <ShieldCheck size={12} /> SECURE CHANNEL ACTIVE
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div style={{ width: 44, height: 44, borderRadius: 14, background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Radio size={20} /></div>
+                                    <div>
+                                        <div style={{ fontSize: 16, fontWeight: 900 }}>BROADCAST: {activeChat?.toUpperCase()}</div>
+                                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--red)' }}>HIGH PRIORITY DISPATCH</div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            {!isMobile && (
+                                <>
+                                    <button className="btn-glass" style={{ width: 44, height: 44, borderRadius: 14 }}><Phone size={18} /></button>
+                                    <button className="btn-glass" style={{ width: 44, height: 44, borderRadius: 14 }}><Video size={18} /></button>
+                                </>
+                            )}
+                            <button className="btn-glass" style={{ width: 44, height: 44, borderRadius: 14 }}><MoreVertical size={18} /></button>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '32px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        {chatMode === 'direct' ? (
+                            <>
+                                <div style={{ textAlign: 'center', margin: '16px 0' }}>
+                                    <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--muted)', background: 'rgba(0,0,0,0.03)', padding: '6px 16px', borderRadius: 20 }}>
+                                        SESSION RECONCILIATION COMPLETED {new Date().toLocaleTimeString()}
+                                    </span>
+                                </div>
+                                {(histories[activeChat.id] || []).map(msg => {
+                                    const isMe = msg.sender === 'me'
+                                    return (
+                                        <div key={msg.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start' }}>
+                                            <div style={{ 
+                                                maxWidth: '80%', padding: '14px 20px', borderRadius: 24,
+                                                background: isMe ? 'var(--accent)' : 'var(--bg-card)',
+                                                color: isMe ? '#fff' : 'var(--text)',
+                                                border: isMe ? 'none' : '1px solid var(--line)',
+                                                borderBottomRightRadius: isMe ? 4 : 24,
+                                                borderBottomLeftRadius: !isMe ? 4 : 24,
+                                                fontSize: 14, fontWeight: 700, lineHeight: 1.5,
+                                                boxShadow: '0 8px 24px rgba(0,0,0,0.04)'
+                                            }}>
+                                                {msg.text}
+                                            </div>
+                                            <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--muted)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                {msg.time} {isMe && <><Circle size={4} fill="var(--green)" /> DELIVERED</>}
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </>
+                        ) : (
+                            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                                <div style={{ width: 120, height: 120, borderRadius: 40, background: 'rgba(239, 68, 68, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+                                    <Radio size={56} color="var(--red)" />
+                                </div>
+                                <h2 style={{ fontSize: 32, fontWeight: 900, letterSpacing: -1 }}>Broadcast Intelligence</h2>
+                                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--muted)', maxWidth: 400 }}>Your announcement will be multi-cast across Telegram & Portal dashboards for the <b>{activeChat}</b> sector.</p>
+                                <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
+                                    <div style={{ padding: '10px 20px', borderRadius: 14, background: 'rgba(0,0,0,0.03)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <AtSign size={14} color="var(--blue)" /> <span style={{ fontSize: 12, fontWeight: 800 }}>Telegram Sync</span>
+                                    </div>
+                                    <div style={{ padding: '10px 20px', borderRadius: 14, background: 'rgba(0,0,0,0.03)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <Bell size={14} color="var(--amber)" /> <span style={{ fontSize: 12, fontWeight: 800 }}>Portal Push</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Input Bar */}
+                    <div style={{ padding: '24px 32px 40px', background: 'rgba(255,255,255,0.4)' }}>
+                        <div style={{ 
+                            background: 'var(--bg-card)', padding: '12px 12px 12px 24px', borderRadius: 24, 
+                            border: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 16,
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.08)'
+                        }}>
+                            <button className="btn-icon" style={{ background: 'none' }}><Paperclip size={22} color="var(--muted)" /></button>
+                            <textarea 
+                                rows={1}
+                                placeholder="Commence transmission..."
+                                value={message}
+                                onChange={e => setMessage(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
+                                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 15, fontWeight: 700, resize: 'none' }}
+                            />
+                            <button className="btn-icon" style={{ background: 'none' }}><Smile size={22} color="var(--muted)" /></button>
+                            <button 
+                                onClick={handleSend}
+                                className="btn"
+                                style={{ width: 48, height: 48, borderRadius: 16, background: 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 20px -4px var(--accent-glow)' }}
+                                disabled={sending || !message.trim()}
+                            >
+                                {sending ? <div className="spinner-sm" /> : <Send size={20} />}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                     <div style={{ width: 140, height: 140, borderRadius: 48, border: '1px solid var(--line)', background: 'linear-gradient(135deg, var(--bg-card) 0%, rgba(0,0,0,0.02) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 32 }}>
+                        <Shield size={64} style={{ opacity: 0.1 }} />
+                     </div>
+                     <h2 style={{ fontSize: 36, fontWeight: 900, letterSpacing: -1.5 }}>Intelligence Hub</h2>
+                     <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--muted)', maxWidth: 380 }}>Secure organizational matrix synchronization. Select personnel to commence encrypted handshake.</p>
+                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 40 }}>
+                        <InfoBadge icon={ShieldCheck} label="E2E SECURE" />
+                        <InfoBadge icon={History} label="AUDITED" />
+                        <InfoBadge icon={Activity} label="REALTIME" />
+                     </div>
+                </div>
+            )}
+        </div>
       </div>
     </div>
   )
+}
+
+function InfoBadge({ icon: Icon, label }) {
+    return (
+        <div style={{ padding: '12px 20px', borderRadius: 16, background: 'rgba(0,0,0,0.02)', border: '1px solid var(--line)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <Icon size={18} color="var(--accent)" />
+            <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: 0.5 }}>{label}</span>
+        </div>
+    )
 }

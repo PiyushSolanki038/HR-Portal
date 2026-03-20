@@ -5,14 +5,15 @@
 /* ─── Stat Card ─── */
 
 .stat-card {
-  background: var(--bg-card);
-  border: var(--border);
-  border-radius: var(--r-lg);
-  padding: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--r-xl);
+  padding: 24px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  transition: all 0.25s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -577,7 +578,61 @@
   text-transform: uppercase;
 }
 
-/* ─── Premium Utilities ─── */
+.super-glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+}
+
+.layout-grid-desktop {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .layout-grid-desktop {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.intelligence-hub {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.operations-pulse {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.section-header .line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--line), transparent);
+}
 
 .card-glass {
   background: var(--bg-card);

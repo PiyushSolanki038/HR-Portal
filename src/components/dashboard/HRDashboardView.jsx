@@ -1,17 +1,29 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useScreenSize } from '../../hooks/useScreenSize'
 import StatCard from '../ui/StatCard'
 import ActivityFeed from '../ui/ActivityFeed'
 import AIInsightEngine from './AIInsightEngine'
 import TeamAvailabilityGrid from './TeamAvailabilityGrid'
+import PerformanceLeaderboard from './PerformanceLeaderboard'
+import BroadcastModal from './BroadcastModal'
+import SystemStatusBadge from './SystemStatusBadge'
+import GlobalSearch from './GlobalSearch'
 import { 
   Users, Clock, CalendarOff, AlertTriangle, CheckCircle, 
-  TrendingUp, Bell, Zap, Star, Award, UserPlus, FileText, Send
+  TrendingUp, Bell, Zap, Star, Award, UserPlus, FileText, Send,
+  Search, Shield, Settings, Database, Heart, MessageSquare
 } from 'lucide-react'
 
-export default function HRDashboardView({ stats, employees, attendance, leaves, onLeaveIds, onRemindAbsent, onRemindAllAbsent, onApproveLeave, onRejectLeave }) {
+export default function HRDashboardView({ 
+  stats, employees, allEmployees, attendance, leaves, onLeaveIds, 
+  presentToday = [], remainingToday = [], systemHealth, availabilityMap, leaderboard, sentimentStats,
+  onRemindAbsent, onRemindAllAbsent, onApproveLeave, onRejectLeave, onBroadcast, onSentimentSurvey
+}) {
   const { isMobile, isTablet, isDesktop } = useScreenSize()
-  const { total, present, late, absent, onLeave, pendingLeaves } = stats
+  const [isBroadcastOpen, setIsBroadcastOpen] = useState(false)
+  
+  const { total, present, late, absent, pending, onLeave, pendingLeaves } = stats
 
   const activeLeaves = (employees || []).filter(e => onLeaveIds?.has(e.id?.toLowerCase()))
   
@@ -19,202 +31,204 @@ export default function HRDashboardView({ stats, employees, attendance, leaves, 
   const topEmp = [...(employees || [])].sort((a,b) => (parseFloat(b.score) || 0) - (parseFloat(a.score) || 0))[0] || { name: '—', av: '??', role: '—', score: 0, color: 'var(--accent)' }
 
   return (
-    <div className="hr-dashboard animate-in" style={{ paddingBottom: 40, padding: isMobile ? 12 : 28, maxWidth: '100%', overflowX: 'hidden' }}>
-      <div className="page-header" style={{ marginBottom: 32, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', display: 'flex', justifyContent: 'space-between', gap: isMobile ? 16 : 24 }}>
-        <div>
-          <h1 className="glow-text" style={{ fontSize: isMobile ? 22 : 32, fontWeight: 900, margin: 0 }}>HR Command Center</h1>
-          <p className="subtitle" style={{ fontSize: isMobile ? 12 : 14 }}>Real-time organizational intelligence — {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+    <div className="hr-dashboard animate-in" style={{ paddingBottom: 60, padding: isMobile ? 12 : 32, maxWidth: '1440px', margin: '0 auto' }}>
+      {/* ─── Executive Top Bar ─── */}
+      <div style={{ marginBottom: 40, display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: 'center', gap: 24 }}>
+        <div style={{ flex: 1 }}>
+          <h1 className="glow-text" style={{ fontSize: isMobile ? 24 : 32, fontWeight: 900, margin: 0, letterSpacing: -1 }}>COMMAND CENTER 4.0</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+            <p className="subtitle" style={{ fontSize: 11, fontWeight: 700, margin: 0, textTransform: 'uppercase', letterSpacing: 1, opacity: 0.6 }}>{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+            <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 10px var(--accent)' }} />
+            <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: 1 }}>Security Level: Administrator</span>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 12, width: isMobile ? '100%' : 'auto', flexWrap: 'wrap' }}>
-          <button className="btn btn-secondary" onClick={onRemindAllAbsent} style={{ flex: isMobile ? 1 : 'none', padding: isMobile ? '10px 12px' : '10px 20px', fontSize: isMobile ? 13 : 14 }}>
-            <Bell size={16} /> {isMobile ? 'Remind' : 'Remind Absent'}
-          </button>
-          <button className="btn btn-primary" style={{ boxShadow: 'var(--shadow-glow)', flex: isMobile ? 1 : 'none', padding: isMobile ? '10px 12px' : '10px 20px', fontSize: isMobile ? 13 : 14 }} onClick={() => {}}>
-            <Send size={16} /> {isMobile ? 'Broadcast' : 'Broadcast Hub'}
-          </button>
-        </div>
-      </div>
 
-      {/* Premium Quick Actions */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : 'repeat(4, 1fr)', 
-        gap: 16, 
-        marginBottom: 32 
-      }}>
-        {[
-          { label: 'Register Employee', icon: UserPlus, to: '/employees', color: 'var(--accent)' },
-          { label: 'Review Leaves', icon: AlertTriangle, to: '/leaves', color: 'var(--blue)' },
-          { label: 'Payroll Run', icon: FileText, to: '/finance', color: 'var(--green)' },
-          { label: 'Governance', icon: Zap, to: '/disciplinary', color: 'var(--purple)' },
-        ].map(action => (
-          <Link key={action.label} to={action.to} className="card-premium" style={{ 
-            padding: '20px', display: 'flex', alignItems: 'center', gap: 16, border: '1px solid var(--line)'
-          }}>
-            <div style={{ width: 44, height: 44, borderRadius: 14, background: `${action.color}15`, color: action.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <action.icon size={22} />
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexShrink: 0 }}>
+          {!isMobile && (
+            <div style={{ width: 340 }}>
+              <GlobalSearch allEmployees={allEmployees} />
             </div>
-            <span style={{ fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>{action.label}</span>
-          </Link>
-        ))}
+          )}
+          {!isMobile && <SystemStatusBadge health={systemHealth} />}
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn btn-secondary btn-icon" onClick={onRemindAllAbsent} title="Nudge All"><Bell size={18} /></button>
+            <button className="btn btn-primary" onClick={() => setIsBroadcastOpen(true)} style={{ padding: '0 24px', height: 44, borderRadius: 12, gap: 10, fontWeight: 900, fontSize: 13 }}>
+              <Send size={16} /> BROADCAST
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Intelligence Row */}
-      <div style={{ marginBottom: 32 }}>
-        <AIInsightEngine 
-          stats={stats} 
-          employees={employees} 
-          attendance={attendance} 
-          leaves={leaves} 
-          onLeaveIds={onLeaveIds} 
-        />
-      </div>
-
+      {/* ─── Vital Stats ─── */}
       <div className="stats-grid" style={{ 
         display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr 1fr' : isTablet ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(160px, 1fr))',
         gap: 16,
-        marginBottom: 32 
+        marginBottom: 40 
       }}>
-        <StatCard
-          title="Total Force"
-          value={total}
-          icon={Users}
-          color="var(--accent)"
-          bgColor="var(--accent-glow)"
-          trend={[10, 11, 12, 12, 12, 12, 12]}
-        />
-        <StatCard
-          title="Active Now"
-          value={present}
-          change={`${total ? Math.round((present / total) * 100) : 0}% rate`}
-          icon={CheckCircle}
-          color="var(--green)"
-          bgColor="var(--green-dim)"
-          trend={[8, 9, 7, 10, 11, 9, present]}
-        />
-        <StatCard
-          title="Late Alerts"
-          value={late}
-          icon={Clock}
-          color="var(--amber)"
-          bgColor="var(--amber-dim)"
-          trend={[0, 1, 0, 2, 1, 0, late]}
-        />
-        <StatCard
-          title="Attention Reqd"
-          value={absent}
-          icon={AlertTriangle}
-          color="var(--red)"
-          bgColor="var(--red-dim)"
-          trend={[1, 0, 2, 0, 1, 1, absent]}
-        />
-        <StatCard
-          title="On Leave"
-          value={onLeave}
-          icon={CalendarOff}
-          color="var(--blue)"
-          bgColor="var(--blue-dim)"
-          trend={[2, 2, 1, 1, 0, 0, onLeave]}
-        />
-        <StatCard
-          title="Leave Queue"
-          value={pendingLeaves}
-          icon={TrendingUp}
-          color="var(--purple)"
-          bgColor="var(--purple-dim)"
-          trend={[5, 4, 6, 2, 3, 1, pendingLeaves]}
-        />
+        <StatCard title="WORKFORCE" value={total} icon={Users} color="var(--accent)" />
+        <StatCard title="ACTIVE" value={present} change={`${total ? Math.round((present / total) * 100) : 0}%`} icon={CheckCircle} color="var(--green)" />
+        <StatCard title="LATE" value={late} icon={Clock} color="var(--amber)" />
+        <StatCard title="ABSENT" value={absent} icon={AlertTriangle} color="var(--red)" />
+        <StatCard title="PENDING" value={pending} icon={Clock} color="var(--purple)" />
+        <StatCard title="ON LEAVE" value={onLeave} icon={CalendarOff} color="var(--blue)" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: (isMobile || isTablet) ? '1fr' : '1.2fr 1fr', gap: isMobile ? 16 : 32 }}>
-        {/* Left Column: Spotlight & Activity */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 16 : 32 }}>
-          {/* Spotlight Section */}
-          <div className="card-premium" style={{ 
-            padding: isMobile ? 16 : 40, background: 'var(--text)', color: 'var(--bg)', border: 'none',
-            overflow: 'hidden'
-          }}>
-            <div style={{ position: 'relative', zIndex: 1 }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--accent)', marginBottom: isMobile ? 16 : 24 }}>
-                 <Star size={16} fill="var(--accent)" />
-                 <span style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 1.5 }}>Employee Spotlight</span>
-               </div>
-               <div style={{ display: 'flex', gap: isMobile ? 16 : 32, alignItems: 'center', flexDirection: isMobile ? 'row' : 'row' }}>
-                  <div style={{ 
-                    width: isMobile ? 64 : 100, 
-                    height: isMobile ? 64 : 100, 
-                    minWidth: isMobile ? 64 : 100,
-                    borderRadius: isMobile ? 20 : 32, 
-                    background: topEmp.color || 'var(--accent)', 
-                    color: '#000', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    fontSize: isMobile ? 24 : 32, 
-                    fontWeight: 900 
-                  }}>
-                    {topEmp.av || topEmp.name?.substring(0,2).toUpperCase()}
-                  </div>
-                  <div>
-                    <h2 style={{ fontSize: isMobile ? 26 : 42, fontWeight: 900, margin: 0, lineHeight: 1 }}>{topEmp.name}</h2>
-                    <p style={{ color: 'var(--accent)', margin: '8px 0 0 0', fontWeight: 700, fontSize: isMobile ? 14 : 16 }}>{topEmp.role}</p>
-                  </div>
-               </div>
-               <div style={{ marginTop: 32, display: 'flex', gap: 12 }}>
-                 <div className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}>{topEmp.score}% Performance</div>
-                 <div className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}>Top Contributor</div>
-               </div>
-            </div>
-            <Award size={200} style={{ position: 'absolute', right: -40, bottom: -40, opacity: 0.1, transform: 'rotate(-15deg)', color: '#fff' }} />
+      {/* ─── Strategic Split Grid ─── */}
+      <div className={isMobile ? '' : 'layout-grid-desktop'}>
+        
+        {/* Left Column: Strategic Intelligence Hub */}
+        <div className="intelligence-hub">
+          <div className="section-header">
+            <Zap size={16} color="var(--accent)" />
+            <h2>Strategic Intelligence</h2>
+            <div className="line" />
           </div>
 
-          <div className="card-premium" style={{ padding: isMobile ? 16 : 32 }}>
-            <h3 style={{ margin: '0 0 24px 0', fontSize: 18, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Zap size={20} color="var(--purple)" /> Intelligence Stream
-            </h3>
-            <ActivityFeed />
-          </div>
-        </div>
+          <AIInsightEngine 
+            stats={stats} 
+            employees={employees} 
+            attendance={attendance} 
+            leaves={leaves} 
+            onLeaveIds={onLeaveIds} 
+          />
 
-        {/* Right Column: Critical Attention & Leaves */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 16 : 32 }}>
-          <div className="card-premium" style={{ padding: isMobile ? 16 : 32 }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <AlertTriangle size={18} color="var(--red)" /> Critical Attention
-              </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1.2fr', gap: 24 }}>
+            <div className="card-premium super-glass" style={{ padding: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Heart size={16} color="var(--purple)" /> Sentiment Pulse
+                </h3>
+                <div className="badge" style={{ background: 'var(--purple-dim)', color: 'var(--purple)', fontSize: 9 }}>REALTIME</div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                 {[
+                   { label: 'Pos', val: sentimentStats?.positive, color: 'var(--green)' },
+                   { label: 'Neu', val: sentimentStats?.neutral, color: 'var(--amber)' },
+                   { label: 'Con', val: sentimentStats?.concerned, color: 'var(--red)' }
+                 ].map(s => (
+                   <div key={s.label} style={{ flex: 1, textAlign: 'center', padding: '12px 8px', background: 'rgba(0,0,0,0.03)', borderRadius: 12 }}>
+                      <div style={{ fontSize: 18, fontWeight: 900, color: s.color }}>{s.val || 0}</div>
+                      <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase' }}>{s.label}</div>
+                   </div>
+                 ))}
+              </div>
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>Performance Index:</span>
+                <span style={{ fontSize: 14, fontWeight: 900 }}>{sentimentStats?.overall || 0}%</span>
+              </div>
             </div>
-            <div className="table-container" style={{ border: 'none' }}>
-               <table style={{ minWidth: 600, width: '100%' }}>
-                  <tbody style={{ background: 'transparent' }}>
-                    {attendance
-                      .filter(a => a.status === 'a' && !onLeaveIds?.has(a.empId?.toLowerCase()))
-                      .slice(0, 5)
-                      .map((rec, i) => (
-                        <tr key={i} style={{ background: 'transparent' }}>
-                          <td style={{ padding: '12px 0', fontWeight: 700 }}>{rec.empName}</td>
-                          <td style={{ padding: '12px 0', color: 'var(--muted)', fontSize: 12 }}>{rec.dept}</td>
-                          <td style={{ padding: '12px 0', textAlign: 'right' }}>
-                            <button className="btn btn-icon btn-sm" onClick={() => onRemindAbsent(rec.empId)}><Bell size={14} /></button>
-                          </td>
-                        </tr>
-                      ))}
-                    {attendance.filter(a => a.status === 'a' && !onLeaveIds?.has(a.empId?.toLowerCase())).length === 0 && (
-                      <tr style={{ background: 'transparent' }}><td colSpan={3} style={{ textAlign: 'center', color: 'var(--muted)', padding: 40 }}>All clear today!</td></tr>
-                    )}
-                  </tbody>
-               </table>
-            </div>
+            
+            <PerformanceLeaderboard leaderboard={leaderboard} />
           </div>
 
           <TeamAvailabilityGrid 
-            employees={employees} 
-            attendance={attendance} 
-            onLeaveIds={onLeaveIds} 
+            availabilityMap={availabilityMap} 
+            totalEmployees={allEmployees.length}
           />
         </div>
+
+        {/* Right Column: Operational Pulse Center */}
+        <div className="operations-pulse">
+          <div className="section-header">
+            <Clock size={16} color="var(--blue)" />
+            <h2>Operational Pulse</h2>
+            <div className="line" />
+          </div>
+
+          {/* Daily Oversight Tab-Card */}
+          <div className="card-premium" style={{ padding: 0, overflow: 'hidden' }}>
+            <div style={{ padding: '20px 24px', background: 'rgba(0,0,0,0.02)', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800 }}>ATTENDANCE OVERSIGHT</h3>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <div className="badge badge-green" style={{ fontSize: 9 }}>{presentToday.length} P</div>
+                <div className="badge badge-amber" style={{ fontSize: 9 }}>{remainingToday.length} W</div>
+              </div>
+            </div>
+            <div style={{ padding: 20, maxHeight: 400, overflowY: 'auto' }} className="custom-scrollbar">
+              {remainingToday.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <p style={{ fontSize: 10, fontWeight: 900, color: 'var(--amber)', marginBottom: 12, textTransform: 'uppercase' }}>Missing Reports</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {remainingToday.slice(0, 8).map(emp => (
+                      <div key={emp.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: 10, background: 'rgba(217, 119, 6, 0.05)', border: '1px solid rgba(217, 119, 6, 0.1)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 28, height: 28, borderRadius: 8, background: emp.color || 'var(--muted)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800 }}>{emp.av || emp.name?.[0]}</div>
+                          <span style={{ fontSize: 12, fontWeight: 700 }}>{emp.name}</span>
+                        </div>
+                        <button onClick={() => onRemindAbsent(emp.id)} style={{ padding: '4px 8px', fontSize: 9, fontWeight: 900, color: 'var(--amber)', background: 'transparent', border: '1px solid var(--amber)', borderRadius: 6 }}>NUDGE</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {presentToday.length > 0 && (
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 900, color: 'var(--green)', marginBottom: 12, textTransform: 'uppercase' }}>Recent Check-ins</p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {presentToday.slice(0, 10).map(emp => (
+                      <div key={emp.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: 10, background: 'rgba(22, 163, 74, 0.05)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 28, height: 28, borderRadius: 8, background: emp.color || 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800 }}>{emp.av || emp.name?.[0]}</div>
+                          <span style={{ fontSize: 12, fontWeight: 600 }}>{emp.name}</span>
+                        </div>
+                        <span style={{ fontSize: 10, fontWeight: 800, color: emp.status === 'l' ? 'var(--amber)' : 'var(--green)' }}>{emp.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Nav Executive Hub */}
+          <div className="card-premium super-glass" style={{ padding: 24 }}>
+            <h3 style={{ margin: '0 0 20px 0', fontSize: 14, fontWeight: 800 }}>QUICK NAVIGATION</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {[
+                { label: 'Employees', to: '/employees', icon: Users, color: 'var(--accent)' },
+                { label: 'Approvals', to: '/leaves', icon: CheckCircle, color: 'var(--blue)' },
+                { label: 'Audit Logs', to: '/audit', icon: Database, color: 'var(--amber)' },
+                { label: 'Messaging', onClick: () => setIsBroadcastOpen(true), icon: Send, color: 'var(--purple)' },
+              ].map(action => (
+                action.to ? (
+                  <Link key={action.label} to={action.to} style={{ 
+                    padding: 16, display: 'flex', flexDirection: 'column', gap: 12, background: 'rgba(255,255,255,0.4)', borderRadius: 16, border: '1px solid var(--line)'
+                  }}>
+                    <action.icon size={18} color={action.color} />
+                    <span style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text)' }}>{action.label}</span>
+                  </Link>
+                ) : (
+                  <div key={action.label} onClick={action.onClick} style={{ 
+                    padding: 16, display: 'flex', flexDirection: 'column', gap: 12, background: 'rgba(255,255,255,0.4)', borderRadius: 16, border: '1px solid var(--line)', cursor: 'pointer'
+                  }}>
+                    <action.icon size={18} color={action.color} />
+                    <span style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text)' }}>{action.label}</span>
+                  </div>
+                )
+              ))}
+            </div>
+          </div>
+
+          {/* Activity Mini Feed */}
+          <div className="card-premium" style={{ padding: 24 }}>
+            <h3 style={{ margin: '0 0 20px 0', fontSize: 14, fontWeight: 800 }}>LIVE ACTIVITY</h3>
+            <ActivityFeed limit={4} />
+          </div>
+        </div>
       </div>
+
+      <BroadcastModal 
+        isOpen={isBroadcastOpen} 
+        onClose={() => setIsBroadcastOpen(false)}
+        onSend={onBroadcast}
+        allEmployees={allEmployees}
+      />
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
+      `}</style>
     </div>
   )
 }

@@ -28,17 +28,21 @@ router.post('/', async (req, res) => {
   try {
     const t = req.body
     const id = `TASK${Date.now()}`
-    // Use object mapping instead of array to ensure columns line up correctly
+    const taskDesc = t.description || t.desc || ''
+    const empId = t.assignedTo || t.empId || ''
+
     const newTask = {
       id,
-      assignedTo: t.assignedTo || t.empId,
+      empId,
       title: t.title,
-      description: t.description || t.desc || '',
+      desc: taskDesc,
       deadline: t.deadline,
-      priority: t.priority || 'med',
+      priority: (t.priority || 'med').toLowerCase(),
       tag: t.tag || 'General',
       done: 'false',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      assignedTo: empId,
+      description: taskDesc
     }
     await appendRow('Tasks', newTask)
 
@@ -201,6 +205,58 @@ router.post('/remind-all', async (req, res) => {
   } catch (err) {
     console.error('[API_ERROR] POST /api/tasks/remind-all:', err.message)
     res.status(500).json({ error: err.message })
+  }
+})
+
+// Bulk Broadcast Telegram Messages
+router.post('/broadcast', async (req, res) => {
+  const { group, message, actor } = req.body
+  try {
+    const [employees, attendance] = await Promise.all([
+      readSheet('Employees'),
+      readSheet('Attendance')
+    ])
+    
+    let targets = []
+    if (group === 'all') {
+      targets = employees
+    } else if (group.startsWith('dept:')) {
+      const deptName = group.split(':')[1]
+      targets = employees.filter(e => String(e.department || e.dept).toLowerCase() === deptName.toLowerCase())
+    } else if (group === 'pending_attendance') {
+      const today = new Date().toLocaleDateString('en-CA')
+      const todayAtt = attendance.filter(a => a.date === today)
+      targets = employees.filter(e => {
+        const r = String(e.role).toLowerCase()
+        if (r === 'admin' || r === 'head') return false
+        return !todayAtt.some(a => a.empId === e.id && (a.status === 'p' || a.status === 'l' || a.status === 'a'))
+      })
+    }
+
+    let count = 0
+    for (const emp of targets) {
+      if (emp.telegramChatId) {
+        await sendMessage(emp.telegramChatId, `📢 <b>HR BROADCAST</b>\n\n${message}`)
+        count++
+      }
+    }
+
+    res.json({ success: true, sentCount: count })
+  } catch (err) {
+    console.error('[API_ERROR] POST /api/tasks/broadcast:', err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// System Health Check
+router.get('/health', async (req, res) => {
+  try {
+    const start = Date.now()
+    await readSheet('Employees')
+    const latency = Date.now() - start
+    res.json({ status: 'healthy', sheets: 'connected', latency: `${latency}ms` })
+  } catch (err) {
+    res.status(503).json({ status: 'degraded', error: err.message })
   }
 })
 

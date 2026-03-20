@@ -21,6 +21,7 @@ import messagesRouter from './routes/messages.js'
 import mentorsRouter from './routes/mentors.js'
 import authRouter from './routes/auth.js'
 import governanceRouter from './routes/governance.js'
+import reviewsRouter from './routes/reviews.js'
 import { spawn } from 'child_process'
 
 const app  = express()
@@ -45,6 +46,7 @@ app.use('/api/messages',   messagesRouter)
 app.use('/api/mentors',    mentorsRouter)
 app.use('/api/auth',       authRouter)
 app.use('/api/governance', governanceRouter)
+app.use('/api/reviews',    reviewsRouter)
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }))
 
