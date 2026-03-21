@@ -11,11 +11,13 @@ const STATUS_COLORS = { p: 'var(--green)', l: 'var(--amber)', a: 'var(--red)', x
 
 export default function Attendance() {
   const { isMobile } = useScreenSize()
-  const { attendance, employees, loading, error } = useData()
+  const { attendance, employees, loading, error, refresh } = useData()
   const [weeklyGrid, setWeeklyGrid] = useState([])
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState('today')
   const [deptFilter, setDeptFilter] = useState('All Departments')
+  const [historyDate, setHistoryDate] = useState('') // New: for filtering history by date
+  const [processing, setProcessing] = useState(false) // New: loading state for actions
 
   const ADMIN_NAMES = ['Shreyansh', 'Ankur']
 
@@ -63,6 +65,72 @@ export default function Attendance() {
     const notAdmin = !nameLower.includes('shreyansh') && !nameLower.includes('ankur')
     return matchesSearch && matchesDept && notAdmin
   })
+
+  // New: Filter for Today (IST)
+  const todayIST = useMemo(() => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }), [])
+  
+  const todayRecords = useMemo(() => 
+    filtered.filter(a => a.date === todayIST),
+    [filtered, todayIST]
+  )
+
+  const historyRecords = useMemo(() => {
+    let sorted = [...filtered].sort((a, b) => {
+      // Sort by date desc, then time desc
+      if (b.date !== a.date) return b.date.localeCompare(a.date)
+      return (b.time || '').localeCompare(a.time || '')
+    })
+    if (historyDate) {
+      sorted = sorted.filter(a => a.date === historyDate)
+    }
+    return sorted
+  }, [filtered, historyDate])
+
+  const notReported = useMemo(() => {
+    return workforce.filter(emp => !todayRecords.some(rec => rec.empId === emp.id))
+  }, [workforce, todayRecords])
+
+  const handleRemindAll = async () => {
+    if (notReported.length === 0) return
+    if (!window.confirm(`Send Telegram reminders to ${notReported.length} employees?`)) return
+    
+    setProcessing(true)
+    try {
+      await api.remindAbsent({ empIds: notReported.map(e => e.id) })
+      alert('Reminders sent successfully!')
+    } catch (err) {
+      alert('Failed to send reminders: ' + err.message)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const handleMarkManual = async (emp) => {
+    if (!window.confirm(`Mark ${emp.name} as Present manually?`)) return
+    
+    setProcessing(true)
+    try {
+      await api.markAttendance({ 
+        empId: emp.id, 
+        empName: emp.name, 
+        dept: emp.department, 
+        report: 'Manually marked by HR',
+        source: 'HR_PORTAL_MANUAL'
+      })
+      await refresh()
+      alert(`${emp.name} marked as present.`)
+    } catch (err) {
+      alert('Failed to mark attendance: ' + err.message)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const handleRefresh = async () => {
+    setProcessing(true)
+    await refresh()
+    setProcessing(false)
+  }
 
   if (loading) return <LoadingSpinner />
   if (error) return <div className="empty-state">Error: {error}</div>
@@ -150,6 +218,25 @@ export default function Attendance() {
             </button>
           ))}
         </div>
+
+        <button 
+          className="btn-glass" 
+          onClick={handleRefresh}
+          disabled={processing}
+          style={{ 
+            padding: '10px 16px', 
+            borderRadius: 12, 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 8,
+            fontSize: 12,
+            fontWeight: 800,
+            opacity: processing ? 0.5 : 1
+          }}
+        >
+          <Clock size={16} className={processing ? 'animate-spin' : ''} />
+          {processing ? 'SYNCING...' : 'REFRESH'}
+        </button>
       </div>
 
       <div className="tabs" style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
@@ -159,14 +246,27 @@ export default function Attendance() {
         <button className={`tab-elite ${tab === 'weekly' ? 'active' : ''}`} onClick={() => setTab('weekly')}>
           Coverage Heatmap
         </button>
+        <button className={`tab-elite ${tab === 'history' ? 'active' : ''}`} onClick={() => setTab('history')}>
+          Attendance History
+        </button>
+        <button className={`tab-elite ${tab === 'missing' ? 'active' : ''}`} onClick={() => setTab('missing')}>
+          Not Reported ({notReported.length})
+        </button>
       </div>
 
       {tab === 'today' && (
         <div className="card-premium super-glass animate-in" style={{ padding: 0, borderRadius: 24, overflow: 'hidden' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900 }}>Personnel Active Today</h3>
+            <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--accent)', background: 'var(--accent)15', padding: '4px 12px', borderRadius: 8 }}>
+              {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ minWidth: 800, borderCollapse: 'separate', borderSpacing: 0 }}>
               <thead>
                 <tr>
+                  <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Date</th>
                   <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Employee Name</th>
                   <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Department</th>
                   <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Arrival Time</th>
@@ -175,8 +275,13 @@ export default function Attendance() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((rec, i) => (
+                {todayRecords.map((rec, i) => (
                   <tr key={i} className="row-hover" style={{ transition: 'all 0.2s' }}>
+                    <td style={{ padding: '16px 24px' }}>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--accent)' }}>
+                        {new Date(rec.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                      </div>
+                    </td>
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                         <div style={{ 
@@ -226,16 +331,171 @@ export default function Attendance() {
                     </td>
                   </tr>
                 ))}
-                {filtered.length === 0 && (
+                {todayRecords.length === 0 && (
                   <tr>
-                    <td colSpan={5} style={{ padding: 64, textAlign: 'center' }}>
+                    <td colSpan={6} style={{ padding: 64, textAlign: 'center' }}>
                       <CheckCircle size={48} color="var(--accent)" style={{ opacity: 0.1, marginBottom: 16 }} />
-                      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--muted)' }}>No records matching your criteria</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--muted)' }}>No personnel reporting yet for today.</div>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {tab === 'history' && (
+        <div className="card-premium super-glass animate-in" style={{ padding: 0, borderRadius: 24, overflow: 'hidden' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.3)' }}>
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900 }}>Complete Attendance Archives</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--muted)', textTransform: 'uppercase' }}>FILTER BY DATE:</div>
+              <input 
+                type="date" 
+                value={historyDate}
+                onChange={e => setHistoryDate(e.target.value)}
+                style={{ 
+                  padding: '8px 12px', 
+                  borderRadius: 8, 
+                  border: '1px solid rgba(0,0,0,0.1)', 
+                  fontSize: 12, 
+                  fontWeight: 700,
+                  outline: 'none',
+                  background: '#fff'
+                }}
+              />
+              {historyDate && (
+                <button 
+                  onClick={() => setHistoryDate('')}
+                  style={{ fontSize: 11, fontWeight: 800, color: 'var(--red)', cursor: 'pointer', background: 'none', border: 'none' }}
+                >
+                  CLEAR
+                </button>
+              )}
+            </div>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ minWidth: 900, borderCollapse: 'separate', borderSpacing: 0 }}>
+              <thead>
+                <tr>
+                  <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Date</th>
+                  <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Employee Name</th>
+                  <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Department</th>
+                  <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Time</th>
+                  <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', color: 'var(--muted)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historyRecords.map((rec, i) => (
+                  <tr key={i} className="row-hover" style={{ transition: 'all 0.1s' }}>
+                    <td style={{ padding: '14px 24px' }}>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--accent)' }}>
+                        {new Date(rec.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </div>
+                    </td>
+                    <td style={{ padding: '14px 24px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900 }}>
+                          {(rec.empName || '').split(' ').map(w => w[0]).join('').slice(0, 2)}
+                        </div>
+                        <span style={{ fontSize: 14, fontWeight: 700 }}>{rec.empName}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: '14px 24px' }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)' }}>{rec.dept}</span>
+                    </td>
+                    <td style={{ padding: '14px 24px' }}>
+                      <span style={{ fontSize: 13, fontWeight: 700 }}>{rec.time}</span>
+                    </td>
+                    <td style={{ padding: '14px 24px' }}>
+                       <span style={{ 
+                        fontSize: 10, fontWeight: 900, color: STATUS_COLORS[rec.status], 
+                        textTransform: 'uppercase', padding: '4px 10px', borderRadius: 6,
+                        background: `${STATUS_COLORS[rec.status]}12`,
+                        border: `1px solid ${STATUS_COLORS[rec.status]}20`
+                      }}>
+                        {STATUS_LABELS[rec.status] || rec.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {tab === 'missing' && (
+        <div className="card-premium super-glass animate-in" style={{ padding: 0, borderRadius: 24, overflow: 'hidden' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(239, 68, 68, 0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: 'var(--red)' }}>Personnel Not Reported Yet</h3>
+              {notReported.length > 0 && (
+                <button 
+                  className="btn-premium"
+                  onClick={handleRemindAll}
+                  disabled={processing}
+                  style={{ 
+                    padding: '6px 16px', borderRadius: 8, fontSize: 11, fontWeight: 900,
+                    background: 'var(--red)', color: '#fff', border: 'none', boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)'
+                  }}
+                >
+                  REMIND ALL ABSENT
+                </button>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--muted)', background: 'rgba(0,0,0,0.05)', padding: '4px 12px', borderRadius: 8 }}>
+                {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--red)', background: 'rgba(239, 68, 68, 0.1)', padding: '4px 12px', borderRadius: 8 }}>
+                {notReported.length} Employees Missing
+              </span>
+            </div>
+          </div>
+          <div style={{ padding: '24px' }}>
+            {notReported.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <CheckCircle size={48} color="var(--green)" style={{ marginBottom: 16, opacity: 0.5 }} />
+                <div style={{ fontSize: 18, fontWeight: 800 }}>Full Attendance Reached!</div>
+                <p style={{ color: 'var(--muted)', fontWeight: 600 }}>Everyone in the workforce has reported today.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                {notReported.map(emp => (
+                  <div key={emp.id} className="card-glass" style={{ 
+                    padding: 16, borderRadius: 16, display: 'flex', alignItems: 'center', gap: 16,
+                    background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.05)'
+                  }}>
+                    <div style={{ 
+                      width: 48, height: 48, borderRadius: 14, 
+                      background: emp.color || 'var(--accent)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#fff', fontSize: 16, fontWeight: 900,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}>
+                      {(emp.name || '').split(' ').map(w => w[0]).join('').slice(0, 2)}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 800 }}>{emp.name}</div>
+                      <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, marginBottom: 8 }}>{emp.department} • {emp.id}</div>
+                      <button 
+                        onClick={() => handleMarkManual(emp)}
+                        disabled={processing}
+                        style={{ 
+                          fontSize: 10, fontWeight: 900, color: 'var(--green)',
+                          background: 'var(--green)15', border: '1px solid var(--green)30',
+                          padding: '4px 10px', borderRadius: 6, cursor: 'pointer'
+                        }}
+                      >
+                        MARK PRESENT
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
