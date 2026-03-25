@@ -128,6 +128,7 @@ router.get('/weekly', async (req, res) => {
 router.post('/mark', async (req, res) => {
   try {
     let { empId, empName, dept, report, source } = req.body
+    empId = (empId || '').trim()
     
     // Fetch missing details from Employees sheet if necessary
     if (!dept || !empName) {

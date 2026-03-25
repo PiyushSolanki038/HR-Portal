@@ -131,9 +131,11 @@ export async function ensureTabsExist(tabNames) {
 const DATE_COLUMNS = ['date', 'month', 'joiningDate', 'lastActive', 'appliedOn', 'attendanceDate']
 
 function normalizeValue(key, val) {
-  if (!val) return ''
+  if (val === undefined || val === null) return ''
   const sVal = String(val).trim()
   
+  if (sVal === '') return ''
+
   // Check if it's a Google Sheets Serial Date (Number between 30000 and 60000)
   if (DATE_COLUMNS.includes(key) && /^\d{5}(\.\d+)?$/.test(sVal)) {
     const serial = parseFloat(sVal)
@@ -420,8 +422,8 @@ export async function batchReadAllSheets() {
       }
       const headers = rows[0].map(h => h.trim())
       const data = rows.slice(1)
-        .filter(row => row.some(cell => cell && cell.trim() !== ''))
-        .map(row => Object.fromEntries(headers.map((h, i) => [h, row[i] || ''])))
+        .filter(row => row.some(cell => cell && String(cell).trim() !== ''))
+        .map(row => Object.fromEntries(headers.map((h, i) => [h, normalizeValue(h, row[i])])))
       
       result[tabName] = data
       CACHE[tabName] = { data, timestamp: Date.now() }

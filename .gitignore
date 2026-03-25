@@ -47,3 +47,6 @@ ENV/
 
 # Credentials
 credentials.json.json
+
+# Temporary scripts
+tmp/

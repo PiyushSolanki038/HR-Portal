@@ -1,0 +1,16 @@
+Employee Headers: ["id","name","role","dept","av","color","status","telegramChatId","tg","wa","email","joining","salary","score","present","late","absent","streak","leaves","mentorId","teamLeaderId","phone","address","mustChangePassword","tempPassword"]
+Attendance Headers: ["id","empId","empName","dept","date","time","status","report","submittedAt"]
+
+--- Amar in Employees ---
+Row 0: ["MKT04","Amar","Marketing Executive","Marketing","AJ","#ec4899","active","FILL_AMAR_CHAT_ID","@Amarjha5","","amar@siswit.com","05 Mar 2026","25000","60","4","0","10","0","0","M508179","MKT01"]
+  Col 1 (name): "Amar" (Length: 4)
+  Col 8 (tg): "@Amarjha5" (Length: 9)
+
+--- Amar in Attendance (Today: 2026-03-25) ---
+Row 0: ["AT1774451812199","MKT04","Amar","Marketing","2026-03-25","20:46","p","Today I tried to pitch the product to HR Mam.","2026-03-25T15:16:52.199Z"]
+
+--- MKT04 in Employees ---
+["MKT04","Amar","Marketing Executive","Marketing","AJ","#ec4899","active","FILL_AMAR_CHAT_ID","@Amarjha5","","amar@siswit.com","05 Mar 2026","25000","60","4","0","10","0","0","M508179","MKT01"]
+
+--- MKT04 in Attendance (Today) ---
+["AT1774451812199","MKT04","Amar","Marketing","2026-03-25","20:46","p","Today I tried to pitch the product to HR Mam.","2026-03-25T15:16:52.199Z"]

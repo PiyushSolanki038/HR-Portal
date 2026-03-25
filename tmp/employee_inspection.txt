@@ -1,0 +1,19 @@
+Total Employees in Sheet: 12
+
+--- Employee Filtering Analysis ---
+
+Workforce (Included in Attendance): 8
+ - [DEV01] Sunny (Developer)
+ - [DEV02] Piyush (Developer)
+ - [DEV03] Anand (Developer Leader)
+ - [MKT02] Finney (Marketing Executive)
+ - [MKT03] Shivam (Marketing Executive)
+ - [MKT04] Amar (Marketing Executive)
+ - [MKT05] Adarsh (Marketing Executive)
+ - [MKT06] Roshan (Marketing Executive)
+
+Filtered Out (Excluded from Attendance): 4
+ - Bipul (Marketing Head) - Reason: Excluded by Role/Name filter
+ - Pooja (HR Manager) - Reason: Excluded by Role/Name filter
+ - Shreyansh (Head) - Reason: Excluded by Role/Name filter
+ - Ankur (Head) - Reason: Excluded by Role/Name filter

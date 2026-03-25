@@ -28,21 +28,27 @@ export default function Attendance() {
   // Filter out admins from workforce
   const workforce = useMemo(() => 
     employees.filter(e => {
-      const r = e.role?.toLowerCase() || ''
-      const n = e.name?.toLowerCase() || ''
-      return !r.includes('admin') && !r.includes('head') && !r.includes('owner') && !r.includes('hr manager') && !n.includes('shreyansh') && !n.includes('ankur')
+      const r = (e.role || '').toLowerCase()
+      const n = (e.name || '').toLowerCase()
+      const s = (e.status || '').toLowerCase()
+      // Only show active employees who are not admins/owners
+      return s !== 'inactive' && !r.includes('admin') && !r.includes('owner') && !r.includes('hr manager') && !n.includes('shreyansh') && !n.includes('ankur')
     }),
     [employees]
   )
 
+  // New: Filter for Today (IST)
+  const todayIST = useMemo(() => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }), [])
+
   const stats = useMemo(() => {
-    const today = attendance.filter(a => {
+    const todayRecs = attendance.filter(a => {
       const n = (a.empName || '').toLowerCase()
-      return !n.includes('shreyansh') && !n.includes('ankur')
+      const isToday = a.date === todayIST
+      return !n.includes('shreyansh') && !n.includes('ankur') && isToday
     })
-    const present = today.filter(a => a.status === 'p' || a.status === 'l').length
-    const late = today.filter(a => a.status === 'l').length
-    const absent = workforce.length - today.length
+    const present = todayRecs.filter(a => a.status === 'p' || a.status === 'l').length
+    const late = todayRecs.filter(a => a.status === 'l').length
+    const absent = workforce.length - todayRecs.length
     
     return {
       total: workforce.length,
@@ -50,10 +56,10 @@ export default function Attendance() {
       late,
       absent: Math.max(0, absent)
     }
-  }, [attendance, workforce])
+  }, [attendance, workforce, todayIST])
 
   const departments = useMemo(() => 
-    ['All Departments', ...new Set(workforce.map(e => e.department).filter(Boolean))],
+    ['All Departments', ...new Set(workforce.map(e => e.dept).filter(Boolean))],
     [workforce]
   )
 
@@ -66,9 +72,6 @@ export default function Attendance() {
     return matchesSearch && matchesDept && notAdmin
   })
 
-  // New: Filter for Today (IST)
-  const todayIST = useMemo(() => new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }), [])
-  
   const todayRecords = useMemo(() => 
     filtered.filter(a => a.date === todayIST),
     [filtered, todayIST]
@@ -87,7 +90,7 @@ export default function Attendance() {
   }, [filtered, historyDate])
 
   const notReported = useMemo(() => {
-    return workforce.filter(emp => !todayRecords.some(rec => rec.empId === emp.id))
+    return workforce.filter(emp => !todayRecords.some(rec => (rec.empId || '').trim() === (emp.id || '').trim()))
   }, [workforce, todayRecords])
 
   const handleRemindAll = async () => {
@@ -113,7 +116,7 @@ export default function Attendance() {
       await api.markAttendance({ 
         empId: emp.id, 
         empName: emp.name, 
-        dept: emp.department, 
+        dept: emp.dept, 
         report: 'Manually marked by HR',
         source: 'HR_PORTAL_MANUAL'
       })
@@ -479,7 +482,7 @@ export default function Attendance() {
                     </div>
                     <div>
                       <div style={{ fontSize: 15, fontWeight: 800 }}>{emp.name}</div>
-                      <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, marginBottom: 8 }}>{emp.department} • {emp.id}</div>
+                      <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600, marginBottom: 8 }}>{emp.dept} • {emp.id}</div>
                       <button 
                         onClick={() => handleMarkManual(emp)}
                         disabled={processing}
